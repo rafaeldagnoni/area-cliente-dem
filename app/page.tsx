@@ -22,7 +22,7 @@ export default function LoginPage() {
     if (error) {
       setMessage('Erro ao fazer login: ' + error.message)
     } else {
-      setMessage('Login realizado com sucesso!')
+      window.location.href = '/dashboard'
     }
 
     setLoading(false)
