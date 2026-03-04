@@ -22,7 +22,28 @@ export default function LoginPage() {
     if (error) {
       setMessage('Erro ao fazer login: ' + error.message)
     } else {
-      window.location.href = '/dashboard'
+      const { data: companies, error: companiesError } = await supabase
+  .from('user_companies')
+  .select('company_id')
+  .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+
+if (companiesError) {
+  setMessage('Erro ao buscar empresas.')
+  setLoading(false)
+  return
+}
+
+if (!companies || companies.length === 0) {
+  setMessage('Usuário sem empresa vinculada.')
+  setLoading(false)
+  return
+}
+
+if (companies.length === 1) {
+  window.location.href = '/dashboard'
+} else {
+  window.location.href = '/select-company'
+}
     }
 
     setLoading(false)
