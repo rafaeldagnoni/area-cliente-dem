@@ -569,7 +569,7 @@ function OverviewView({ mesSel }) {
 }
 
 // ─── APP PRINCIPAL ────────────────────────────────────────────────────────────
-export default function App() {
+export default function Tech4ConDashboard() {
   const [tab, setTab] = useState("overview");
   const [mesSel, setMesSel] = useState(0);
   const [filial, setFilial] = useState("Consolidado");
@@ -692,4 +692,3 @@ export default function App() {
     </div>
   );
 }
-export default function Tech4ConDashboard() {
