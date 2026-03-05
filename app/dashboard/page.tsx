@@ -1,78 +1,72 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '../../lib/supabaseClient'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import supabase from "@/lib/supabaseClient";
 
-export default function Dashboard() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [companyName, setCompanyName] = useState<string | null>(null)
+export default function DashboardIndexPage() {
+  const router = useRouter();
+  const [msg, setMsg] = useState("Carregando...");
 
   useEffect(() => {
-    const checkAccess = async () => {
-      const { data } = await supabase.auth.getSession()
+    const run = async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth?.user;
 
-      if (!data.session) {
-        router.push('/')
-        return
+      if (!user) {
+        router.replace("/login");
+        return;
       }
 
-      const activeCompany = localStorage.getItem('activeCompany')
-
-      if (!activeCompany) {
-        router.push('/select-company')
-        return
+      // 1) tenta pegar do localStorage (rápido)
+      const slugLocal = localStorage.getItem("active_company_slug");
+      if (slugLocal) {
+        router.replace(`/dashboard/${slugLocal}`);
+        return;
       }
 
-      const { data: company } = await supabase
-        .from('companies')
-        .select('name')
-        .eq('id', activeCompany)
-        .single()
+      // 2) tenta pegar do profiles.active_company_id
+      const { data: profile, error: pErr } = await supabase
+        .from("profiles")
+        .select("active_company_id")
+        .eq("id", user.id)
+        .single();
 
-      setCompanyName(company?.name ?? null)
-      setUserEmail(data.session.user.email ?? null)
-      setLoading(false)
-    }
+      if (pErr) {
+        setMsg("Não consegui carregar sua empresa ativa. Vá em Trocar empresa.");
+        return;
+      }
 
-    checkAccess()
-  }, [router])
+      const activeCompanyId = profile?.active_company_id;
+      if (!activeCompanyId) {
+        router.replace("/select-company");
+        return;
+      }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    localStorage.removeItem('activeCompany')
-    router.push('/')
-  }
+      // 3) busca o slug da empresa ativa e redireciona
+      const { data: company, error: cErr } = await supabase
+        .from("companies")
+        .select("slug")
+        .eq("id", activeCompanyId)
+        .single();
 
-  const handleSwitchCompany = () => {
-    router.push('/select-company')
-  }
+      if (cErr || !company?.slug) {
+        router.replace("/select-company");
+        return;
+      }
 
-  if (loading) {
-    return <p style={{ padding: 40 }}>Carregando...</p>
-  }
+      localStorage.setItem("active_company_slug", company.slug);
+      router.replace(`/dashboard/${company.slug}`);
+    };
 
+    run();
+  }, [router]);
+
+  // fallback simples
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Dashboard</h1>
-
-      <p>
-        Empresa ativa: <strong>{companyName}</strong>
-      </p>
-
-      <p>Usuário: {userEmail}</p>
-
-      <div style={{ marginTop: 20 }}>
-        <button onClick={handleSwitchCompany} style={{ marginRight: 10 }}>
-          Trocar empresa
-        </button>
-
-        <button onClick={handleLogout}>
-          Sair
-        </button>
-      </div>
+    <div style={{ padding: 24 }}>
+      <h2>Dashboard</h2>
+      <p>{msg}</p>
     </div>
-  )
+  );
 }
