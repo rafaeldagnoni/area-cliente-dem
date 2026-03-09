@@ -11,12 +11,19 @@ type PageProps = {
 export default function DynamicDashboardPage({ params }: PageProps) {
   const { slug } = params;
 
-  // Por enquanto, só Tech4Con usa o dashboard real
   if (slug === "tech4con") {
     return <Tech4ConDashboard />;
   }
 
-  // Placeholder para outros clientes
+  if (slug === "mediarh") {
+    return (
+      <div style={{ padding: 40 }}>
+        <h1>Dashboard Mediarh</h1>
+        <p>Em construção.</p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: 40 }}>
       <h1>Dashboard em construção</h1>
