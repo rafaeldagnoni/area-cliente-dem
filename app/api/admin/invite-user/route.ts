@@ -37,6 +37,11 @@ async function validateAdmin(req: Request) {
   return { ok: true };
 }
 
+type AdminUser = {
+  id: string;
+  email?: string | null;
+};
+
 export async function POST(req: Request) {
   const auth = await validateAdmin(req);
   if (!auth.ok) {
@@ -62,7 +67,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: usersError.message }, { status: 400 });
     }
 
-    let user = usersData.users.find(
+    const users = (usersData?.users || []) as AdminUser[];
+
+    let user = users.find(
       (u) => (u.email || "").toLowerCase() === email
     );
 
@@ -79,7 +86,12 @@ export async function POST(req: Request) {
         );
       }
 
-      user = inviteData.user;
+      user = inviteData.user
+        ? {
+            id: inviteData.user.id,
+            email: inviteData.user.email,
+          }
+        : undefined;
     }
 
     if (!user?.id) {
