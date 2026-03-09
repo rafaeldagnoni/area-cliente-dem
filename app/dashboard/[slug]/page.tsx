@@ -21,7 +21,7 @@ export default function DynamicDashboardPage({ params }: PageProps) {
 
   useEffect(() => {
     const validateAccess = async () => {
-      // 1) Verifica sessão
+      // 1) sessão
       const { data: sessionData } = await supabase.auth.getSession();
 
       if (!sessionData.session) {
@@ -31,21 +31,7 @@ export default function DynamicDashboardPage({ params }: PageProps) {
 
       const user = sessionData.session.user;
 
-      // 2) Verifica empresa ativa
-      const activeCompanySlug = localStorage.getItem("active_company_slug");
-
-      if (!activeCompanySlug) {
-        router.replace("/select-company");
-        return;
-      }
-
-      // Se slug da URL não bater com a empresa ativa, redireciona
-      if (activeCompanySlug !== slug) {
-        router.replace(`/dashboard/${activeCompanySlug}`);
-        return;
-      }
-
-      // 3) Busca empresa pelo slug
+      // 2) busca empresa pelo slug
       const { data: company, error: companyError } = await supabase
         .from("companies")
         .select("id, slug")
@@ -57,7 +43,7 @@ export default function DynamicDashboardPage({ params }: PageProps) {
         return;
       }
 
-      // 4) Verifica vínculo do usuário com a empresa
+      // 3) valida vínculo real do usuário com a empresa
       const { data: link, error: linkError } = await supabase
         .from("user_companies")
         .select("id")
@@ -69,6 +55,10 @@ export default function DynamicDashboardPage({ params }: PageProps) {
         router.replace("/select-company");
         return;
       }
+
+      // 4) sincroniza empresa ativa
+      localStorage.setItem("active_company_slug", company.slug);
+      localStorage.setItem("active_company_id", company.id);
 
       setAuthorized(true);
       setLoading(false);
