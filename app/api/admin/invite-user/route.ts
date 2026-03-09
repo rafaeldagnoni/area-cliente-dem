@@ -1,32 +1,126 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+async function validateAdmin(req: Request) {
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : null;
+
+  if (!token) {
+    return { ok: false, error: "Não autenticado." };
+  }
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error || !data.user?.email) {
+    return { ok: false, error: "Sessão inválida." };
+  }
+
+  const allowedEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  const isAllowed = allowedEmails.includes(data.user.email.toLowerCase());
+
+  if (!isAllowed) {
+    return { ok: false, error: "Acesso negado." };
+  }
+
+  return { ok: true };
+}
+
 export async function POST(req: Request) {
+  const auth = await validateAdmin(req);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: 403 });
+  }
+
   try {
     const body = await req.json();
+    const email = String(body.email || "").trim().toLowerCase();
+    const companyId = String(body.companyId || "").trim();
 
-    const email = body.email;
-    const company_id = body.company_id;
-
-    const { data: inviteData, error: inviteError } =
-      await supabaseAdmin.auth.admin.inviteUserByEmail(email);
-
-    if (inviteError) {
-      return NextResponse.json({ error: inviteError.message }, { status: 400 });
+    if (!email || !companyId) {
+      return NextResponse.json(
+        { error: "Email e companyId são obrigatórios." },
+        { status: 400 }
+      );
     }
 
-    const userId = inviteData.user.id;
+    const { data: usersData, error: usersError } =
+      await supabaseAdmin.auth.admin.listUsers();
 
-    const { error: linkError } = await supabaseAdmin
+    if (usersError) {
+      return NextResponse.json({ error: usersError.message }, { status: 400 });
+    }
+
+    let user = usersData.users.find(
+      (u) => (u.email || "").toLowerCase() === email
+    );
+
+    if (!user) {
+      const { data: inviteData, error: inviteError } =
+        await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        });
+
+      if (inviteError) {
+        return NextResponse.json(
+          { error: inviteError.message },
+          { status: 400 }
+        );
+      }
+
+      user = inviteData.user;
+    }
+
+    if (!user?.id) {
+      return NextResponse.json(
+        { error: "Não foi possível obter o usuário." },
+        { status: 400 }
+      );
+    }
+
+    const { data: existingLink } = await supabaseAdmin
       .from("user_companies")
-      .insert([{ user_id: userId, company_id }]);
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("company_id", companyId)
+      .maybeSingle();
 
-    if (linkError) {
-      return NextResponse.json({ error: linkError.message }, { status: 400 });
+    if (!existingLink) {
+      const { error: linkError } = await supabaseAdmin
+        .from("user_companies")
+        .insert([
+          {
+            user_id: user.id,
+            company_id: companyId,
+          },
+        ]);
+
+      if (linkError) {
+        return NextResponse.json(
+          { error: linkError.message },
+          { status: 400 }
+        );
+      }
     }
 
-    return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      userId: user.id,
+      email,
+      companyId,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
