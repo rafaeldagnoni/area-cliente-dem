@@ -1,6 +1,7 @@
 "use client";
 
 import Tech4ConDashboard from "../tech4con/page";
+import MediarhDashboard from "../mediarh/page";
 
 type PageProps = {
   params: {
@@ -16,12 +17,7 @@ export default function DynamicDashboardPage({ params }: PageProps) {
   }
 
   if (slug === "mediarh") {
-    return (
-      <div style={{ padding: 40 }}>
-        <h1>Dashboard Mediarh</h1>
-        <p>Em construção.</p>
-      </div>
-    );
+    return <MediarhDashboard />;
   }
 
   return (
