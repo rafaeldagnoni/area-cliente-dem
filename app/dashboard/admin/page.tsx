@@ -4,11 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
+type CompanyUser = {
+  id: string;
+  email: string;
+};
+
 type Company = {
   id: string;
   name: string;
   slug: string;
   status?: string;
+  users?: CompanyUser[];
 };
 
 export default function AdminPage() {
@@ -43,7 +49,7 @@ export default function AdminPage() {
       return false;
     }
 
-    const res = await fetch("/api/admin/companies", {
+    const res = await fetch("/api/admin/company-users", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -148,6 +154,7 @@ export default function AdminPage() {
     alert("Convite enviado e usuário vinculado com sucesso.");
     setInviteEmail("");
     setSelectedCompanyId("");
+    await loadCompanies();
   }
 
   async function handleToggleStatus(company: Company) {
@@ -319,23 +326,44 @@ export default function AdminPage() {
                   border: "1px solid #eee",
                   borderRadius: 8,
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 12,
-                  flexWrap: "wrap",
+                  flexDirection: "column",
+                  gap: 10,
                 }}
               >
-                <div>
-                  <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
-                  {company.status || "active"}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
+                    {company.status || "active"}
+                  </div>
+
+                  <button
+                    onClick={() => handleToggleStatus(company)}
+                    style={{ padding: "8px 14px" }}
+                  >
+                    {company.status === "inactive" ? "Ativar" : "Inativar"}
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => handleToggleStatus(company)}
-                  style={{ padding: "8px 14px" }}
-                >
-                  {company.status === "inactive" ? "Ativar" : "Inativar"}
-                </button>
+                <div>
+                  <strong>Usuários vinculados:</strong>
+                  {company.users && company.users.length > 0 ? (
+                    <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+                      {company.users.map((user) => (
+                        <li key={`${company.id}-${user.id}`}>{user.email}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p style={{ marginTop: 8 }}>Nenhum usuário vinculado.</p>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
