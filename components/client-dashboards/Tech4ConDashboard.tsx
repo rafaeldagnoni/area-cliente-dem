@@ -46,10 +46,6 @@ const fmtK = (v: number): string => {
   if (abs >= 1000) return `R$ ${(v/1000).toFixed(0)}k`;
   return fmtBRL(v);
 };
-const fmtPct = (v: number, base: number): string => {
-  if (!base || base === 0) return "0,00%";
-  return ((v / Math.abs(base)) * 100).toFixed(2).replace(".",",") + "%";
-};
 
 // ─── MESES ────────────────────────────────────────────────────────────────────
 const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -248,7 +244,8 @@ function KPICard({ label, valor, percentual, cor, small = false }: {
       border: `1px solid ${cor || C.border}`,
       borderRadius: 8,
       padding: small ? "12px 16px" : "16px 20px",
-      minWidth: small ? 140 : 160
+      minWidth: small ? 140 : 160,
+      flex: 1
     }}>
       <div style={{
         fontFamily: "'Barlow Condensed',sans-serif",
@@ -277,10 +274,11 @@ function KPICard({ label, valor, percentual, cor, small = false }: {
   );
 }
 
-function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
+function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno }: {
   rows: Array<{ key: string; nivel: number; tipo?: string }>;
   dados: any;
-  mesSel: number;
+  mesInicial: number;
+  mesFinal: number;
   titulo: string;
   mostrarAno: boolean;
 }) {
@@ -292,16 +290,27 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
     return conta.valores[mesIdx] || 0;
   };
 
-  const getPct = (key: string, mesIdx: number): number => {
+  const getValorPeriodo = (key: string): number => {
     const conta = dados.contas[key];
-    if (!conta || !conta.percentuais) return 0;
-    return conta.percentuais[mesIdx] || 0;
+    if (!conta || !conta.valores) return 0;
+    let soma = 0;
+    for (let i = mesInicial; i <= mesFinal; i++) {
+      soma += conta.valores[i] || 0;
+    }
+    return soma;
   };
 
   const getAnual = (key: string): number => {
     const conta = dados.contas[key];
     if (!conta || !conta.valores) return 0;
     return conta.valores.reduce((a: number, b: number) => a + b, 0);
+  };
+
+  // Calcular percentual do período
+  const receitaPeriodo = getValorPeriodo("Receita de Vendas");
+  const getPctPeriodo = (key: string): number => {
+    if (!receitaPeriodo) return 0;
+    return (getValorPeriodo(key) / receitaPeriodo) * 100;
   };
 
   return (
@@ -314,8 +323,15 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
             </th>
             {mostrarAno ? (
               <>
-                {MESES_CURTO.map(m => (
-                  <th key={m} style={{ padding: "10px 8px", textAlign: "right", color: C.white, fontWeight: 600, fontSize: 11 }}>{m}</th>
+                {MESES_CURTO.map((m, i) => (
+                  <th key={m} style={{ 
+                    padding: "10px 8px", 
+                    textAlign: "right", 
+                    color: C.white, 
+                    fontWeight: 600, 
+                    fontSize: 11,
+                    background: (i >= mesInicial && i <= mesFinal) ? C.redDark : C.dark
+                  }}>{m}</th>
                 ))}
                 <th style={{ padding: "10px 8px", textAlign: "right", color: C.red, fontWeight: 700, fontSize: 11 }}>TOTAL</th>
               </>
@@ -329,8 +345,8 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
         </thead>
         <tbody>
           {rows.map((row, idx) => {
-            const valor = getValor(row.key, mesSel);
-            const pct = getPct(row.key, mesSel);
+            const valorPeriodo = getValorPeriodo(row.key);
+            const pctPeriodo = getPctPeriodo(row.key);
             const isDestaque = row.tipo === "destaque";
             const isResultado = row.tipo === "resultado";
             const isSubtotal = row.tipo === "subtotal";
@@ -363,7 +379,8 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
                         fontFamily: "'JetBrains Mono',monospace", 
                         fontSize: 11,
                         color: getValor(row.key, i) < 0 ? C.red : C.dark,
-                        borderBottom: `1px solid ${C.gray100}`
+                        borderBottom: `1px solid ${C.gray100}`,
+                        background: (i >= mesInicial && i <= mesFinal) ? `${C.red}08` : "transparent"
                       }}>
                         {fmtK(getValor(row.key, i))}
                       </td>
@@ -386,11 +403,11 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
                       padding: "8px 12px", 
                       textAlign: "right", 
                       fontFamily: "'JetBrains Mono',monospace",
-                      color: valor < 0 ? C.red : C.dark,
+                      color: valorPeriodo < 0 ? C.red : C.dark,
                       fontWeight,
                       borderBottom: `1px solid ${C.gray100}`
                     }}>
-                      {fmtBRL(valor)}
+                      {fmtBRL(valorPeriodo)}
                     </td>
                     <td style={{ 
                       padding: "8px 12px", 
@@ -400,7 +417,7 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
                       color: C.gray500,
                       borderBottom: `1px solid ${C.gray100}`
                     }}>
-                      {pct.toFixed(2).replace(".",",")}%
+                      {pctPeriodo.toFixed(2).replace(".",",")}%
                     </td>
                   </>
                 )}
@@ -413,8 +430,19 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
   );
 }
 
-function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
+function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial: number; mesFinal: number }) {
   if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner />;
+
+  // Soma valores do período selecionado
+  const getValorPeriodo = (key: string): number => {
+    const conta = dados.dre.contas[key];
+    if (!conta || !conta.valores) return 0;
+    let soma = 0;
+    for (let i = mesInicial; i <= mesFinal; i++) {
+      soma += conta.valores[i] || 0;
+    }
+    return soma;
+  };
 
   const getValor = (key: string, idx: number): number => {
     const conta = dados.dre.contas[key];
@@ -422,34 +450,37 @@ function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
     return conta.valores[idx] || 0;
   };
 
-  const receitaAtual = getValor("Receita de Vendas", mesSel);
-  const margemBruta = getValor("Margem bruta", mesSel);
-  const margemContrib = getValor("Margem líquida (margem de contribuição)", mesSel);
-  const ebitda = getValor("Ebitda", mesSel);
-  const lucroLiq = getValor("Resultado operacional líquido", mesSel);
+  // KPIs do período
+  const receitaPeriodo = getValorPeriodo("Receita de Vendas");
+  const margemBrutaPeriodo = getValorPeriodo("Margem bruta");
+  const margemContribPeriodo = getValorPeriodo("Margem líquida (margem de contribuição)");
+  const ebitdaPeriodo = getValorPeriodo("Ebitda");
+  const lucroLiqPeriodo = getValorPeriodo("Resultado operacional líquido");
+  const gastosFixosPeriodo = getValorPeriodo("Gastos fixos (custos fixos + despesas fixas)");
 
-  const pctMargemBruta = receitaAtual ? (margemBruta / receitaAtual) * 100 : 0;
-  const pctMargemContrib = receitaAtual ? (margemContrib / receitaAtual) * 100 : 0;
-  const pctEbitda = receitaAtual ? (ebitda / receitaAtual) * 100 : 0;
-  const pctLucro = receitaAtual ? (lucroLiq / receitaAtual) * 100 : 0;
+  const pctMargemBruta = receitaPeriodo ? (margemBrutaPeriodo / receitaPeriodo) * 100 : 0;
+  const pctMargemContrib = receitaPeriodo ? (margemContribPeriodo / receitaPeriodo) * 100 : 0;
+  const pctEbitda = receitaPeriodo ? (ebitdaPeriodo / receitaPeriodo) * 100 : 0;
+  const pctLucro = receitaPeriodo ? (lucroLiqPeriodo / receitaPeriodo) * 100 : 0;
 
   // Ponto de equilíbrio
-  const gastosFixos = getValor("Gastos fixos (custos fixos + despesas fixas)", mesSel);
-  const pontoEquilibrio = pctMargemContrib > 0 ? (gastosFixos / (pctMargemContrib / 100)) : 0;
+  const pontoEquilibrio = pctMargemContrib > 0 ? (gastosFixosPeriodo / (pctMargemContrib / 100)) : 0;
 
-  // Dados para gráficos
+  // Dados para gráficos (todos os meses)
   const chartData = MESES_CURTO.map((m, i) => ({
     mes: m,
     Receita: getValor("Receita de Vendas", i),
     EBITDA: getValor("Ebitda", i),
     MargemBruta: getValor("Margem bruta", i),
+    inRange: i >= mesInicial && i <= mesFinal
   }));
 
+  // Dados do pie apenas do período
   const pieData = [
-    { name: "Custo Produtos", value: Math.abs(getValor("Custo dos Produtos Vendidos", mesSel)) },
-    { name: "Despesas Variáveis", value: Math.abs(getValor("Despesas Variáveis", mesSel)) },
-    { name: "Gastos Fixos", value: Math.abs(gastosFixos) },
-    { name: "Lucro", value: Math.max(0, lucroLiq) },
+    { name: "Custo Produtos", value: Math.abs(getValorPeriodo("Custo dos Produtos Vendidos")) },
+    { name: "Despesas Variáveis", value: Math.abs(getValorPeriodo("Despesas Variáveis")) },
+    { name: "Gastos Fixos", value: Math.abs(gastosFixosPeriodo) },
+    { name: "Lucro", value: Math.max(0, lucroLiqPeriodo) },
   ].filter(d => d.value > 0);
 
   const PIE_COLORS = [C.red, C.orange, C.blue, C.green];
@@ -467,16 +498,21 @@ function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
     );
   };
 
+  // Label do período
+  const periodoLabel = mesInicial === mesFinal 
+    ? MESES[mesInicial] 
+    : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* KPIs */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Faturamento" valor={receitaAtual} percentual={100} cor={C.blue} small={false} />
-        <KPICard label="Margem Bruta" valor={margemBruta} percentual={pctMargemBruta} cor={C.gold} small={false} />
-        <KPICard label="Margem Contrib." valor={margemContrib} percentual={pctMargemContrib} cor={C.orange} small={false} />
-        <KPICard label="EBITDA" valor={ebitda} percentual={pctEbitda} cor={C.red} small={false} />
-        <KPICard label="Lucro Líquido" valor={lucroLiq} percentual={pctLucro} cor={C.green} small={false} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={(pontoEquilibrio/receitaAtual)*100 || 0} cor={C.gray700} small={false} />
+        <KPICard label="Faturamento" valor={receitaPeriodo} percentual={100} cor={C.blue} small={false} />
+        <KPICard label="Margem Bruta" valor={margemBrutaPeriodo} percentual={pctMargemBruta} cor={C.gold} small={false} />
+        <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} small={false} />
+        <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.red} small={false} />
+        <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} small={false} />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={(pontoEquilibrio/receitaPeriodo)*100 || 0} cor={C.gray700} small={false} />
       </div>
 
       {/* Gráficos */}
@@ -485,6 +521,9 @@ function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ width: 3, height: 14, background: C.blue, borderRadius: 2, display: "inline-block" }}></span>
             Faturamento Mensal
+            <span style={{ marginLeft: "auto", fontSize: 10, color: C.gray500, fontWeight: 400 }}>
+              Período selecionado em destaque
+            </span>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={chartData}>
@@ -506,7 +545,7 @@ function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ width: 3, height: 14, background: C.gold, borderRadius: 2, display: "inline-block" }}></span>
-            Composição {MESES[mesSel]}
+            Composição — {periodoLabel}
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
@@ -532,7 +571,12 @@ function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
             <YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>
-              {chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : C.blue} />)}
+              {chartData.map((d, i) => (
+                <Cell 
+                  key={i} 
+                  fill={d.EBITDA < 0 ? C.red : (d.inRange ? C.blue : C.gray300)} 
+                />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -544,7 +588,8 @@ function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
 // ─── APP PRINCIPAL ────────────────────────────────────────────────────────────
 export default function App() {
   const [tab, setTab] = useState("overview");
-  const [mesSel, setMesSel] = useState(0);
+  const [mesInicial, setMesInicial] = useState(0);
+  const [mesFinal, setMesFinal] = useState(0);
   const [filial, setFilial] = useState("Consolidado");
   const [ano, setAno] = useState(2026);
   const [modoAnual, setModoAnual] = useState(false);
@@ -596,18 +641,37 @@ export default function App() {
     return receita && receita.valores && receita.valores[m.idx] > 0;
   });
 
-  // Ajustar mês selecionado se necessário
+  // Ajustar meses selecionados quando dados carregam
   useEffect(() => {
-    if (mesesDisponiveis.length > 0 && !mesesDisponiveis.find(m => m.idx === mesSel)) {
-      setMesSel(mesesDisponiveis[0].idx);
+    if (mesesDisponiveis.length > 0) {
+      // Se mesInicial não está disponível, ajusta pro primeiro disponível
+      if (!mesesDisponiveis.find(m => m.idx === mesInicial)) {
+        setMesInicial(mesesDisponiveis[0].idx);
+      }
+      // Se mesFinal não está disponível ou é menor que mesInicial, ajusta pro último disponível
+      if (!mesesDisponiveis.find(m => m.idx === mesFinal) || mesFinal < mesInicial) {
+        setMesFinal(mesesDisponiveis[mesesDisponiveis.length - 1].idx);
+      }
     }
-  }, [mesesDisponiveis, mesSel]);
+  }, [mesesDisponiveis]);
+
+  // Garantir que mesFinal >= mesInicial
+  useEffect(() => {
+    if (mesFinal < mesInicial) {
+      setMesFinal(mesInicial);
+    }
+  }, [mesInicial, mesFinal]);
 
   const TABS = [
     { id: "overview", label: "Visão Geral" },
     { id: "dre", label: "DRE" },
     { id: "dfc", label: "DFC" },
   ];
+
+  // Label do período para o breadcrumb
+  const periodoLabel = mesInicial === mesFinal 
+    ? MESES[mesInicial]?.toUpperCase() || "-"
+    : `${MESES_CURTO[mesInicial]?.toUpperCase() || "-"} A ${MESES_CURTO[mesFinal]?.toUpperCase() || "-"}`;
 
   return (
     <div style={{ background: C.gray50, minHeight: "100vh", fontFamily: "'Barlow',sans-serif" }}>
@@ -631,7 +695,7 @@ export default function App() {
           </div>
 
           {/* CONTROLES */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {/* Ano */}
             <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{
               border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px",
@@ -648,18 +712,50 @@ export default function App() {
               {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f}>{f}</option>)}
             </select>
 
-            {/* Mês */}
-            <select value={mesSel} onChange={e => setMesSel(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{
-              border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px",
-              fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer",
-              opacity: mesesDisponiveis.length === 0 ? 0.5 : 1
-            }}>
-              {mesesDisponiveis.length > 0 ? (
-                mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)
-              ) : (
-                <option>-</option>
-              )}
-            </select>
+            {/* Separador */}
+            <span style={{ color: C.gray300, fontSize: 12 }}>|</span>
+
+            {/* Mês Inicial */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>DE</span>
+              <select 
+                value={mesInicial} 
+                onChange={e => setMesInicial(Number(e.target.value))} 
+                disabled={mesesDisponiveis.length === 0} 
+                style={{
+                  border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px",
+                  fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer",
+                  opacity: mesesDisponiveis.length === 0 ? 0.5 : 1
+                }}
+              >
+                {mesesDisponiveis.length > 0 ? (
+                  mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)
+                ) : (
+                  <option>-</option>
+                )}
+              </select>
+            </div>
+
+            {/* Mês Final */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>ATÉ</span>
+              <select 
+                value={mesFinal} 
+                onChange={e => setMesFinal(Number(e.target.value))} 
+                disabled={mesesDisponiveis.length === 0} 
+                style={{
+                  border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px",
+                  fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer",
+                  opacity: mesesDisponiveis.length === 0 ? 0.5 : 1
+                }}
+              >
+                {mesesDisponiveis.length > 0 ? (
+                  mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)
+                ) : (
+                  <option>-</option>
+                )}
+              </select>
+            </div>
 
             {/* Toggle anual (só DRE/DFC) */}
             {(tab === "dre" || tab === "dfc") && (
@@ -695,7 +791,7 @@ export default function App() {
         <span style={{ color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>{filial.toUpperCase()}</span>
         <span style={{ color: C.gray500, fontSize: 11 }}>›</span>
         <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 1 }}>
-          {mesesDisponiveis.length > 0 ? MESES[mesSel].toUpperCase() : "-"}
+          {periodoLabel}
         </span>
         <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }}>
           {loading ? "Carregando..." : (
@@ -712,15 +808,16 @@ export default function App() {
           <LoadingSpinner />
         ) : (
           <>
-            {tab === "overview" && <OverviewView dados={dados} mesSel={mesSel} />}
+            {tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} />}
 
             {tab === "dre" && (
               <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
                 <TabelaFinanceira
                   rows={DRE_ROWS}
                   dados={dados?.dre}
-                  mesSel={mesSel}
-                  titulo={`DRE — ${ano}`}
+                  mesInicial={mesInicial}
+                  mesFinal={mesFinal}
+                  titulo={`DRE — ${ano} — ${periodoLabel}`}
                   mostrarAno={modoAnual}
                 />
               </div>
@@ -731,8 +828,9 @@ export default function App() {
                 <TabelaFinanceira
                   rows={DFC_ROWS}
                   dados={dados?.dfc}
-                  mesSel={mesSel}
-                  titulo={`DFC — ${ano}`}
+                  mesInicial={mesInicial}
+                  mesFinal={mesFinal}
+                  titulo={`DFC — ${ano} — ${periodoLabel}`}
                   mostrarAno={modoAnual}
                 />
               </div>
