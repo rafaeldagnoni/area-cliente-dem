@@ -39,6 +39,7 @@ async function validateAdmin(req: Request) {
 
 export async function GET(req: Request) {
   const auth = await validateAdmin(req);
+
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: 403 });
   }
@@ -53,21 +54,26 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ companies: data });
+    return NextResponse.json({ companies: data || [] });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Erro interno do servidor." },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: Request) {
   const auth = await validateAdmin(req);
+
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: 403 });
   }
 
   try {
     const body = await req.json();
-    const { name, slug } = body;
+    const name = String(body?.name || "").trim();
+    const slug = String(body?.slug || "").trim().toLowerCase();
 
     if (!name || !slug) {
       return NextResponse.json(
@@ -80,11 +86,12 @@ export async function POST(req: Request) {
       .from("companies")
       .insert([
         {
-          name: String(name).trim(),
-          slug: String(slug).trim().toLowerCase(),
+          name,
+          slug,
+          status: "active",
         },
       ])
-      .select("id, name, slug")
+      .select("id, name, slug, status")
       .single();
 
     if (error) {
@@ -93,6 +100,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ company: data });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Erro interno do servidor." },
+      { status: 500 }
+    );
   }
 }
