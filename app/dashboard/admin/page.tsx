@@ -189,6 +189,40 @@ export default function AdminPage() {
     await loadCompanies();
   }
 
+  async function handleRemoveUser(company: Company, user: CompanyUser) {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja remover o acesso de ${user.email} da empresa ${company.name}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const token = await getAccessToken();
+
+    const res = await fetch("/api/admin/remove-company-user", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        companyId: company.id,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      alert(json.error || "Erro ao remover acesso.");
+      return;
+    }
+
+    alert("Acesso removido com sucesso.");
+    await loadCompanies();
+  }
+
   async function handleAdminLogout() {
     await supabase.auth.signOut();
     router.replace("/admin/login");
@@ -357,7 +391,26 @@ export default function AdminPage() {
                   {company.users && company.users.length > 0 ? (
                     <ul style={{ marginTop: 8, paddingLeft: 20 }}>
                       {company.users.map((user) => (
-                        <li key={`${company.id}-${user.id}`}>{user.email}</li>
+                        <li
+                          key={`${company.id}-${user.id}`}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 12,
+                            flexWrap: "wrap",
+                            marginBottom: 8,
+                          }}
+                        >
+                          <span>{user.email}</span>
+
+                          <button
+                            onClick={() => handleRemoveUser(company, user)}
+                            style={{ padding: "6px 12px" }}
+                          >
+                            Remover acesso
+                          </button>
+                        </li>
                       ))}
                     </ul>
                   ) : (
