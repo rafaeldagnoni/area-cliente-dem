@@ -461,12 +461,12 @@ function OverviewView({ dados, mesSel }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* KPIs */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Faturamento" valor={receitaAtual} percentual={100} cor={C.blue} />
-        <KPICard label="Margem Bruta" valor={margemBruta} percentual={pctMargemBruta} cor={C.gold} />
-        <KPICard label="Margem Contrib." valor={margemContrib} percentual={pctMargemContrib} cor={C.orange} />
-        <KPICard label="EBITDA" valor={ebitda} percentual={pctEbitda} cor={C.red} />
-        <KPICard label="Lucro Líquido" valor={lucroLiq} percentual={pctLucro} cor={C.green} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={(pontoEquilibrio/receitaAtual)*100 || 0} cor={C.gray700} />
+        <KPICard label="Faturamento" valor={receitaAtual} percentual={100} cor={C.blue} small={false} />
+        <KPICard label="Margem Bruta" valor={margemBruta} percentual={pctMargemBruta} cor={C.gold} small={false} />
+        <KPICard label="Margem Contrib." valor={margemContrib} percentual={pctMargemContrib} cor={C.orange} small={false} />
+        <KPICard label="EBITDA" valor={ebitda} percentual={pctEbitda} cor={C.red} small={false} />
+        <KPICard label="Lucro Líquido" valor={lucroLiq} percentual={pctLucro} cor={C.green} small={false} />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={(pontoEquilibrio/receitaAtual)*100 || 0} cor={C.gray700} small={false} />
       </div>
 
       {/* Gráficos */}
