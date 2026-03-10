@@ -227,7 +227,7 @@ export default function DynamicDashboardPage({ params }: PageProps) {
             <img 
               src={`/logos/${slug}.png`}
               alt={companyName}
-              style={{ height: '32px', maxWidth: '120px', objectFit: 'contain' }}
+              style={{ height: '60px', maxWidth: '120px', objectFit: 'contain' }}
               onError={(e) => {
                 // Se não encontrar o logo, esconde a imagem
                 (e.target as HTMLImageElement).style.display = 'none';
