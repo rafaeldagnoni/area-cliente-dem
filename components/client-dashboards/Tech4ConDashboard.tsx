@@ -34,19 +34,19 @@ const C = {
 };
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
-const fmtBRL = (v) => {
+const fmtBRL = (v: number | null | undefined): string => {
   if (v === 0 || v === null || v === undefined) return "R$ -";
   const abs = Math.abs(v);
   const s = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(abs);
   return v < 0 ? `-R$ ${s}` : `R$ ${s}`;
 };
-const fmtK = (v) => {
+const fmtK = (v: number): string => {
   const abs = Math.abs(v);
   if (abs >= 1000000) return `R$ ${(v/1000000).toFixed(1)}M`;
   if (abs >= 1000) return `R$ ${(v/1000).toFixed(0)}k`;
   return fmtBRL(v);
 };
-const fmtPct = (v, base) => {
+const fmtPct = (v: number, base: number): string => {
   if (!base || base === 0) return "0,00%";
   return ((v / Math.abs(base)) * 100).toFixed(2).replace(".",",") + "%";
 };
@@ -189,7 +189,7 @@ function LoadingSpinner() {
   );
 }
 
-function ErrorMessage({ message, onRetry }) {
+function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div style={{ 
       display: "flex", 
@@ -235,7 +235,13 @@ function ErrorMessage({ message, onRetry }) {
   );
 }
 
-function KPICard({ label, valor, percentual, cor, small }) {
+function KPICard({ label, valor, percentual, cor, small = false }: { 
+  label: string; 
+  valor: number; 
+  percentual?: number; 
+  cor?: string; 
+  small?: boolean 
+}) {
   return (
     <div style={{
       background: cor ? `${cor}11` : C.white,
@@ -271,28 +277,32 @@ function KPICard({ label, valor, percentual, cor, small }) {
   );
 }
 
-function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }) {
+function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }: {
+  rows: Array<{ key: string; nivel: number; tipo?: string }>;
+  dados: any;
+  mesSel: number;
+  titulo: string;
+  mostrarAno: boolean;
+}) {
   if (!dados || !dados.contas) return <LoadingSpinner />;
 
-  const getValor = (key, mesIdx) => {
+  const getValor = (key: string, mesIdx: number): number => {
     const conta = dados.contas[key];
     if (!conta || !conta.valores) return 0;
     return conta.valores[mesIdx] || 0;
   };
 
-  const getPct = (key, mesIdx) => {
+  const getPct = (key: string, mesIdx: number): number => {
     const conta = dados.contas[key];
     if (!conta || !conta.percentuais) return 0;
     return conta.percentuais[mesIdx] || 0;
   };
 
-  const getAnual = (key) => {
+  const getAnual = (key: string): number => {
     const conta = dados.contas[key];
     if (!conta || !conta.valores) return 0;
-    return conta.valores.reduce((a, b) => a + b, 0);
+    return conta.valores.reduce((a: number, b: number) => a + b, 0);
   };
-
-  const receita = getValor("Receita de Vendas", mesSel);
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -403,10 +413,10 @@ function TabelaFinanceira({ rows, dados, mesSel, titulo, mostrarAno }) {
   );
 }
 
-function OverviewView({ dados, mesSel }) {
+function OverviewView({ dados, mesSel }: { dados: any; mesSel: number }) {
   if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner />;
 
-  const getValor = (key, idx) => {
+  const getValor = (key: string, idx: number): number => {
     const conta = dados.dre.contas[key];
     if (!conta || !conta.valores) return 0;
     return conta.valores[idx] || 0;
@@ -444,11 +454,11 @@ function OverviewView({ dados, mesSel }) {
 
   const PIE_COLORS = [C.red, C.orange, C.blue, C.green];
 
-  const CustomTooltip = ({ active, payload }) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     return (
       <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 6, padding: "8px 12px", fontSize: 12 }}>
-        {payload.map((p, i) => (
+        {payload.map((p: any, i: number) => (
           <div key={i} style={{ color: p.color, marginBottom: 2 }}>
             {p.name}: {fmtBRL(p.value)}
           </div>
@@ -486,7 +496,7 @@ function OverviewView({ dados, mesSel }) {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={C.gray100} />
               <XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
               <Area type="monotone" dataKey="Receita" stroke={C.blue} strokeWidth={2} fill="url(#colorReceita)" />
             </AreaChart>
@@ -503,7 +513,7 @@ function OverviewView({ dados, mesSel }) {
               <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={45} paddingAngle={2}>
                 {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={v => fmtBRL(v)} contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 12 }} />
+              <Tooltip formatter={(v: any) => fmtBRL(v)} contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 12 }} />
               <Legend wrapperStyle={{ fontSize: 11, fontFamily: "'Barlow',sans-serif" }} />
             </PieChart>
           </ResponsiveContainer>
@@ -519,7 +529,7 @@ function OverviewView({ dados, mesSel }) {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke={C.gray100} />
             <XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tickFormatter={v => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 11 }} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>
               {chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : C.blue} />)}
@@ -539,10 +549,10 @@ export default function App() {
   const [ano, setAno] = useState(2026);
   const [modoAnual, setModoAnual] = useState(false);
 
-  const [dados, setDados] = useState(null);
+  const [dados, setDados] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
 
   // Carregar fonte
   useEffect(() => {
@@ -568,7 +578,7 @@ export default function App() {
 
       setDados(json);
       setUltimaAtualizacao(new Date(json.atualizadoEm));
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || "Erro de conexão");
     } finally {
       setLoading(false);
