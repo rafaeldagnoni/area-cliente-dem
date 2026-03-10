@@ -16,6 +16,7 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companyName, setCompanyName] = useState("");
@@ -37,6 +38,11 @@ export default function AdminPage() {
   async function loadCompanies() {
     const token = await getAccessToken();
 
+    if (!token) {
+      router.replace("/login");
+      return false;
+    }
+
     const res = await fetch("/api/admin/companies", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -45,32 +51,38 @@ export default function AdminPage() {
 
     const json = await res.json();
 
-    if (json.error) {
-      alert(json.error);
-      return;
+    if (!res.ok) {
+      if (res.status === 403) {
+        setErrorMessage("Acesso não autorizado.");
+        setIsAllowed(false);
+        return false;
+      }
+
+      setErrorMessage(json.error || "Erro ao carregar empresas.");
+      setIsAllowed(false);
+      return false;
     }
 
     setCompanies(json.companies || []);
+    setIsAllowed(true);
+    return true;
   }
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data } = await supabase.auth.getUser();
-      const email = (data.user?.email || "").toLowerCase();
+      const { data } = await supabase.auth.getSession();
 
-      const allowedEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-        .split(",")
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
-
-      if (!email || !allowedEmails.includes(email)) {
-        router.replace("/dashboard");
+      if (!data.session) {
+        router.replace("/login");
         return;
       }
 
-      setIsAllowed(true);
-      await loadCompanies();
+      const ok = await loadCompanies();
       setLoading(false);
+
+      if (!ok) {
+        return;
+      }
     };
 
     checkAccess();
@@ -95,8 +107,8 @@ export default function AdminPage() {
 
     const json = await res.json();
 
-    if (json.error) {
-      alert(json.error);
+    if (!res.ok) {
+      alert(json.error || "Erro ao criar empresa.");
       return;
     }
 
@@ -128,8 +140,8 @@ export default function AdminPage() {
 
     const json = await res.json();
 
-    if (json.error) {
-      alert(json.error);
+    if (!res.ok) {
+      alert(json.error || "Erro ao convidar usuário.");
       return;
     }
 
@@ -138,16 +150,53 @@ export default function AdminPage() {
     setSelectedCompanyId("");
   }
 
+  async function handleToggleStatus(company: Company) {
+    const token = await getAccessToken();
+    const newStatus = company.status === "inactive" ? "active" : "inactive";
+
+    const res = await fetch("/api/admin/companies", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        companyId: company.id,
+        status: newStatus,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      alert(json.error || "Erro ao alterar status.");
+      return;
+    }
+
+    alert(
+      `Empresa ${company.name} ${
+        newStatus === "active" ? "ativada" : "inativada"
+      } com sucesso.`
+    );
+
+    await loadCompanies();
+  }
+
   if (loading) {
     return <div style={{ padding: 40 }}>Carregando...</div>;
   }
 
   if (!isAllowed) {
-    return null;
+    return (
+      <div style={{ padding: 40, maxWidth: 700 }}>
+        <h1 style={{ marginBottom: 16 }}>403 - Acesso não autorizado</h1>
+        <p>{errorMessage || "Você não tem permissão para acessar esta área."}</p>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: 40, maxWidth: 900 }}>
+    <div style={{ padding: 40, maxWidth: 1000 }}>
       <h1 style={{ marginBottom: 24 }}>Admin D&M</h1>
 
       <div
@@ -239,11 +288,33 @@ export default function AdminPage() {
         {companies.length === 0 ? (
           <p>Nenhuma empresa cadastrada.</p>
         ) : (
-          <ul style={{ paddingLeft: 20 }}>
+          <ul style={{ paddingLeft: 0, listStyle: "none" }}>
             {companies.map((company) => (
-              <li key={company.id} style={{ marginBottom: 8 }}>
-                <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
-                {company.status || "active"}
+              <li
+                key={company.id}
+                style={{
+                  marginBottom: 12,
+                  padding: 12,
+                  border: "1px solid #eee",
+                  borderRadius: 8,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
+                  {company.status || "active"}
+                </div>
+
+                <button
+                  onClick={() => handleToggleStatus(company)}
+                  style={{ padding: "8px 14px" }}
+                >
+                  {company.status === "inactive" ? "Ativar" : "Inativar"}
+                </button>
               </li>
             ))}
           </ul>
