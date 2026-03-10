@@ -8,6 +8,7 @@ type Company = {
   id: string;
   name: string;
   slug: string;
+  status?: string;
 };
 
 export default function AdminPage() {
@@ -209,7 +210,7 @@ export default function AdminPage() {
             <option value="">Selecione a empresa</option>
             {companies.map((company) => (
               <option key={company.id} value={company.id}>
-                {company.name}
+                {company.name} {company.status ? `(${company.status})` : ""}
               </option>
             ))}
           </select>
@@ -241,7 +242,8 @@ export default function AdminPage() {
           <ul style={{ paddingLeft: 20 }}>
             {companies.map((company) => (
               <li key={company.id} style={{ marginBottom: 8 }}>
-                <strong>{company.name}</strong> — slug: {company.slug}
+                <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
+                {company.status || "active"}
               </li>
             ))}
           </ul>
