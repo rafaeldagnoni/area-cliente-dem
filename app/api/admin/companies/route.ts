@@ -106,3 +106,73 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function PATCH(req: Request) {
+  const auth = await validateAdmin(req);
+
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: 403 });
+  }
+
+  try {
+    const body = await req.json();
+
+    const companyId = String(body?.companyId || "").trim();
+    const status = body?.status ? String(body.status).trim().toLowerCase() : "";
+    const name = body?.name ? String(body.name).trim() : "";
+    const slug = body?.slug ? String(body.slug).trim().toLowerCase() : "";
+
+    if (!companyId) {
+      return NextResponse.json(
+        { error: "companyId é obrigatório." },
+        { status: 400 }
+      );
+    }
+
+    const updatePayload: Record<string, string> = {};
+
+    if (status) {
+      if (!["active", "inactive"].includes(status)) {
+        return NextResponse.json(
+          { error: "Status inválido." },
+          { status: 400 }
+        );
+      }
+
+      updatePayload.status = status;
+    }
+
+    if (name) {
+      updatePayload.name = name;
+    }
+
+    if (slug) {
+      updatePayload.slug = slug;
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      return NextResponse.json(
+        { error: "Nenhum campo válido enviado para atualização." },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("companies")
+      .update(updatePayload)
+      .eq("id", companyId)
+      .select("id, name, slug, status")
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ company: data });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.message || "Erro interno do servidor." },
+      { status: 500 }
+    );
+  }
+}
