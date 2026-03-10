@@ -207,19 +207,32 @@ export default function DynamicDashboardPage({ params }: PageProps) {
       {/* Header do Dashboard */}
       <header className="dashboard-header">
         <div className="dashboard-header-left">
-          {/* Logo */}
+          {/* Logo D&M */}
           <img 
             src="/logo-dm.png" 
             alt="D&M Consultoria" 
             className="dashboard-logo"
           />
 
-          {/* Divider + Nome da Empresa */}
-          <div className="dashboard-company">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dm-mid)" strokeWidth="2">
-              <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-            <span className="dashboard-company-name">{companyName}</span>
+          {/* Separador */}
+          <div style={{
+            width: '1px',
+            height: '32px',
+            background: 'var(--dm-light)',
+            margin: '0 0.5rem'
+          }} />
+
+          {/* Logo do Cliente */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <img 
+              src={`/logos/${slug}.png`}
+              alt={companyName}
+              style={{ height: '32px', maxWidth: '120px', objectFit: 'contain' }}
+              onError={(e) => {
+                // Se não encontrar o logo, esconde a imagem
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
             <span className="badge badge-success">Ativo</span>
           </div>
         </div>
