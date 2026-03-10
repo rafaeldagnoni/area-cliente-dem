@@ -61,7 +61,7 @@ export default function LoginPage() {
             <img 
               src="/logo-dm-white.png" 
               alt="D&M Consultoria" 
-              style={{ height: '70px' }}
+              style={{ height: '100px' }}
             />
           </div>
 
