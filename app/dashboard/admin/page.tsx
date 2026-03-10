@@ -223,6 +223,43 @@ export default function AdminPage() {
     await loadCompanies();
   }
 
+  async function handleEditCompany(company: Company) {
+    const newName = window.prompt("Novo nome da empresa:", company.name);
+    if (!newName) {
+      return;
+    }
+
+    const newSlug = window.prompt("Novo slug da empresa:", company.slug);
+    if (!newSlug) {
+      return;
+    }
+
+    const token = await getAccessToken();
+
+    const res = await fetch("/api/admin/companies", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        companyId: company.id,
+        name: newName,
+        slug: newSlug,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      alert(json.error || "Erro ao editar empresa.");
+      return;
+    }
+
+    alert("Empresa atualizada com sucesso.");
+    await loadCompanies();
+  }
+
   async function handleAdminLogout() {
     await supabase.auth.signOut();
     router.replace("/admin/login");
@@ -378,12 +415,21 @@ export default function AdminPage() {
                     {company.status || "active"}
                   </div>
 
-                  <button
-                    onClick={() => handleToggleStatus(company)}
-                    style={{ padding: "8px 14px" }}
-                  >
-                    {company.status === "inactive" ? "Ativar" : "Inativar"}
-                  </button>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button
+                      onClick={() => handleEditCompany(company)}
+                      style={{ padding: "8px 14px" }}
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => handleToggleStatus(company)}
+                      style={{ padding: "8px 14px" }}
+                    >
+                      {company.status === "inactive" ? "Ativar" : "Inativar"}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
