@@ -34,11 +34,16 @@ export default function DynamicDashboardPage({ params }: PageProps) {
 
       const { data: company, error: companyError } = await supabase
         .from("companies")
-        .select("id, slug, name")
+        .select("id, slug, name, status")
         .eq("slug", slug)
         .maybeSingle();
 
       if (companyError || !company) {
+        router.replace("/select-company");
+        return;
+      }
+
+      if (company.status !== "active") {
         router.replace("/select-company");
         return;
       }
