@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import Tech4ConDashboard from "../tech4con/page";
-import MediarhDashboard from "../mediarh/page";
+import Tech4ConDashboard from "@/components/client-dashboards/Tech4ConDashboard";
+import MediarhDashboard from "@/components/client-dashboards/MediarhDashboard";
 
 type PageProps = {
   params: {
@@ -21,7 +21,6 @@ export default function DynamicDashboardPage({ params }: PageProps) {
 
   useEffect(() => {
     const validateAccess = async () => {
-      // 1) sessão
       const { data: sessionData } = await supabase.auth.getSession();
 
       if (!sessionData.session) {
@@ -31,7 +30,6 @@ export default function DynamicDashboardPage({ params }: PageProps) {
 
       const user = sessionData.session.user;
 
-      // 2) busca empresa pelo slug
       const { data: company, error: companyError } = await supabase
         .from("companies")
         .select("id, slug")
@@ -43,7 +41,6 @@ export default function DynamicDashboardPage({ params }: PageProps) {
         return;
       }
 
-      // 3) valida vínculo real do usuário com a empresa
       const { data: link, error: linkError } = await supabase
         .from("user_companies")
         .select("id")
@@ -56,7 +53,6 @@ export default function DynamicDashboardPage({ params }: PageProps) {
         return;
       }
 
-      // 4) sincroniza empresa ativa
       localStorage.setItem("active_company_slug", company.slug);
       localStorage.setItem("active_company_id", company.id);
 
