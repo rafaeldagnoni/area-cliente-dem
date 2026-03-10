@@ -39,7 +39,7 @@ export default function AdminPage() {
     const token = await getAccessToken();
 
     if (!token) {
-      router.replace("/login");
+      router.replace("/");
       return false;
     }
 
@@ -73,7 +73,7 @@ export default function AdminPage() {
       const { data } = await supabase.auth.getSession();
 
       if (!data.session) {
-        router.replace("/login");
+        router.replace("/");
         return;
       }
 
@@ -257,9 +257,10 @@ export default function AdminPage() {
             style={{ padding: 10, minWidth: 220 }}
           >
             <option value="">Selecione a empresa</option>
+
             {companies.map((company) => (
               <option key={company.id} value={company.id}>
-                {company.name} {company.status ? `(${company.status})` : ""}
+                {company.name}
               </option>
             ))}
           </select>
@@ -305,15 +306,14 @@ export default function AdminPage() {
                 }}
               >
                 <div>
-                  <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
-                  {company.status || "active"}
+                  <strong>{company.name}</strong> — slug: {company.slug}
                 </div>
 
                 <button
                   onClick={() => handleToggleStatus(company)}
                   style={{ padding: "8px 14px" }}
                 >
-                  {company.status === "inactive" ? "Ativar" : "Inativar"}
+                  Inativar
                 </button>
               </li>
             ))}
