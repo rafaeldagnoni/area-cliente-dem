@@ -39,7 +39,7 @@ export default function AdminPage() {
     const token = await getAccessToken();
 
     if (!token) {
-      router.replace("/");
+      router.replace("/admin/login");
       return false;
     }
 
@@ -73,7 +73,7 @@ export default function AdminPage() {
       const { data } = await supabase.auth.getSession();
 
       if (!data.session) {
-        router.replace("/");
+        router.replace("/admin/login");
         return;
       }
 
@@ -182,6 +182,11 @@ export default function AdminPage() {
     await loadCompanies();
   }
 
+  async function handleAdminLogout() {
+    await supabase.auth.signOut();
+    router.replace("/admin/login");
+  }
+
   if (loading) {
     return <div style={{ padding: 40 }}>Carregando...</div>;
   }
@@ -197,7 +202,22 @@ export default function AdminPage() {
 
   return (
     <div style={{ padding: 40, maxWidth: 1000 }}>
-      <h1 style={{ marginBottom: 24 }}>Admin D&M</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+          gap: 12,
+          flexWrap: "wrap",
+        }}
+      >
+        <h1 style={{ margin: 0 }}>Admin D&M</h1>
+
+        <button onClick={handleAdminLogout} style={{ padding: "10px 16px" }}>
+          Sair do admin
+        </button>
+      </div>
 
       <div
         style={{
@@ -260,7 +280,7 @@ export default function AdminPage() {
 
             {companies.map((company) => (
               <option key={company.id} value={company.id}>
-                {company.name}
+                {company.name} {company.status ? `(${company.status})` : ""}
               </option>
             ))}
           </select>
@@ -306,14 +326,15 @@ export default function AdminPage() {
                 }}
               >
                 <div>
-                  <strong>{company.name}</strong> — slug: {company.slug}
+                  <strong>{company.name}</strong> — slug: {company.slug} — status:{" "}
+                  {company.status || "active"}
                 </div>
 
                 <button
                   onClick={() => handleToggleStatus(company)}
                   style={{ padding: "8px 14px" }}
                 >
-                  Inativar
+                  {company.status === "inactive" ? "Ativar" : "Inativar"}
                 </button>
               </li>
             ))}
