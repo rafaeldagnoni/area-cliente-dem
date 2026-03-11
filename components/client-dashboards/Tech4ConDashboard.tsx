@@ -7,6 +7,9 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;6
 // ─── API CONFIG ───────────────────────────────────────────────────────────────
 const API_URL = "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X5z88QMnJ-XQE3C-CjghVFRYa8ZJmhib9UNbRwmlPjt4I/exec";
 
+// ─── LOGO DO CLIENTE ──────────────────────────────────────────────────────────
+const LOGO_URL = "/logos/tech4con.png";
+
 // ─── PALETA TECH4CON ──────────────────────────────────────────────────────────
 const C = {
   red:        "#C8102E",
@@ -83,13 +86,13 @@ const DRE_ROWS = [
   { key: "Ebitda", nivel: 0, tipo: "destaque" },
   { key: "Receitas Financeiras", nivel: 1 },
   { key: "Despesas Financeiras", nivel: 1 },
-  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado" },
+  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado", calculado: true },
   { key: "Impostos Sob Lucro", nivel: 1 },
-  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado" },
+  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado", calculado: true },
   { key: "Distribuição de Lucro", nivel: 1 },
-  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque" },
+  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque", calculado: true },
   { key: "Investimentos e Financiamentos", nivel: 0, tipo: "subtotal" },
-  { key: "Resultado após Capex", nivel: 0, tipo: "destaque" },
+  { key: "Resultado após Capex", nivel: 0, tipo: "destaque", calculado: true },
 ];
 
 // ─── ESTRUTURA DFC ────────────────────────────────────────────────────────────
@@ -125,33 +128,30 @@ const DFC_ROWS = [
   { key: "Ebitda", nivel: 0, tipo: "destaque" },
   { key: "Receitas Financeiras", nivel: 1 },
   { key: "Despesas Financeiras", nivel: 1 },
-  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado" },
+  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado", calculado: true },
   { key: "Impostos Sob Lucro", nivel: 1 },
-  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado" },
+  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado", calculado: true },
   { key: "Distribuição de Lucro", nivel: 1 },
-  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque" },
+  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque", calculado: true },
   { key: "Investimentos e Financiamentos", nivel: 0, tipo: "subtotal" },
   { key: "Compra de Ativo Imobilizado", nivel: 1 },
   { key: "Empréstimos e Financiamentos (Saída)", nivel: 1 },
-  { key: "Resultado após Capex", nivel: 0, tipo: "destaque" },
+  { key: "Resultado após Capex", nivel: 0, tipo: "destaque", calculado: true },
 ];
 
 // ─── COMPONENTES ──────────────────────────────────────────────────────────────
 
 function Logo() {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-      <svg width="32" height="32" viewBox="0 0 100 100">
-        <polygon points="25,15 50,85 40,85 15,15" fill={C.red}/>
-        <polygon points="35,15 60,85 50,85 25,15" fill={C.redDark} fillOpacity="0.7"/>
-        <rect x="55" y="15" width="12" height="70" fill={C.black}/>
-        <rect x="72" y="15" width="12" height="70" fill={C.black}/>
-      </svg>
-      <div style={{ display:"flex", flexDirection:"column", lineHeight:1 }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:18, color:C.black, letterSpacing:2 }}>TECH</span>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800, fontSize:18, color:C.red, letterSpacing:2 }}>4CON</span>
-      </div>
-    </div>
+    <img 
+      src={LOGO_URL} 
+      alt="Tech4Con" 
+      style={{ 
+        height: 40, 
+        maxWidth: 150, 
+        objectFit: "contain" 
+      }} 
+    />
   );
 }
 
@@ -274,8 +274,73 @@ function KPICard({ label, valor, percentual, cor, small = false }: {
   );
 }
 
+// ─── FUNÇÃO PARA CALCULAR VALORES DERIVADOS ──────────────────────────────────
+function calcularValoresDerivados(dados: any, mesIdx: number): Record<string, number> {
+  if (!dados || !dados.contas) return {};
+
+  const getVal = (key: string): number => {
+    const conta = dados.contas[key];
+    if (!conta || !conta.valores) return 0;
+    return conta.valores[mesIdx] || 0;
+  };
+
+  const ebitda = getVal("Ebitda");
+  const receitasFinanceiras = getVal("Receitas Financeiras");
+  const despesasFinanceiras = getVal("Despesas Financeiras");
+  const impostosSobLucro = getVal("Impostos Sob Lucro");
+  const distribuicaoLucro = getVal("Distribuição de Lucro");
+  const investimentos = getVal("Investimentos e Financiamentos");
+
+  // Cálculos derivados
+  const resultadoOperacionalBruto = ebitda + receitasFinanceiras + despesasFinanceiras;
+  const resultadoOperacionalLiquido = resultadoOperacionalBruto + impostosSobLucro;
+  const resultadoPosDistribuicao = resultadoOperacionalLiquido + distribuicaoLucro;
+  const resultadoAposCapex = resultadoPosDistribuicao + investimentos;
+
+  return {
+    "Resultado operacional bruto": resultadoOperacionalBruto,
+    "Resultado operacional líquido": resultadoOperacionalLiquido,
+    "Resultado pós distribuição de lucros": resultadoPosDistribuicao,
+    "Resultado após Capex": resultadoAposCapex,
+  };
+}
+
+function calcularValoresDerivadosPeriodo(dados: any, mesInicial: number, mesFinal: number): Record<string, number> {
+  if (!dados || !dados.contas) return {};
+
+  const getValPeriodo = (key: string): number => {
+    const conta = dados.contas[key];
+    if (!conta || !conta.valores) return 0;
+    let soma = 0;
+    for (let i = mesInicial; i <= mesFinal; i++) {
+      soma += conta.valores[i] || 0;
+    }
+    return soma;
+  };
+
+  const ebitda = getValPeriodo("Ebitda");
+  const receitasFinanceiras = getValPeriodo("Receitas Financeiras");
+  const despesasFinanceiras = getValPeriodo("Despesas Financeiras");
+  const impostosSobLucro = getValPeriodo("Impostos Sob Lucro");
+  const distribuicaoLucro = getValPeriodo("Distribuição de Lucro");
+  const investimentos = getValPeriodo("Investimentos e Financiamentos");
+
+  // Cálculos derivados
+  const resultadoOperacionalBruto = ebitda + receitasFinanceiras + despesasFinanceiras;
+  const resultadoOperacionalLiquido = resultadoOperacionalBruto + impostosSobLucro;
+  const resultadoPosDistribuicao = resultadoOperacionalLiquido + distribuicaoLucro;
+  const resultadoAposCapex = resultadoPosDistribuicao + investimentos;
+
+  return {
+    "Resultado operacional bruto": resultadoOperacionalBruto,
+    "Resultado operacional líquido": resultadoOperacionalLiquido,
+    "Resultado pós distribuição de lucros": resultadoPosDistribuicao,
+    "Resultado após Capex": resultadoAposCapex,
+  };
+}
+
 function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno }: {
-  rows: Array<{ key: string; nivel: number; tipo?: string }>;
+  rows: Array<{ key: string; nivel: number; tipo?: string; calculado?: boolean }>;
   dados: any;
   mesInicial: number;
   mesFinal: number;
@@ -306,11 +371,40 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
     return conta.valores.reduce((a: number, b: number) => a + b, 0);
   };
 
+  // Valores derivados do período
+  const valoresDerivadosPeriodo = calcularValoresDerivadosPeriodo(dados, mesInicial, mesFinal);
+
   // Calcular percentual do período
   const receitaPeriodo = getValorPeriodo("Receita de Vendas");
-  const getPctPeriodo = (key: string): number => {
+  const getPctPeriodo = (valor: number): number => {
     if (!receitaPeriodo) return 0;
-    return (getValorPeriodo(key) / receitaPeriodo) * 100;
+    return (valor / receitaPeriodo) * 100;
+  };
+
+  // Função para obter valor (com fallback para calculados)
+  const getValorFinal = (key: string, mesIdx: number): number => {
+    const valorOriginal = getValor(key, mesIdx);
+    if (valorOriginal !== 0) return valorOriginal;
+    
+    // Se zerado, tentar calcular
+    const derivados = calcularValoresDerivados(dados, mesIdx);
+    return derivados[key] || 0;
+  };
+
+  const getValorPeriodoFinal = (key: string): number => {
+    const valorOriginal = getValorPeriodo(key);
+    if (valorOriginal !== 0) return valorOriginal;
+    
+    // Se zerado, usar calculado
+    return valoresDerivadosPeriodo[key] || 0;
+  };
+
+  const getAnualFinal = (key: string): number => {
+    let soma = 0;
+    for (let i = 0; i < 12; i++) {
+      soma += getValorFinal(key, i);
+    }
+    return soma;
   };
 
   return (
@@ -345,8 +439,8 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
         </thead>
         <tbody>
           {rows.map((row, idx) => {
-            const valorPeriodo = getValorPeriodo(row.key);
-            const pctPeriodo = getPctPeriodo(row.key);
+            const valorPeriodo = getValorPeriodoFinal(row.key);
+            const pctPeriodo = getPctPeriodo(valorPeriodo);
             const isDestaque = row.tipo === "destaque";
             const isResultado = row.tipo === "resultado";
             const isSubtotal = row.tipo === "subtotal";
@@ -372,29 +466,32 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
                 </td>
                 {mostrarAno ? (
                   <>
-                    {MESES_CURTO.map((_, i) => (
-                      <td key={i} style={{ 
-                        padding: "8px", 
-                        textAlign: "right", 
-                        fontFamily: "'JetBrains Mono',monospace", 
-                        fontSize: 11,
-                        color: getValor(row.key, i) < 0 ? C.red : C.dark,
-                        borderBottom: `1px solid ${C.gray100}`,
-                        background: (i >= mesInicial && i <= mesFinal) ? `${C.red}08` : "transparent"
-                      }}>
-                        {fmtK(getValor(row.key, i))}
-                      </td>
-                    ))}
+                    {MESES_CURTO.map((_, i) => {
+                      const val = getValorFinal(row.key, i);
+                      return (
+                        <td key={i} style={{ 
+                          padding: "8px", 
+                          textAlign: "right", 
+                          fontFamily: "'JetBrains Mono',monospace", 
+                          fontSize: 11,
+                          color: val < 0 ? C.red : C.dark,
+                          borderBottom: `1px solid ${C.gray100}`,
+                          background: (i >= mesInicial && i <= mesFinal) ? `${C.red}08` : "transparent"
+                        }}>
+                          {fmtK(val)}
+                        </td>
+                      );
+                    })}
                     <td style={{ 
                       padding: "8px", 
                       textAlign: "right", 
                       fontFamily: "'JetBrains Mono',monospace", 
                       fontSize: 11,
                       fontWeight: 700,
-                      color: getAnual(row.key) < 0 ? C.red : C.dark,
+                      color: getAnualFinal(row.key) < 0 ? C.red : C.dark,
                       borderBottom: `1px solid ${C.gray100}`
                     }}>
-                      {fmtK(getAnual(row.key))}
+                      {fmtK(getAnualFinal(row.key))}
                     </td>
                   </>
                 ) : (
@@ -455,8 +552,11 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   const margemBrutaPeriodo = getValorPeriodo("Margem bruta");
   const margemContribPeriodo = getValorPeriodo("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodo("Ebitda");
-  const lucroLiqPeriodo = getValorPeriodo("Resultado operacional líquido");
   const gastosFixosPeriodo = getValorPeriodo("Gastos fixos (custos fixos + despesas fixas)");
+
+  // Calcular Lucro Líquido (valores derivados)
+  const valoresDerivados = calcularValoresDerivadosPeriodo(dados.dre, mesInicial, mesFinal);
+  const lucroLiqPeriodo = valoresDerivados["Resultado operacional líquido"] || getValorPeriodo("Resultado operacional líquido");
 
   const pctMargemBruta = receitaPeriodo ? (margemBrutaPeriodo / receitaPeriodo) * 100 : 0;
   const pctMargemContrib = receitaPeriodo ? (margemContribPeriodo / receitaPeriodo) * 100 : 0;
@@ -464,7 +564,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   const pctLucro = receitaPeriodo ? (lucroLiqPeriodo / receitaPeriodo) * 100 : 0;
 
   // Ponto de equilíbrio
-  const pontoEquilibrio = pctMargemContrib > 0 ? (gastosFixosPeriodo / (pctMargemContrib / 100)) : 0;
+  const pontoEquilibrio = pctMargemContrib > 0 ? (Math.abs(gastosFixosPeriodo) / (pctMargemContrib / 100)) : 0;
 
   // Dados para gráficos (todos os meses)
   const chartData = MESES_CURTO.map((m, i) => ({
@@ -512,7 +612,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
         <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} small={false} />
         <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.red} small={false} />
         <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} small={false} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={(pontoEquilibrio/receitaPeriodo)*100 || 0} cor={C.gray700} small={false} />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={receitaPeriodo ? (pontoEquilibrio/receitaPeriodo)*100 : 0} cor={C.gray700} small={false} />
       </div>
 
       {/* Gráficos */}
