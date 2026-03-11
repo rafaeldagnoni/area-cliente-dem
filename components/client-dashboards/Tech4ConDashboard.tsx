@@ -119,7 +119,7 @@ const DRE_ROWS = [
   { key: "Investimentos e Financiamentos", nivel: 0, tipo: "subtotal" },
   { key: "Compra de Ativo Imobilizado", nivel: 1 },
   { key: "Empréstimos e Financiamentos (Saída)", nivel: 1 },
-  { key: "Resultado após Capex", nivel: 0, tipo: "destaque" },
+  { key: "Resultado após Capex & Endividamento", nivel: 0, tipo: "destaque" },
 ];
 
 // ─── ESTRUTURA DFC ────────────────────────────────────────────────────────────
@@ -163,7 +163,7 @@ const DFC_ROWS = [
   { key: "Investimentos e Financiamentos", nivel: 0, tipo: "subtotal" },
   { key: "Compra de Ativo Imobilizado", nivel: 1 },
   { key: "Empréstimos e Financiamentos (Saída)", nivel: 1 },
-  { key: "Resultado após Capex", nivel: 0, tipo: "destaque" },
+  { key: "Resultado após Capex & Endividamento", nivel: 0, tipo: "destaque" },
 ];
 
 // ─── COMPONENTES ──────────────────────────────────────────────────────────────
