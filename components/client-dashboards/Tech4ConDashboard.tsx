@@ -54,7 +54,7 @@ const fmtK = (v: number): string => {
 const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const MESES_CURTO = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
-// ─── ESTRUTURA DRE ────────────────────────────────────────────────────────────
+// ─── ESTRUTURA DRE (ATUALIZADA COM TODAS AS CONTAS) ──────────────────────────
 const DRE_ROWS = [
   { key: "Receita de Vendas", nivel: 0, tipo: "total" },
   { key: "Receita Outros", nivel: 1 },
@@ -83,16 +83,43 @@ const DRE_ROWS = [
   { key: "Gasto com Pessoal - Adm", nivel: 1 },
   { key: "Gasto com pessoal - Prod/Oper", nivel: 1 },
   { key: "Despesas Operacionais", nivel: 1 },
+  { key: "Uso e Consumo", nivel: 1 },
+  { key: "Viagens e Hospedagens", nivel: 1 },
   { key: "Ebitda", nivel: 0, tipo: "destaque" },
-  { key: "Receitas Financeiras", nivel: 1 },
-  { key: "Despesas Financeiras", nivel: 1 },
-  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado", calculado: true },
-  { key: "Impostos Sob Lucro", nivel: 1 },
-  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado", calculado: true },
-  { key: "Distribuição de Lucro", nivel: 1 },
-  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque", calculado: true },
+  // ─── RECEITAS FINANCEIRAS ───
+  { key: "Receitas Financeiras", nivel: 0, tipo: "subtotal" },
+  { key: "Depósitos Judiciais", nivel: 1 },
+  { key: "Outras receitas financeiras", nivel: 1 },
+  { key: "Receita sob mudança cambio", nivel: 1 },
+  { key: "Receita sobre Aplicações (Fundos de Recebiveis e Inve", nivel: 1 },
+  { key: "Receita sobre Aplicações (Renda Fixa)", nivel: 1 },
+  { key: "Valorização ativo", nivel: 1 },
+  { key: "Ganho de Capital - Imobilizado", nivel: 1 },
+  // ─── DESPESAS FINANCEIRAS ───
+  { key: "Despesas Financeiras", nivel: 0, tipo: "subtotal" },
+  { key: "Depreciação", nivel: 1 },
+  { key: "Despesas bancárias", nivel: 1 },
+  { key: "Despesas sob mudança cambio", nivel: 1 },
+  { key: "IR sobre aplicações - Renda Fixa", nivel: 1 },
+  { key: "IR sobre aplicações - Renda Variável", nivel: 1 },
+  { key: "Juros e multas", nivel: 1 },
+  { key: "Outras despesas financeiras", nivel: 1 },
+  { key: "Prejuízo sobre Aplicações (Fundos de Recebiveis e Inve", nivel: 1 },
+  { key: "Título de Capitalização", nivel: 1 },
+  // ─── RESULTADOS FINAIS ───
+  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado" },
+  { key: "Impostos Sob Lucro", nivel: 0, tipo: "subtotal" },
+  { key: "CSLL", nivel: 1 },
+  { key: "IRPJ", nivel: 1 },
+  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado" },
+  { key: "Distribuição de Lucro", nivel: 0, tipo: "subtotal" },
+  { key: "Distribuição de lucro", nivel: 1 },
+  { key: "Gratificações a funcionários", nivel: 1 },
+  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque" },
   { key: "Investimentos e Financiamentos", nivel: 0, tipo: "subtotal" },
-  { key: "Resultado após Capex", nivel: 0, tipo: "destaque", calculado: true },
+  { key: "Compra de Ativo Imobilizado", nivel: 1 },
+  { key: "Empréstimos e Financiamentos (Saída)", nivel: 1 },
+  { key: "Resultado após Capex", nivel: 0, tipo: "destaque" },
 ];
 
 // ─── ESTRUTURA DFC ────────────────────────────────────────────────────────────
@@ -126,17 +153,17 @@ const DFC_ROWS = [
   { key: "Gasto com pessoal - Prod/Oper", nivel: 1 },
   { key: "Despesas Operacionais", nivel: 1 },
   { key: "Ebitda", nivel: 0, tipo: "destaque" },
-  { key: "Receitas Financeiras", nivel: 1 },
-  { key: "Despesas Financeiras", nivel: 1 },
-  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado", calculado: true },
-  { key: "Impostos Sob Lucro", nivel: 1 },
-  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado", calculado: true },
-  { key: "Distribuição de Lucro", nivel: 1 },
-  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque", calculado: true },
+  { key: "Receitas Financeiras", nivel: 0, tipo: "subtotal" },
+  { key: "Despesas Financeiras", nivel: 0, tipo: "subtotal" },
+  { key: "Resultado operacional bruto", nivel: 0, tipo: "resultado" },
+  { key: "Impostos Sob Lucro", nivel: 0, tipo: "subtotal" },
+  { key: "Resultado operacional líquido", nivel: 0, tipo: "resultado" },
+  { key: "Distribuição de Lucro", nivel: 0, tipo: "subtotal" },
+  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque" },
   { key: "Investimentos e Financiamentos", nivel: 0, tipo: "subtotal" },
   { key: "Compra de Ativo Imobilizado", nivel: 1 },
   { key: "Empréstimos e Financiamentos (Saída)", nivel: 1 },
-  { key: "Resultado após Capex", nivel: 0, tipo: "destaque", calculado: true },
+  { key: "Resultado após Capex", nivel: 0, tipo: "destaque" },
 ];
 
 // ─── COMPONENTES ──────────────────────────────────────────────────────────────
@@ -274,73 +301,8 @@ function KPICard({ label, valor, percentual, cor, small = false }: {
   );
 }
 
-// ─── FUNÇÃO PARA CALCULAR VALORES DERIVADOS ──────────────────────────────────
-function calcularValoresDerivados(dados: any, mesIdx: number): Record<string, number> {
-  if (!dados || !dados.contas) return {};
-
-  const getVal = (key: string): number => {
-    const conta = dados.contas[key];
-    if (!conta || !conta.valores) return 0;
-    return conta.valores[mesIdx] || 0;
-  };
-
-  const ebitda = getVal("Ebitda");
-  const receitasFinanceiras = getVal("Receitas Financeiras");
-  const despesasFinanceiras = getVal("Despesas Financeiras");
-  const impostosSobLucro = getVal("Impostos Sob Lucro");
-  const distribuicaoLucro = getVal("Distribuição de Lucro");
-  const investimentos = getVal("Investimentos e Financiamentos");
-
-  // Cálculos derivados
-  const resultadoOperacionalBruto = ebitda + receitasFinanceiras + despesasFinanceiras;
-  const resultadoOperacionalLiquido = resultadoOperacionalBruto + impostosSobLucro;
-  const resultadoPosDistribuicao = resultadoOperacionalLiquido + distribuicaoLucro;
-  const resultadoAposCapex = resultadoPosDistribuicao + investimentos;
-
-  return {
-    "Resultado operacional bruto": resultadoOperacionalBruto,
-    "Resultado operacional líquido": resultadoOperacionalLiquido,
-    "Resultado pós distribuição de lucros": resultadoPosDistribuicao,
-    "Resultado após Capex": resultadoAposCapex,
-  };
-}
-
-function calcularValoresDerivadosPeriodo(dados: any, mesInicial: number, mesFinal: number): Record<string, number> {
-  if (!dados || !dados.contas) return {};
-
-  const getValPeriodo = (key: string): number => {
-    const conta = dados.contas[key];
-    if (!conta || !conta.valores) return 0;
-    let soma = 0;
-    for (let i = mesInicial; i <= mesFinal; i++) {
-      soma += conta.valores[i] || 0;
-    }
-    return soma;
-  };
-
-  const ebitda = getValPeriodo("Ebitda");
-  const receitasFinanceiras = getValPeriodo("Receitas Financeiras");
-  const despesasFinanceiras = getValPeriodo("Despesas Financeiras");
-  const impostosSobLucro = getValPeriodo("Impostos Sob Lucro");
-  const distribuicaoLucro = getValPeriodo("Distribuição de Lucro");
-  const investimentos = getValPeriodo("Investimentos e Financiamentos");
-
-  // Cálculos derivados
-  const resultadoOperacionalBruto = ebitda + receitasFinanceiras + despesasFinanceiras;
-  const resultadoOperacionalLiquido = resultadoOperacionalBruto + impostosSobLucro;
-  const resultadoPosDistribuicao = resultadoOperacionalLiquido + distribuicaoLucro;
-  const resultadoAposCapex = resultadoPosDistribuicao + investimentos;
-
-  return {
-    "Resultado operacional bruto": resultadoOperacionalBruto,
-    "Resultado operacional líquido": resultadoOperacionalLiquido,
-    "Resultado pós distribuição de lucros": resultadoPosDistribuicao,
-    "Resultado após Capex": resultadoAposCapex,
-  };
-}
-
 function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno }: {
-  rows: Array<{ key: string; nivel: number; tipo?: string; calculado?: boolean }>;
+  rows: Array<{ key: string; nivel: number; tipo?: string }>;
   dados: any;
   mesInicial: number;
   mesFinal: number;
@@ -371,9 +333,6 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
     return conta.valores.reduce((a: number, b: number) => a + b, 0);
   };
 
-  // Valores derivados do período
-  const valoresDerivadosPeriodo = calcularValoresDerivadosPeriodo(dados, mesInicial, mesFinal);
-
   // Calcular percentual do período
   const receitaPeriodo = getValorPeriodo("Receita de Vendas");
   const getPctPeriodo = (valor: number): number => {
@@ -381,31 +340,20 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
     return (valor / receitaPeriodo) * 100;
   };
 
-  // Função para obter valor (com fallback para calculados)
-  const getValorFinal = (key: string, mesIdx: number): number => {
-    const valorOriginal = getValor(key, mesIdx);
-    if (valorOriginal !== 0) return valorOriginal;
-    
-    // Se zerado, tentar calcular
-    const derivados = calcularValoresDerivados(dados, mesIdx);
-    return derivados[key] || 0;
-  };
-
-  const getValorPeriodoFinal = (key: string): number => {
-    const valorOriginal = getValorPeriodo(key);
-    if (valorOriginal !== 0) return valorOriginal;
-    
-    // Se zerado, usar calculado
-    return valoresDerivadosPeriodo[key] || 0;
-  };
-
-  const getAnualFinal = (key: string): number => {
-    let soma = 0;
-    for (let i = 0; i < 12; i++) {
-      soma += getValorFinal(key, i);
-    }
-    return soma;
-  };
+  // Filtrar rows que existem nos dados (para não mostrar linhas vazias que não existem na planilha)
+  const rowsExistentes = rows.filter(row => {
+    const conta = dados.contas[row.key];
+    // Mostrar se a conta existe OU se é um totalizador importante
+    if (conta) return true;
+    // Sempre mostrar totalizadores principais mesmo sem dados
+    const totalizadores = [
+      "Receita de Vendas", "Receita líquida", "Margem bruta", 
+      "Margem líquida (margem de contribuição)", "Ebitda",
+      "Resultado operacional bruto", "Resultado operacional líquido",
+      "Resultado pós distribuição de lucros", "Resultado após Capex"
+    ];
+    return totalizadores.includes(row.key);
+  });
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -438,8 +386,8 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, idx) => {
-            const valorPeriodo = getValorPeriodoFinal(row.key);
+          {rowsExistentes.map((row, idx) => {
+            const valorPeriodo = getValorPeriodo(row.key);
             const pctPeriodo = getPctPeriodo(valorPeriodo);
             const isDestaque = row.tipo === "destaque";
             const isResultado = row.tipo === "resultado";
@@ -467,7 +415,7 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
                 {mostrarAno ? (
                   <>
                     {MESES_CURTO.map((_, i) => {
-                      const val = getValorFinal(row.key, i);
+                      const val = getValor(row.key, i);
                       return (
                         <td key={i} style={{ 
                           padding: "8px", 
@@ -488,10 +436,10 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
                       fontFamily: "'JetBrains Mono',monospace", 
                       fontSize: 11,
                       fontWeight: 700,
-                      color: getAnualFinal(row.key) < 0 ? C.red : C.dark,
+                      color: getAnual(row.key) < 0 ? C.red : C.dark,
                       borderBottom: `1px solid ${C.gray100}`
                     }}>
-                      {fmtK(getAnualFinal(row.key))}
+                      {fmtK(getAnual(row.key))}
                     </td>
                   </>
                 ) : (
@@ -553,10 +501,9 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   const margemContribPeriodo = getValorPeriodo("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodo("Ebitda");
   const gastosFixosPeriodo = getValorPeriodo("Gastos fixos (custos fixos + despesas fixas)");
-
-  // Calcular Lucro Líquido (valores derivados)
-  const valoresDerivados = calcularValoresDerivadosPeriodo(dados.dre, mesInicial, mesFinal);
-  const lucroLiqPeriodo = valoresDerivados["Resultado operacional líquido"] || getValorPeriodo("Resultado operacional líquido");
+  
+  // Lucro Líquido = Resultado operacional líquido (agora vem da API)
+  const lucroLiqPeriodo = getValorPeriodo("Resultado operacional líquido");
 
   const pctMargemBruta = receitaPeriodo ? (margemBrutaPeriodo / receitaPeriodo) * 100 : 0;
   const pctMargemContrib = receitaPeriodo ? (margemContribPeriodo / receitaPeriodo) * 100 : 0;
