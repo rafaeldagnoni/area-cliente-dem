@@ -49,7 +49,7 @@ const MESES_CURTO = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out"
 // ─── ESTRUTURA DRE ─────────────────────────────────────────────────────────
 const DRE_ROWS = [
   { key: "Receita Bruta", nivel: 0, tipo: "total" },
-  { key: "Receita Outros", nivel: 1 },
+  { key: "Benefícios - Adm", nivel: 1 },
   { key: "Receita Serviço", nivel: 1 },
   { key: "Receita de Vendas", nivel: 1 },
   { key: "Receita de Vendas - Recorrência", nivel: 1 },
@@ -98,7 +98,7 @@ const DESPESAS_KEYS = [
   "Gasto com Pessoal - Adm", "Gasto com pessoal - Prod/Oper", "Despesas Operacionais"
 ];
 const RECEITAS_KEYS = [
-  "Receita Outros", "Receita Serviço", "Receita de Vendas", 
+  "Benefícios - Adm", "Receita Serviço", "Receita de Vendas", 
   "Receita de Vendas - Recorrência", "Receitas Financeiras"
 ];
 
