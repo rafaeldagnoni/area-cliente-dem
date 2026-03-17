@@ -447,11 +447,35 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
     return conta.valores.reduce((a: number, b: number) => a + b, 0);
   };
 
-  // Calcular percentual do período
-  const receitaPeriodo = getValorPeriodo("Receita Bruta");
-  const getPctPeriodo = (valor: number): number => {
-    if (!receitaPeriodo) return 0;
-    return (valor / receitaPeriodo) * 100;
+  // Calcular percentuais do período
+  // Na DRE: Antes de "Receita líquida" = % sobre Receita Bruta
+  //         Após "Receita líquida" = % sobre Receita Líquida
+  // Na DFC: % sobre Receita Bruta (ou Receitas)
+  const receitaBrutaPeriodo = getValorPeriodo("Receita Bruta") || getValorPeriodo("Receitas");
+  const receitaLiquidaPeriodo = getValorPeriodo("Receita líquida");
+  
+  // Lista de contas que vêm ANTES de Receita Líquida (usam Receita Bruta como base)
+  const contasAntesReceitaLiquida = [
+    "Receita Bruta", "Receita Outros", "Receita Serviço", "Receita de Vendas",
+    "Receita de Vendas - Recorrência", "Deduções de Vendas", "Comissões de vendas",
+    "Devolução ou Cancelamento NF", "ICMS", "Pis", "Cofins", "Iss", "Simples Nacional"
+  ];
+  
+  const getPctPeriodo = (key: string, valor: number): number => {
+    // Se não existe Receita Líquida (ex: DFC), usa Receita Bruta/Receitas para tudo
+    if (!receitaLiquidaPeriodo) {
+      return receitaBrutaPeriodo ? (valor / receitaBrutaPeriodo) * 100 : 0;
+    }
+    // Se é conta antes de Receita Líquida, usa Receita Bruta
+    if (contasAntesReceitaLiquida.includes(key)) {
+      return receitaBrutaPeriodo ? (valor / receitaBrutaPeriodo) * 100 : 0;
+    }
+    // Se é a própria Receita Líquida, usa Receita Bruta como base
+    if (key === "Receita líquida") {
+      return receitaBrutaPeriodo ? (valor / receitaBrutaPeriodo) * 100 : 0;
+    }
+    // Demais contas (após Receita Líquida) usam Receita Líquida como base
+    return receitaLiquidaPeriodo ? (valor / receitaLiquidaPeriodo) * 100 : 0;
   };
 
   // Filtrar rows que existem nos dados
@@ -501,7 +525,7 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
         <tbody>
           {rowsExistentes.map((row, idx) => {
             const valorPeriodo = getValorPeriodo(row.key);
-            const pctPeriodo = getPctPeriodo(valorPeriodo);
+            const pctPeriodo = getPctPeriodo(row.key, valorPeriodo);
             const isDestaque = row.tipo === "destaque";
             const isResultado = row.tipo === "resultado";
             const isSubtotal = row.tipo === "subtotal";
@@ -608,17 +632,20 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   };
 
   // KPIs do período
-  const receitaPeriodo = getValorPeriodo("Receita Bruta");
+  const receitaBrutaPeriodo = getValorPeriodo("Receita Bruta");
+  const receitaLiquidaPeriodo = getValorPeriodo("Receita líquida");
   const margemBrutaPeriodo = getValorPeriodo("Margem bruta");
   const margemContribPeriodo = getValorPeriodo("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodo("Ebitda");
   const gastosFixosPeriodo = getValorPeriodo("Gastos fixos (custos fixos + despesas fixas)");
   const lucroLiqPeriodo = getValorPeriodo("Resultado pós distribuição de lucros");
 
-  const pctMargemBruta = receitaPeriodo ? (margemBrutaPeriodo / receitaPeriodo) * 100 : 0;
-  const pctMargemContrib = receitaPeriodo ? (margemContribPeriodo / receitaPeriodo) * 100 : 0;
-  const pctEbitda = receitaPeriodo ? (ebitdaPeriodo / receitaPeriodo) * 100 : 0;
-  const pctLucro = receitaPeriodo ? (lucroLiqPeriodo / receitaPeriodo) * 100 : 0;
+  // Margem Bruta: % sobre Receita Bruta
+  const pctMargemBruta = receitaBrutaPeriodo ? (margemBrutaPeriodo / receitaBrutaPeriodo) * 100 : 0;
+  // Após Receita Líquida: % sobre Receita Líquida
+  const pctMargemContrib = receitaLiquidaPeriodo ? (margemContribPeriodo / receitaLiquidaPeriodo) * 100 : 0;
+  const pctEbitda = receitaLiquidaPeriodo ? (ebitdaPeriodo / receitaLiquidaPeriodo) * 100 : 0;
+  const pctLucro = receitaLiquidaPeriodo ? (lucroLiqPeriodo / receitaLiquidaPeriodo) * 100 : 0;
 
   // Ponto de equilíbrio
   const pontoEquilibrio = pctMargemContrib > 0 ? (Math.abs(gastosFixosPeriodo) / (pctMargemContrib / 100)) : 0;
@@ -663,12 +690,12 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* KPIs */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Faturamento" valor={receitaPeriodo} percentual={100} cor={C.primary} small={false} />
+        <KPICard label="Faturamento" valor={receitaBrutaPeriodo} percentual={100} cor={C.primary} small={false} />
         <KPICard label="Margem Bruta" valor={margemBrutaPeriodo} percentual={pctMargemBruta} cor={C.gold} small={false} />
         <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} small={false} />
         <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.teal} small={false} />
         <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} small={false} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={receitaPeriodo ? (pontoEquilibrio/receitaPeriodo)*100 : 0} cor={C.gray700} small={false} />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={receitaBrutaPeriodo ? (pontoEquilibrio/receitaBrutaPeriodo)*100 : 0} cor={C.gray700} small={false} />
       </div>
 
       {/* Gráficos */}
