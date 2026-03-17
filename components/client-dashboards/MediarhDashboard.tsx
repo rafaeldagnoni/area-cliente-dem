@@ -587,8 +587,8 @@ export default function MediarhDashboard() {
     { id: "overview", label: "Visão Geral" },
     { id: "dre", label: "DRE" },
     { id: "dfc", label: "DFC" },
-    { id: "pagar", label: "A Pagar" },
-    { id: "receber", label: "A Receber" },
+    { id: "pagar", label: "Despesas" },
+    { id: "receber", label: "Receitas" },
   ];
 
   return (
