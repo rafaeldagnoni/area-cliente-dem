@@ -65,7 +65,7 @@ const MESES_CURTO = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out"
 
 // ─── ESTRUTURA DRE (PLANO DE CONTAS MEDIARH) ─────────────────────────────────
 const DRE_ROWS = [
-  { key: "Receita de Vendas", nivel: 0, tipo: "total" },
+  { key: "Receita Bruta", nivel: 0, tipo: "total" },
   { key: "Receita Outros", nivel: 1 },
   { key: "Receita Serviço", nivel: 1 },
   { key: "Receita de Vendas - Recorrência", nivel: 1 },
@@ -178,7 +178,7 @@ const DRE_ROWS = [
 // ─── ESTRUTURA DFC (PLANO DE CONTAS MEDIARH) ─────────────────────────────────
 const DFC_ROWS = [
   { key: "Saldo Inicial", nivel: 0, tipo: "destaque" },
-  { key: "Receita de Vendas", nivel: 0, tipo: "total" },
+  { key: "Receita Bruta", nivel: 0, tipo: "total" },
   { key: "Receita Outros", nivel: 1 },
   { key: "Receita Serviço", nivel: 1 },
   { key: "Receita de Vendas - Recorrência", nivel: 1 },
@@ -448,7 +448,7 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
   };
 
   // Calcular percentual do período
-  const receitaPeriodo = getValorPeriodo("Receita de Vendas");
+  const receitaPeriodo = getValorPeriodo("Receita Bruta");
   const getPctPeriodo = (valor: number): number => {
     if (!receitaPeriodo) return 0;
     return (valor / receitaPeriodo) * 100;
@@ -459,7 +459,7 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
     const conta = dados.contas[row.key];
     if (conta) return true;
     const totalizadores = [
-      "Receita de Vendas", "Receita líquida", "Margem bruta", 
+      "Receita Bruta", "Receita líquida", "Margem bruta", 
       "Margem líquida (margem de contribuição)", "Ebitda",
       "Resultado operacional bruto", "Resultado operacional líquido",
       "Resultado pós distribuição de lucros", "Resultado após Capex",
@@ -608,12 +608,12 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   };
 
   // KPIs do período
-  const receitaPeriodo = getValorPeriodo("Receita de Vendas");
+  const receitaPeriodo = getValorPeriodo("Receita Bruta");
   const margemBrutaPeriodo = getValorPeriodo("Margem bruta");
   const margemContribPeriodo = getValorPeriodo("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodo("Ebitda");
   const gastosFixosPeriodo = getValorPeriodo("Gastos fixos (custos fixos + despesas fixas)");
-  const lucroLiqPeriodo = getValorPeriodo("Resultado operacional líquido");
+  const lucroLiqPeriodo = getValorPeriodo("Resultado pós distribuição de lucros");
 
   const pctMargemBruta = receitaPeriodo ? (margemBrutaPeriodo / receitaPeriodo) * 100 : 0;
   const pctMargemContrib = receitaPeriodo ? (margemContribPeriodo / receitaPeriodo) * 100 : 0;
@@ -626,7 +626,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   // Dados para gráficos
   const chartData = MESES_CURTO.map((m, i) => ({
     mes: m,
-    Receita: getValor("Receita de Vendas", i),
+    Receita: getValor("Receita Bruta", i),
     EBITDA: getValor("Ebitda", i),
     MargemBruta: getValor("Margem bruta", i),
     inRange: i >= mesInicial && i <= mesFinal
@@ -792,7 +792,7 @@ export default function App() {
   // Meses disponíveis (com dados)
   const mesesDisponiveis = MESES.map((m, i) => ({ label: m, idx: i })).filter(m => {
     if (!dados || !dados.dre || !dados.dre.contas) return false;
-    const receita = dados.dre.contas["Receita de Vendas"];
+    const receita = dados.dre.contas["Receita Bruta"];
     return receita && receita.valores && receita.valores[m.idx] > 0;
   });
 
