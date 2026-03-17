@@ -372,12 +372,13 @@ function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => v
   );
 }
 
-function KPICard({ label, valor, percentual, cor, small = false }: { 
+function KPICard({ label, valor, percentual, cor, small = false, showDiff = false }: { 
   label: string; 
   valor: number; 
   percentual?: number; 
   cor?: string; 
-  small?: boolean 
+  small?: boolean;
+  showDiff?: boolean;  // Se true, mostra +/- e usa verde/vermelho
 }) {
   return (
     <div style={{
@@ -407,9 +408,11 @@ function KPICard({ label, valor, percentual, cor, small = false }: {
         <div style={{
           fontFamily: "'JetBrains Mono',monospace",
           fontSize: 11,
-          color: C.gray500,
+          color: showDiff ? (percentual >= 0 ? C.green : C.red) : C.gray500,
           marginTop: 4
-        }}>{percentual.toFixed(2).replace(".",",")}%</div>
+        }}>
+          {showDiff && percentual > 0 ? "+" : ""}{percentual.toFixed(2).replace(".",",")}%
+        </div>
       )}
     </div>
   );
@@ -631,6 +634,12 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
 
   // Ponto de equilíbrio
   const pontoEquilibrio = pctMargemContrib > 0 ? (Math.abs(gastosFixosPeriodo) / (pctMargemContrib / 100)) : 0;
+  
+  // % do Ponto de Equilíbrio: quanto o faturamento está acima/abaixo do PE
+  // Positivo = ultrapassou, Negativo = faltou
+  const pctPontoEquilibrio = pontoEquilibrio > 0 
+    ? ((receitaBrutaPeriodo - pontoEquilibrio) / pontoEquilibrio) * 100 
+    : 0;
 
   // Dados para gráficos
   const chartData = MESES_CURTO.map((m, i) => ({
@@ -677,7 +686,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
         <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} small={false} />
         <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.teal} small={false} />
         <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} small={false} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={receitaBrutaPeriodo ? (pontoEquilibrio/receitaBrutaPeriodo)*100 : 0} cor={C.gray700} small={false} />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={pctPontoEquilibrio} cor={C.gray700} small={false} showDiff={true} />
       </div>
 
       {/* Gráficos */}
