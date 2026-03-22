@@ -492,7 +492,7 @@ function DespesasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}&filial=${filial}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_pagar&filial=${filial}`);
         const json = await res.json();
         if (json.success) {
           setLancamentos(json.lancamentos || []);
@@ -503,7 +503,7 @@ function DespesasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
       finally { setLoading(false); }
     };
     fetchData();
-  }, [ano, filial, apiUrl]);
+  }, [filial, apiUrl]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
@@ -544,8 +544,8 @@ function DespesasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
               <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.filial}</td>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_emissao)}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento ? fmtData(l.data_pagamento) : "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento || "-"}</td>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.conta_bancaria || "-"}</td>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.categoria_descrição}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.red, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
@@ -576,7 +576,7 @@ function ReceitasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&filial=${filial}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_receber&filial=${filial}`);
         const json = await res.json();
         if (json.success) {
           setLancamentos(json.lancamentos || []);
@@ -587,7 +587,7 @@ function ReceitasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
       finally { setLoading(false); }
     };
     fetchData();
-  }, [ano, filial, apiUrl]);
+  }, [filial, apiUrl]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
@@ -628,8 +628,8 @@ function ReceitasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
               <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.filial}</td>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_emissao)}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento ? fmtData(l.data_recebimento) : "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento || "-"}</td>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.conta_bancaria || "-"}</td>
                 <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.categoria_descrição}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.green, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
@@ -703,34 +703,114 @@ export default function Tech4ConDashboard() {
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        {/* Header */}
-        <header style={{ background: C.red, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 36 }} />
-            <div style={{ display: "flex", gap: 2 }}>
-              {tabs.map(t => (
-                <button key={t.id} onClick={() => setTab(t.id as any)} style={{ padding: "6px 14px", borderRadius: 0, border: "none", background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, fontWeight: 600, fontSize: 12, cursor: "pointer", transition: "all 0.15s", fontFamily: "'Barlow',sans-serif", textTransform: tab === t.id ? "none" : "none" }}>{t.label}</button>
-              ))}
-            </div>
+      <div style={{ background: C.dark, padding: "28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Logo */}
+          <img src={LOGO_URL} alt="Tech4Con" style={{ height: 40 }} />
+
+          {/* Abas */}
+          <div style={{
+            display: "flex", gap: 2, flex: 1, marginLeft: 32
+          }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id as any)} style={{
+                background: tab === t.id ? C.white : "transparent",
+                color: tab === t.id ? C.red : C.white,
+                border: "none", borderRadius: 4,
+                padding: "6px 18px", cursor: "pointer",
+                fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1,
+                textTransform: "uppercase", transition: "all 0.15s"
+              }}>{t.label}</button>
+            ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif" }}>
+
+          {/* CONTROLES */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Ano */}
+            <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{
+              border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px",
+              fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer"
+            }}>
               {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
             </select>
-            <select value={filial} onChange={e => setFilial(e.target.value)} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif" }}>
-              {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
+
+            {/* Filial */}
+            <select value={filial} onChange={e => setFilial(e.target.value)} style={{
+              border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px",
+              fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer"
+            }}>
+              {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f}>{f}</option>)}
             </select>
-            <span style={{ color: C.white, fontSize: 12 }}>|</span>
-            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
-              {mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)}
-            </select>
-            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
-              {mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)}
-            </select>
-            {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ padding: "5px 12px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: modoAnual ? C.white : "transparent", color: modoAnual ? C.red : C.white, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5 }}>▤ MENSAL</button>}
-            <button onClick={fetchDados} disabled={loading} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: loading ? C.redMid : C.white, color: C.red, fontSize: 12, cursor: loading ? "default" : "pointer", fontWeight: 600, fontFamily: "'Barlow',sans-serif" }}>↻</button>
+
+            {/* Separador */}
+            <span style={{ color: C.gray300, fontSize: 12 }}>|</span>
+
+            {/* Mês Inicial */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>DE</span>
+              <select 
+                value={mesInicial} 
+                onChange={e => setMesInicial(Number(e.target.value))} 
+                disabled={mesesDisponiveis.length === 0} 
+                style={{
+                  border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px",
+                  fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer",
+                  opacity: mesesDisponiveis.length === 0 ? 0.5 : 1
+                }}
+              >
+                {mesesDisponiveis.length > 0 ? (
+                  mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)
+                ) : (
+                  <option>-</option>
+                )}
+              </select>
+            </div>
+
+            {/* Mês Final */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>ATÉ</span>
+              <select 
+                value={mesFinal} 
+                onChange={e => setMesFinal(Number(e.target.value))} 
+                disabled={mesesDisponiveis.length === 0} 
+                style={{
+                  border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px",
+                  fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer",
+                  opacity: mesesDisponiveis.length === 0 ? 0.5 : 1
+                }}
+              >
+                {mesesDisponiveis.length > 0 ? (
+                  mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)
+                ) : (
+                  <option>-</option>
+                )}
+              </select>
+            </div>
+
+            {/* Toggle anual (só DRE/DFC) */}
+            {(tab === "dre" || tab === "dfc") && (
+              <button onClick={() => setModoAnual(!modoAnual)} style={{
+                background: modoAnual ? C.dark : C.white,
+                color: modoAnual ? C.white : C.gray500,
+                border: `1px solid ${C.border}`, borderRadius: 4,
+                padding: "5px 12px", cursor: "pointer",
+                fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: 1
+              }}>
+                {modoAnual ? "▤ ANUAL" : "▤ MENSAL"}
+              </button>
+            )}
+
+            {/* Botão atualizar */}
+            <button onClick={fetchDados} disabled={loading} style={{
+              background: C.white,
+              color: loading ? C.gray300 : C.gray500,
+              border: `1px solid ${C.border}`, borderRadius: 4,
+              padding: "5px 10px", cursor: loading ? "default" : "pointer",
+              fontFamily: "'Barlow',sans-serif", fontSize: 12
+            }}>
+              {loading ? "..." : "↻"}
+            </button>
           </div>
-        </header>
+        </div>
 
         {/* Breadcrumb */}
         <div style={{ background: C.dark, padding: "6px 24px", display: "flex", alignItems: "center", gap: 8 }}>
