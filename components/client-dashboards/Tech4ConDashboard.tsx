@@ -479,49 +479,48 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   );
 }
 
-// ─── DESPESAS VIEW ───────────────────────────────────────────────────────────
-function DespesasView({ ano, filial, apiUrl }: { ano: number; filial: string; apiUrl: string }) {
+// ─── DESPESAS VIEW (CONTAS A PAGAR) ────────────────────────────────────────────
+function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filtroStatus, setFiltroStatus] = useState<"todos" | string>("todos");
-  const [statusOpcoes, setStatusOpcoes] = useState<string[]>([]);
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "Pendente" | "Liquidado">("todos");
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=contas_pagar&filial=${filial}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}`);
         const json = await res.json();
-        if (json.success) {
-          setLancamentos(json.lancamentos || []);
-          const statuses = [...new Set((json.lancamentos || []).map((l: any) => l.status_titulo))].filter(Boolean);
-          setStatusOpcoes(statuses as string[]);
-        } else throw new Error(json.error || "Erro ao carregar");
+        if (json.success) setLancamentos(json.lancamentos || []);
+        else throw new Error(json.error || "Erro ao carregar");
       } catch (e: any) { setError(e.message); }
       finally { setLoading(false); }
     };
     fetchData();
-  }, [filial, apiUrl]);
+  }, [ano, apiUrl]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
   const filtrados = filtroStatus === "todos" ? lancamentos : lancamentos.filter(l => l.status_titulo === filtroStatus);
-  const totalGeral = lancamentos.reduce((acc, l) => acc + (l.valor_documento || 0), 0);
-  const qtdTotal = lancamentos.length;
+  const totalPendente = lancamentos.filter(l => l.status_titulo === "Pendente").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
+  const totalLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
+  const qtdPendente = lancamentos.filter(l => l.status_titulo === "Pendente").length;
+  const qtdLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Total Despesas" valor={totalGeral} cor={C.red} subLabel={`${qtdTotal} lançamentos`} />
+        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} />
+        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} />
+        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-        <button onClick={() => setFiltroStatus("todos")} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === "todos" ? C.red : C.border}`, background: filtroStatus === "todos" ? C.red : C.white, color: filtroStatus === "todos" ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Todos</button>
-        {statusOpcoes.map(s => (
+        {(["todos", "Pendente", "Liquidado"] as const).map(s => (
           <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? C.red : C.border}`, background: filtroStatus === s ? C.red : C.white, color: filtroStatus === s ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-            {s}
+            {s === "todos" ? "Todos" : s}
           </button>
         ))}
       </div>
@@ -529,83 +528,78 @@ function DespesasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
             <tr style={{ background: C.dark }}>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Filial</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Emissão</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Pagamento</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Conta</th>
               <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Emissão</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Pagamento</th>
               <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 600 }}>Valor</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Status</th>
             </tr>
           </thead>
           <tbody>
-            {filtrados.slice(0, 100).map((l, i) => (
+            {filtrados.slice(0, 50).map((l, i) => (
               <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.filial}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento || "-"}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.conta_bancaria || "-"}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.categoria_descrição}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento || "-"}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.red, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: C.redLight, color: C.red }}>{l.status_titulo}</span>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filtrados.length > 100 && <div style={{ padding: 12, textAlign: "center", color: C.gray500, fontSize: 12 }}>Mostrando 100 de {filtrados.length} lançamentos</div>}
+        {filtrados.length > 50 && <div style={{ padding: 12, textAlign: "center", color: C.gray500, fontSize: 12 }}>Mostrando 50 de {filtrados.length} lançamentos</div>}
         {filtrados.length === 0 && <div style={{ padding: 40, textAlign: "center", color: C.gray500 }}>Nenhum lançamento encontrado</div>}
       </div>
     </div>
   );
 }
 
-// ─── RECEITAS VIEW ───────────────────────────────────────────────────────────
-function ReceitasView({ ano, filial, apiUrl }: { ano: number; filial: string; apiUrl: string }) {
+// ─── RECEITAS VIEW (CONTAS A RECEBER) ──────────────────────────────────────────
+function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filtroStatus, setFiltroStatus] = useState<"todos" | string>("todos");
-  const [statusOpcoes, setStatusOpcoes] = useState<string[]>([]);
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "Pendente" | "Liquidado">("todos");
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=contas_receber&filial=${filial}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}`);
         const json = await res.json();
-        if (json.success) {
-          setLancamentos(json.lancamentos || []);
-          const statuses = [...new Set((json.lancamentos || []).map((l: any) => l.status_titulo))].filter(Boolean);
-          setStatusOpcoes(statuses as string[]);
-        } else throw new Error(json.error || "Erro ao carregar");
+        if (json.success) setLancamentos(json.lancamentos || []);
+        else throw new Error(json.error || "Erro ao carregar");
       } catch (e: any) { setError(e.message); }
       finally { setLoading(false); }
     };
     fetchData();
-  }, [filial, apiUrl]);
+  }, [ano, apiUrl]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
   const filtrados = filtroStatus === "todos" ? lancamentos : lancamentos.filter(l => l.status_titulo === filtroStatus);
-  const totalGeral = lancamentos.reduce((acc, l) => acc + (l.valor_documento || 0), 0);
-  const qtdTotal = lancamentos.length;
+  const totalPendente = lancamentos.filter(l => l.status_titulo === "Pendente").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
+  const totalLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
+  const qtdPendente = lancamentos.filter(l => l.status_titulo === "Pendente").length;
+  const qtdLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Total Receitas" valor={totalGeral} cor={C.green} subLabel={`${qtdTotal} lançamentos`} />
+        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} />
+        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} />
+        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-        <button onClick={() => setFiltroStatus("todos")} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === "todos" ? C.green : C.border}`, background: filtroStatus === "todos" ? C.green : C.white, color: filtroStatus === "todos" ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Todos</button>
-        {statusOpcoes.map(s => (
+        {(["todos", "Pendente", "Liquidado"] as const).map(s => (
           <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? C.green : C.border}`, background: filtroStatus === s ? C.green : C.white, color: filtroStatus === s ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-            {s}
+            {s === "todos" ? "Todos" : s}
           </button>
         ))}
       </div>
@@ -613,34 +607,30 @@ function ReceitasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
             <tr style={{ background: C.dark }}>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Filial</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Emissão</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Recebimento</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Conta</th>
               <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Emissão</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Recebimento</th>
               <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 600 }}>Valor</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Status</th>
             </tr>
           </thead>
           <tbody>
-            {filtrados.slice(0, 100).map((l, i) => (
+            {filtrados.slice(0, 50).map((l, i) => (
               <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.filial}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento || "-"}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.conta_bancaria || "-"}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontSize: 11, color: C.gray500 }}>{l.categoria_descrição}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento || "-"}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.green, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: C.greenLight, color: C.green }}>{l.status_titulo}</span>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filtrados.length > 100 && <div style={{ padding: 12, textAlign: "center", color: C.gray500, fontSize: 12 }}>Mostrando 100 de {filtrados.length} lançamentos</div>}
+        {filtrados.length > 50 && <div style={{ padding: 12, textAlign: "center", color: C.gray500, fontSize: 12 }}>Mostrando 50 de {filtrados.length} lançamentos</div>}
         {filtrados.length === 0 && <div style={{ padding: 40, textAlign: "center", color: C.gray500 }}>Nenhum lançamento encontrado</div>}
       </div>
     </div>
@@ -844,8 +834,8 @@ export default function Tech4ConDashboard() {
             </div>
           )}
           
-          {tab === "despesas" && <DespesasView ano={ano} filial={filial} apiUrl={API_URL} />}
-          {tab === "receitas" && <ReceitasView ano={ano} filial={filial} apiUrl={API_URL} />}
+          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} />}
+          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} />}
         </div>
       </div>
 
