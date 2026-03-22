@@ -389,6 +389,10 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   const margemContribPeriodo = getValorPeriodoDRE("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodoDRE("Ebitda");
   const gastosFixosPeriodo = getValorPeriodoDRE("Gastos fixos (custos fixos + despesas fixas)");
+  const despesasFinanceirasPeriodo = getValorPeriodoDRE("Despesas Financeiras");
+  const impostosLucroPeriodo = getValorPeriodoDRE("Impostos Sob Lucro");
+  const distribuicaoLucroPeriodo = getValorPeriodoDRE("Distribuição de Lucro");
+  const investimentosPeriodo = getValorPeriodoDRE("Investimentos e Financiamentos");
   const lucroLiqPeriodo = getValorPeriodoDRE("Resultado pós distribuição de lucros");
 
   const pctMargemBruta = receitaBrutaPeriodo ? (margemBrutaPeriodo / receitaBrutaPeriodo) * 100 : 0;
@@ -396,7 +400,10 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   const pctEbitda = receitaLiquidaPeriodo ? (ebitdaPeriodo / receitaLiquidaPeriodo) * 100 : 0;
   const pctLucro = receitaBrutaPeriodo ? (lucroLiqPeriodo / receitaBrutaPeriodo) * 100 : 0;
 
-  const pontoEquilibrio = pctMargemContrib > 0 ? (Math.abs(gastosFixosPeriodo) / (pctMargemContrib / 100)) : 0;
+  // Novo cálculo do Ponto de Equilíbrio
+  const margemContribUnitaria = receitaBrutaPeriodo > 0 ? (margemContribPeriodo / receitaBrutaPeriodo) : 0;
+  const custosTotaisAlem = Math.abs(gastosFixosPeriodo) + Math.abs(despesasFinanceirasPeriodo) + Math.abs(impostosLucroPeriodo) + Math.abs(distribuicaoLucroPeriodo) + Math.abs(investimentosPeriodo);
+  const pontoEquilibrio = margemContribUnitaria > 0 ? (custosTotaisAlem / margemContribUnitaria) : 0;
   const pctPontoEquilibrio = pontoEquilibrio > 0 ? ((receitaBrutaPeriodo - pontoEquilibrio) / pontoEquilibrio) * 100 : 0;
 
   const mesAtual = mesFinal;
@@ -485,7 +492,7 @@ function DespesasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=despesas&ano=${ano}&filial=${filial}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}&filial=${filial}`);
         const json = await res.json();
         if (json.success) {
           setLancamentos(json.lancamentos || []);
@@ -569,7 +576,7 @@ function ReceitasView({ ano, filial, apiUrl }: { ano: number; filial: string; ap
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=receitas&ano=${ano}&filial=${filial}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&filial=${filial}`);
         const json = await res.json();
         if (json.success) {
           setLancamentos(json.lancamentos || []);
@@ -665,20 +672,21 @@ export default function Tech4ConDashboard() {
       setDados(json);
       setUltimaAtualizacao(new Date());
       
-      // Extrair meses disponíveis
+      // Extrair meses disponíveis SEM resetar os selecionados
       if (json.dre?.contas?.["Receita de Vendas"]?.valores) {
         const meses = json.dre.contas["Receita de Vendas"].valores
           .map((v: number, i: number) => v !== 0 ? { idx: i, label: MESES[i] } : null)
           .filter((m: any) => m !== null);
         setMesesDisponiveis(meses);
-        if (meses.length > 0 && mesInicial === 0 && mesFinal === 0) {
+        // Apenas define os meses se estiverem em 0 (primeira carga)
+        if ((mesInicial === 0 && mesFinal === 0) && meses.length > 0) {
           setMesInicial(meses[0].idx);
           setMesFinal(meses[meses.length - 1].idx);
         }
       }
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
-  }, [ano, filial, mesInicial, mesFinal]);
+  }, [ano, filial]);
 
   useEffect(() => { fetchDados(); }, [fetchDados]);
 
@@ -696,29 +704,31 @@ export default function Tech4ConDashboard() {
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
         {/* Header */}
-        <header style={{ background: `linear-gradient(135deg, ${C.red} 0%, ${C.redDark} 100%)`, padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
-          <img src={LOGO_URL} alt="Tech4Con" style={{ height: 40 }} />
-          <div style={{ display: "flex", gap: 4 }}>
-            {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ padding: "8px 16px", borderRadius: 4, border: "none", background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s", fontFamily: "'Barlow Condensed',sans-serif" }}>{t.label}</button>
-            ))}
+        <header style={{ background: C.red, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 36 }} />
+            <div style={{ display: "flex", gap: 2 }}>
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setTab(t.id as any)} style={{ padding: "6px 14px", borderRadius: 0, border: "none", background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, fontWeight: 600, fontSize: 12, cursor: "pointer", transition: "all 0.15s", fontFamily: "'Barlow',sans-serif", textTransform: tab === t.id ? "none" : "none" }}>{t.label}</button>
+              ))}
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ padding: "6px 10px", borderRadius: 4, border: `1px solid ${C.white}40`, background: "transparent", color: C.white, fontSize: 12, cursor: "pointer" }}>
-              {[2024, 2025, 2026].map(a => <option key={a} value={a} style={{ color: C.dark }}>{a}</option>)}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif" }}>
+              {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
             </select>
-            <select value={filial} onChange={e => setFilial(e.target.value)} style={{ padding: "6px 10px", borderRadius: 4, border: `1px solid ${C.white}40`, background: "transparent", color: C.white, fontSize: 12, cursor: "pointer" }}>
-              {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f} style={{ color: C.dark }}>{f}</option>)}
+            <select value={filial} onChange={e => setFilial(e.target.value)} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif" }}>
+              {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
             </select>
-            <span style={{ color: C.white, fontSize: 11 }}>|</span>
-            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ padding: "6px 10px", borderRadius: 4, border: `1px solid ${C.white}40`, background: "transparent", color: C.white, fontSize: 12, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
-              {mesesDisponiveis.map(m => <option key={m.idx} value={m.idx} style={{ color: C.dark }}>{m.label}</option>)}
+            <span style={{ color: C.white, fontSize: 12 }}>|</span>
+            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
+              {mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)}
             </select>
-            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ padding: "6px 10px", borderRadius: 4, border: `1px solid ${C.white}40`, background: "transparent", color: C.white, fontSize: 12, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
-              {mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx} style={{ color: C.dark }}>{m.label}</option>)}
+            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: C.white, color: C.dark, fontSize: 12, cursor: "pointer", fontFamily: "'Barlow',sans-serif", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
+              {mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>)}
             </select>
-            {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ padding: "6px 10px", borderRadius: 4, border: `1px solid ${C.white}40`, background: modoAnual ? C.white : "transparent", color: modoAnual ? C.red : C.white, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif" }}>▤ MENSAL</button>}
-            <button onClick={fetchDados} disabled={loading} style={{ padding: "6px 10px", borderRadius: 4, border: "none", background: C.white, color: C.red, fontSize: 12, cursor: loading ? "default" : "pointer", fontWeight: 600 }}>↻</button>
+            {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ padding: "5px 12px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: modoAnual ? C.white : "transparent", color: modoAnual ? C.red : C.white, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5 }}>▤ MENSAL</button>}
+            <button onClick={fetchDados} disabled={loading} style={{ padding: "5px 10px", borderRadius: 0, border: `1px solid ${C.redDark}`, background: loading ? C.redMid : C.white, color: C.red, fontSize: 12, cursor: loading ? "default" : "pointer", fontWeight: 600, fontFamily: "'Barlow',sans-serif" }}>↻</button>
           </div>
         </header>
 
