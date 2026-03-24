@@ -260,9 +260,9 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
         <line x1="227" y1="160" x2="227" y2="148" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
         
         {/* Marker labels */}
-        <text x="45" y="195" fontSize="14" fontWeight="700" fill={C.gray600} textAnchor="middle">0%</text>
-        <text x="160" y="35" fontSize="14" fontWeight="700" fill={C.gray600} textAnchor="middle">100%</text>
-        <text x="275" y="195" fontSize="14" fontWeight="700" fill={C.gray600} textAnchor="middle">150%</text>
+        <text x="45" y="195" fontSize="14" fontWeight="700" fill={C.gray700} textAnchor="middle">0%</text>
+        <text x="160" y="35" fontSize="14" fontWeight="700" fill={C.gray700} textAnchor="middle">100%</text>
+        <text x="275" y="195" fontSize="14" fontWeight="700" fill={C.gray700} textAnchor="middle">150%</text>
         
         {/* Needle */}
         <g transform={`rotate(${angle}, 160, 170)`}>
@@ -286,7 +286,7 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
           {displayPct.toFixed(1).replace(".",",")}
           <span style={{ fontSize: 36, fontWeight: 700, opacity: 0.85, marginLeft: 4 }}>%</span>
         </div>
-        <div style={{ fontSize: 13, color: C.gray600, marginTop: 10, fontWeight: 500, fontFamily: "'Barlow',sans-serif" }}>
+        <div style={{ fontSize: 13, color: C.gray700, marginTop: 10, fontWeight: 500, fontFamily: "'Barlow',sans-serif" }}>
           <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(value)}</span> de <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(max)}</span>
         </div>
       </div>
