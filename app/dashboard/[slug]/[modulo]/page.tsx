@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useParams } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 // ─── FONTES ───────────────────────────────────────────────────────────────────
