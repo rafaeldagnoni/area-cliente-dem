@@ -474,7 +474,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
         <Top5List title="Top 5 Receitas" items={top5Receitas} cor={C.green} tipo="receita" />
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>EBITDA Mensal</div>
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height={240}>
             <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>{chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : (d.inRange ? C.red : C.gray300)} />)}</Bar></BarChart>
           </ResponsiveContainer>
         </div>
@@ -1070,8 +1070,9 @@ export default function Tech4ConDashboard() {
     { id: "overview", label: "Visão Geral" },
     { id: "dre", label: "DRE" },
     { id: "dfc", label: "DFC" },
-    { id: "despesas", label: "Despesas" },
     { id: "receitas", label: "Receitas" },
+    { id: "despesas", label: "Despesas" },
+    { id: "orcado-realizado", label: "Orçado vs Realizado" },
   ];
 
   return (
