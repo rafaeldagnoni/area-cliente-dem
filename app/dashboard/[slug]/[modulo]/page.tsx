@@ -1071,14 +1071,14 @@ export default function Tech4ConDashboard() {
             <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>PERÍODO:</span>
             
             {/* Mês Inicial */}
-            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (!disabled) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
+            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (mesesDisponiveis.length > 0) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
               {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
             </select>
 
             <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>até</span>
 
             {/* Mês Final */}
-            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (!disabled) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
+            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (mesesDisponiveis.length > 0) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
               {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
             </select>
           </div>
