@@ -1022,59 +1022,112 @@ export default function Tech4ConDashboard() {
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        <div style={{ background: C.dark, padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+        {/* ─── HEADER PRINCIPAL ─── */}
+        <div style={{ background: C.red, padding: "12px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+          {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 40 }} />
-            <div style={{ width: 1, height: 40, background: C.gray500, opacity: 0.3 }}></div>
+            <div style={{ width: 1, height: 40, background: C.white, opacity: 0.3 }}></div>
             <img src={LOGO_URL} alt="Tech4Con" style={{ height: 36 }} />
           </div>
           
-          <div style={{ display: "flex", gap: 2, flex: 1, marginLeft: 24 }}>
+          {/* Abas */}
+          <div style={{ display: "flex", gap: 2, flex: 1 }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
             ))}
           </div>
 
+          {/* Menu Dropdown */}
           <MenuDropdown tab={tab} loading={loading} />
         </div>
 
-        <div style={{ background: C.dark, padding: "8px 24px", display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, fontWeight: 600 }}>{ano}</span>
-          <span style={{ color: C.gray500, fontSize: 12 }}>›</span>
-          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: "none", background: "transparent", color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, cursor: "pointer", fontWeight: 600 }}>
-            {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
-          </select>
-          <span style={{ color: C.gray500, fontSize: 12 }}>›</span>
-          <span style={{ color: C.red, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.5 }}>{periodoLabel}</span>
-          <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>
+        {/* ─── BARRA DE CONTEXTO ─── */}
+        <div style={{ background: C.redLight, padding: "8px 28px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${C.border}` }}>
+          <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, fontWeight: 700 }}>CONTEXTO:</span>
+          <span style={{ color: C.dark, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>Ano {ano}</span>
+          <span style={{ color: C.gray300, fontSize: 11 }}>•</span>
+          <span style={{ color: C.dark, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>{filial}</span>
+          <span style={{ color: C.gray300, fontSize: 11 }}>•</span>
+          <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700 }}>{periodoLabel}</span>
+          <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }}>
             {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
           </span>
         </div>
 
-        <div style={{ padding: "16px 28px", display: "flex", alignItems: "center", gap: 12, background: C.dark, flexWrap: "wrap" }}>
-          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600 }}>
+        {/* ─── BARRA DE CONTROLES ─── */}
+        <div style={{ background: C.white, padding: "12px 28px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", borderBottom: `1px solid ${C.border}` }}>
+          {/* Ano */}
+          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => (e.currentTarget.style.borderColor = C.red)} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
             {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
           
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>DE</span>
-            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600 }}>
+          {/* Filial */}
+          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => (e.currentTarget.style.borderColor = C.red)} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
+            {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
+            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>PERÍODO:</span>
+            
+            {/* Mês Inicial */}
+            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (!disabled) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
               {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
             </select>
-          </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>ATÉ</span>
-            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600 }}>
+            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>até</span>
+
+            {/* Mês Final */}
+            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (!disabled) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
               {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
             </select>
           </div>
 
-          {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ background: modoAnual ? C.dark : C.white, color: modoAnual ? C.white : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 14px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>{modoAnual ? "▤ ANUAL" : "▤ MENSAL"}</button>}
-          
-          <button onClick={fetchDados} disabled={loading} style={{ background: C.white, color: loading ? C.gray300 : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", cursor: loading ? "default" : "pointer", fontFamily: "'Barlow',sans-serif", fontSize: 13, fontWeight: 600 }}>
-            {loading ? "..." : "↻"}
-          </button>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            {(tab === "dre" || tab === "dfc") && (
+              <button 
+                onClick={() => setModoAnual(!modoAnual)} 
+                style={{ 
+                  background: modoAnual ? C.red : C.white, 
+                  color: modoAnual ? C.white : C.dark, 
+                  border: `1px solid ${modoAnual ? C.red : C.border}`, 
+                  borderRadius: 4, 
+                  padding: "8px 14px", 
+                  cursor: "pointer", 
+                  fontFamily: "'Barlow Condensed',sans-serif", 
+                  fontWeight: 700, 
+                  fontSize: 12, 
+                  letterSpacing: 1,
+                  transition: "all 0.15s"
+                }}
+                onMouseOver={(e) => { if (!modoAnual) { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.background = C.redLight; } }}
+                onMouseOut={(e) => { if (!modoAnual) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; } }}
+              >
+                {modoAnual ? "ANUAL" : "MENSAL"}
+              </button>
+            )}
+            
+            <button 
+              onClick={fetchDados} 
+              disabled={loading} 
+              style={{ 
+                background: loading ? C.gray100 : C.white, 
+                color: loading ? C.gray300 : C.red, 
+                border: `1px solid ${loading ? C.gray100 : C.border}`, 
+                borderRadius: 4, 
+                padding: "8px 12px", 
+                cursor: loading ? "default" : "pointer", 
+                fontFamily: "'Barlow',sans-serif", 
+                fontSize: 13, 
+                fontWeight: 600,
+                transition: "all 0.15s"
+              }}
+              onMouseOver={(e) => { if (!loading) { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.background = C.redLight; } }}
+              onMouseOut={(e) => { if (!loading) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; } }}
+            >
+              {loading ? "..." : "↻ Atualizar"}
+            </button>
+          </div>
         </div>
 
         <div style={{ padding: "24px 28px", maxWidth: 1400, margin: "0 auto" }}>
