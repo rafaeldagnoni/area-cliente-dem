@@ -736,9 +736,9 @@ function MenuDropdown({ tab, loading }: any) {
   const handleGerarPDF = async () => {
     try {
       const html2pdf = (await import('html2pdf.js')).default;
-      const elemento = document.querySelector('[style*="padding: 24px"]');
+      const elemento = document.querySelector('div[style*="display: flex"][style*="flexDirection: column"]') || document.querySelector('div[style*="flex-direction: column"]') || document.body;
       
-      if (!elemento) {
+      if (!elemento || elemento === document.body) {
         alert('Erro: Conteúdo não encontrado na página');
         return;
       }
