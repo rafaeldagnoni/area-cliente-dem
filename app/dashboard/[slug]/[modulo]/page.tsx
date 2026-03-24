@@ -1031,7 +1031,7 @@ export default function Tech4ConDashboard() {
   const [mesInicial, setMesInicial] = useState(0);
   const [mesFinal, setMesFinal] = useState(0);
   const [modoAnual, setModoAnual] = useState(false);
-  const [tab, setTab] = useState<"overview" | "dre" | "dfc" | "despesas" | "receitas">("overview");
+  const [tab, setTab] = useState<"overview" | "dre" | "dfc" | "receitas" | "despesas" | "orcado-realizado">("overview");
   const [dados, setDados] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
