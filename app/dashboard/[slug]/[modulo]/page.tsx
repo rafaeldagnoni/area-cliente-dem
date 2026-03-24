@@ -727,15 +727,15 @@ function MenuDropdown({ tab, loading }: any) {
         <button 
           onClick={() => setMenuAberto(!menuAberto)} 
           style={{ 
-            background: C.white, 
-            color: C.dark, 
+            background: C.red, 
+            color: C.white, 
             border: "none", 
             borderRadius: 4, 
-            padding: "6px 12px", 
+            padding: "8px 12px", 
             cursor: "pointer", 
             fontFamily: "'Barlow',sans-serif", 
             fontWeight: 700, 
-            fontSize: 16,
+            fontSize: 18,
             transition: "all 0.15s"
           }}
         >
@@ -1023,18 +1023,30 @@ export default function Tech4ConDashboard() {
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
         {/* ─── HEADER PRINCIPAL ─── */}
-        <div style={{ background: C.red, padding: "12px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+        <div style={{ 
+          background: C.white,
+          backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1200 200\"><defs><pattern id=\"buildings\" x=\"0\" y=\"0\" width=\"200\" height=\"200\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23E8E8E8\" stroke-width=\"1\" fill=\"none\"><rect x=\"10\" y=\"60\" width=\"30\" height=\"120\"/><line x1=\"10\" y1=\"70\" x2=\"40\" y2=\"70\"/><line x1=\"10\" y1=\"80\" x2=\"40\" y2=\"80\"/><line x1=\"10\" y1=\"90\" x2=\"40\" y2=\"90\"/><line x1=\"10\" y1=\"100\" x2=\"40\" y2=\"100\"/><line x1=\"10\" y1=\"110\" x2=\"40\" y2=\"110\"/><line x1=\"10\" y1=\"120\" x2=\"40\" y2=\"120\"/><rect x=\"50\" y=\"40\" width=\"35\" height=\"140\"/><line x1=\"50\" y1=\"50\" x2=\"85\" y2=\"50\"/><line x1=\"50\" y1=\"65\" x2=\"85\" y2=\"65\"/><line x1=\"50\" y1=\"80\" x2=\"85\" y2=\"80\"/><line x1=\"50\" y1=\"95\" x2=\"85\" y2=\"95\"/><line x1=\"50\" y1=\"110\" x2=\"85\" y2=\"110\"/><line x1=\"50\" y1=\"125\" x2=\"85\" y2=\"125\"/><rect x=\"95\" y=\"50\" width=\"30\" height=\"130\"/><line x1=\"95\" y1=\"60\" x2=\"125\" y2=\"60\"/><line x1=\"95\" y1=\"75\" x2=\"125\" y2=\"75\"/><line x1=\"95\" y1=\"90\" x2=\"125\" y2=\"90\"/><line x1=\"95\" y1=\"105\" x2=\"125\" y2=\"105\"/><line x1=\"95\" y1=\"120\" x2=\"125\" y2=\"120\"/><rect x=\"135\" y=\"70\" width=\"35\" height=\"110\"/><line x1=\"135\" y1=\"80\" x2=\"170\" y2=\"80\"/><line x1=\"135\" y1=\"95\" x2=\"170\" y2=\"95\"/><line x1=\"135\" y1=\"110\" x2=\"170\" y2=\"110\"/><line x1=\"135\" y1=\"125\" x2=\"170\" y2=\"125\"/></g></pattern></defs><rect width=\"1200\" height=\"200\" fill=\"white\"/><rect width=\"1200\" height=\"200\" fill=\"url(%23buildings)\" opacity=\"0.15\"/></svg>')",
+          backgroundRepeat: "repeat-x",
+          backgroundPosition: "center bottom",
+          padding: "12px 28px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 24,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          borderBottom: `2px solid ${C.red}`
+        }}>
           {/* Logos */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 40 }} />
-            <div style={{ width: 1, height: 40, background: C.white, opacity: 0.3 }}></div>
-            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 36 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 48 }} />
+            <div style={{ width: 2, height: 48, background: C.red, opacity: 0.3 }}></div>
+            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 44 }} />
           </div>
           
           {/* Abas */}
           <div style={{ display: "flex", gap: 2, flex: 1 }}>
             {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
+              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
             ))}
           </div>
 
