@@ -220,84 +220,90 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
   const displayPct = ((value / max) * 100);
   
   return (
-    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 420, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, color: C.dark, textTransform: "uppercase", marginBottom: 24, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.8 }}>
+    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 440 }}>
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, color: C.dark, textTransform: "uppercase", marginBottom: 28, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.8 }}>
         <span style={{ width: 4, height: 16, background: C.red, borderRadius: 2 }}></span>
         {label}
       </div>
       
-      <svg width="280" height="180" viewBox="0 0 280 180" style={{ marginBottom: 4 }}>
-        {/* Background track */}
+      <svg width="320" height="200" viewBox="0 0 320 200" style={{ marginBottom: 12 }}>
+        {/* Define the gauge track - smooth arc from -90 to 90 degrees */}
         <defs>
-          <linearGradient id="riskGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={C.red} stopOpacity="0.25" />
-            <stop offset="100%" stopColor={C.red} stopOpacity="0.1" />
-          </linearGradient>
-          <linearGradient id="cautionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={C.gold} stopOpacity="0.25" />
-            <stop offset="100%" stopColor={C.gold} stopOpacity="0.1" />
-          </linearGradient>
-          <linearGradient id="healthGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={C.green} stopOpacity="0.1" />
-            <stop offset="100%" stopColor={C.green} stopOpacity="0.25" />
+          <linearGradient id="gaugeGradient" x1="0%" y1="100%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={C.red} />
+            <stop offset="33%" stopColor={C.gold} />
+            <stop offset="66%" stopColor={C.green} />
           </linearGradient>
         </defs>
         
-        {/* Background track light */}
-        <path d="M 45 165 A 120 120 0 0 1 235 165" fill="none" stroke={C.gray100} strokeWidth="20" strokeLinecap="round" />
+        {/* Background track - full arc */}
+        <path 
+          d="M 50 170 A 120 120 0 0 1 270 170" 
+          fill="none" 
+          stroke={C.gray100} 
+          strokeWidth="24" 
+          strokeLinecap="round" 
+        />
         
-        {/* Risk zone (0-80%) */}
-        <path d="M 45 165 A 120 120 0 0 1 109 21" fill="none" stroke="url(#riskGradient)" strokeWidth="20" strokeLinecap="round" />
+        {/* Colored gauge track */}
+        <path 
+          d="M 50 170 A 120 120 0 0 1 270 170" 
+          fill="none" 
+          stroke="url(#gaugeGradient)" 
+          strokeWidth="24" 
+          strokeLinecap="round" 
+        />
         
-        {/* Caution zone (80-100%) */}
-        <path d="M 109 21 A 120 120 0 0 1 140 12" fill="none" stroke="url(#cautionGradient)" strokeWidth="20" strokeLinecap="round" />
+        {/* Zone separators (subtle) */}
+        <line x1="93" y1="160" x2="93" y2="148" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
+        <line x1="160" y1="50" x2="160" y2="38" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
+        <line x1="227" y1="160" x2="227" y2="148" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
         
-        {/* Health zone (100-150%) */}
-        <path d="M 140 12 A 120 120 0 0 1 235 165" fill="none" stroke="url(#healthGradient)" strokeWidth="20" strokeLinecap="round" />
+        {/* Marker labels */}
+        <text x="45" y="195" fontSize="14" fontWeight="700" fill={C.gray600} textAnchor="middle">0%</text>
+        <text x="160" y="35" fontSize="14" fontWeight="700" fill={C.gray600} textAnchor="middle">100%</text>
+        <text x="275" y="195" fontSize="14" fontWeight="700" fill={C.gray600} textAnchor="middle">150%</text>
         
-        {/* Markers */}
-        <text x="45" y="180" fontSize="13" fontWeight="700" fill={C.gray500} textAnchor="middle">0%</text>
-        <text x="140" y="8" fontSize="13" fontWeight="700" fill={C.gray500} textAnchor="middle">100%</text>
-        <text x="235" y="180" fontSize="13" fontWeight="700" fill={C.gray500} textAnchor="middle">150%</text>
-        
-        {/* Needle group with shadow */}
-        <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.1))">
-          <g transform={`rotate(${angle}, 140, 165)`}>
-            {/* Needle */}
-            <line x1="140" y1="165" x2="140" y2="45" stroke={currentColor} strokeWidth="7" strokeLinecap="round" opacity="0.9" />
-            {/* Center circle - outer */}
-            <circle cx="140" cy="165" r="13" fill={currentColor} opacity="0.2" />
-            {/* Center circle - middle */}
-            <circle cx="140" cy="165" r="10" fill={currentColor} />
-            {/* Center circle - inner highlight */}
-            <circle cx="140" cy="165" r="7" fill={C.white} />
-          </g>
+        {/* Needle */}
+        <g transform={`rotate(${angle}, 160, 170)`}>
+          {/* Shadow */}
+          <line x1="160" y1="170" x2="160" y2="50" stroke="rgba(0,0,0,0.1)" strokeWidth="8" strokeLinecap="round" />
+          
+          {/* Main needle */}
+          <line x1="160" y1="170" x2="160" y2="50" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
+          
+          {/* Center pivot - outer circle */}
+          <circle cx="160" cy="170" r="12" fill={C.white} stroke={currentColor} strokeWidth="2" />
+          
+          {/* Center pivot - middle dot */}
+          <circle cx="160" cy="170" r="6" fill={currentColor} />
         </g>
       </svg>
       
       {/* Value display */}
-      <div style={{ textAlign: "center", marginTop: 8 }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 56, fontWeight: 900, color: currentColor, letterSpacing: -1.5, lineHeight: 1 }}>
-          {displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 32, fontWeight: 700, opacity: 0.9, marginLeft: 2 }}>%</span>
+      <div style={{ textAlign: "center", marginTop: 12 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 64, fontWeight: 900, color: currentColor, letterSpacing: -2, lineHeight: 0.9 }}>
+          {displayPct.toFixed(1).replace(".",",")}
+          <span style={{ fontSize: 36, fontWeight: 700, opacity: 0.85, marginLeft: 4 }}>%</span>
         </div>
-        <div style={{ fontSize: 13, color: C.gray700, marginTop: 8, fontWeight: 500, fontFamily: "'Barlow',sans-serif", letterSpacing: 0.2 }}>
-          {fmtK(value)} de {fmtK(max)}
+        <div style={{ fontSize: 13, color: C.gray600, marginTop: 10, fontWeight: 500, fontFamily: "'Barlow',sans-serif" }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(value)}</span> de <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(max)}</span>
         </div>
       </div>
       
       {/* Legend */}
-      <div style={{ display: "flex", gap: 20, marginTop: 20, fontSize: 12, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 16, width: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 14, height: 14, borderRadius: "50%", background: C.red, boxShadow: `0 2px 4px ${C.red}20` }}></div>
-          <span style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, color: C.dark }}>Risco &lt; 80%</span>
+      <div style={{ display: "flex", gap: 24, marginTop: 24, fontSize: 12, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 18, width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+          <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.red }}></div>
+          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark, fontSize: 12 }}>Risco</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 14, height: 14, borderRadius: "50%", background: C.gold, boxShadow: `0 2px 4px ${C.gold}20` }}></div>
-          <span style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, color: C.dark }}>Atenção 80–100%</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+          <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.gold }}></div>
+          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark, fontSize: 12 }}>Atenção</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 14, height: 14, borderRadius: "50%", background: C.green, boxShadow: `0 2px 4px ${C.green}20` }}></div>
-          <span style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, color: C.dark }}>Saudável &gt; 100%</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+          <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.green }}></div>
+          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark, fontSize: 12 }}>Saudável</span>
         </div>
       </div>
     </div>
