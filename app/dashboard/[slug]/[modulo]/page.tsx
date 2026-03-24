@@ -1022,113 +1022,109 @@ export default function Tech4ConDashboard() {
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        {/* ─── HEADER PRINCIPAL ─── */}
+        {/* ─── HEADER ÚNICO E COMPACTO ─── */}
         <div style={{ 
           background: C.white,
           backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1400 160\"><defs><pattern id=\"cityscape\" x=\"0\" y=\"0\" width=\"280\" height=\"160\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23D4D4D4\" stroke-width=\"0.8\" fill=\"none\" opacity=\"0.6\"><rect x=\"10\" y=\"80\" width=\"25\" height=\"70\"/><line x1=\"10\" y1=\"85\" x2=\"35\" y2=\"85\"/><line x1=\"10\" y1=\"90\" x2=\"35\" y2=\"90\"/><line x1=\"10\" y1=\"95\" x2=\"35\" y2=\"95\"/><line x1=\"10\" y1=\"100\" x2=\"35\" y2=\"100\"/><line x1=\"10\" y1=\"105\" x2=\"35\" y2=\"105\"/><line x1=\"10\" y1=\"110\" x2=\"35\" y2=\"110\"/><line x1=\"10\" y1=\"115\" x2=\"35\" y2=\"115\"/><line x1=\"10\" y1=\"120\" x2=\"35\" y2=\"120\"/><line x1=\"15\" y1=\"80\" x2=\"15\" y2=\"150\"/><line x1=\"25\" y1=\"80\" x2=\"25\" y2=\"150\"/><line x1=\"35\" y1=\"80\" x2=\"35\" y2=\"150\"/><rect x=\"45\" y=\"60\" width=\"30\" height=\"90\"/><line x1=\"45\" y1=\"70\" x2=\"75\" y2=\"70\"/><line x1=\"45\" y1=\"80\" x2=\"75\" y2=\"80\"/><line x1=\"45\" y1=\"90\" x2=\"75\" y2=\"90\"/><line x1=\"45\" y1=\"100\" x2=\"75\" y2=\"100\"/><line x1=\"45\" y1=\"110\" x2=\"75\" y2=\"110\"/><line x1=\"45\" y1=\"120\" x2=\"75\" y2=\"120\"/><line x1=\"52\" y1=\"60\" x2=\"52\" y2=\"150\"/><line x1=\"60\" y1=\"60\" x2=\"60\" y2=\"150\"/><line x1=\"68\" y1=\"60\" x2=\"68\" y2=\"150\"/><rect x=\"85\" y=\"70\" width=\"28\" height=\"80\"/><line x1=\"85\" y1=\"78\" x2=\"113\" y2=\"78\"/><line x1=\"85\" y1=\"86\" x2=\"113\" y2=\"86\"/><line x1=\"85\" y1=\"94\" x2=\"113\" y2=\"94\"/><line x1=\"85\" y1=\"102\" x2=\"113\" y2=\"102\"/><line x1=\"85\" y1=\"110\" x2=\"113\" y2=\"110\"/><line x1=\"85\" y1=\"118\" x2=\"113\" y2=\"118\"/><line x1=\"92\" y1=\"70\" x2=\"92\" y2=\"150\"/><line x1=\"99\" y1=\"70\" x2=\"99\" y2=\"150\"/><line x1=\"106\" y1=\"70\" x2=\"106\" y2=\"150\"/><rect x=\"125\" y=\"50\" width=\"32\" height=\"100\"/><line x1=\"125\" y1=\"60\" x2=\"157\" y2=\"60\"/><line x1=\"125\" y1=\"72\" x2=\"157\" y2=\"72\"/><line x1=\"125\" y1=\"84\" x2=\"157\" y2=\"84\"/><line x1=\"125\" y1=\"96\" x2=\"157\" y2=\"96\"/><line x1=\"125\" y1=\"108\" x2=\"157\" y2=\"108\"/><line x1=\"125\" y1=\"120\" x2=\"157\" y2=\"120\"/><line x1=\"132\" y1=\"50\" x2=\"132\" y2=\"150\"/><line x1=\"141\" y1=\"50\" x2=\"141\" y2=\"150\"/><line x1=\"150\" y1=\"50\" x2=\"150\" y2=\"150\"/><rect x=\"170\" y=\"75\" width=\"25\" height=\"75\"/><line x1=\"170\" y1=\"83\" x2=\"195\" y2=\"83\"/><line x1=\"170\" y1=\"91\" x2=\"195\" y2=\"91\"/><line x1=\"170\" y1=\"99\" x2=\"195\" y2=\"99\"/><line x1=\"170\" y1=\"107\" x2=\"195\" y2=\"107\"/><line x1=\"170\" y1=\"115\" x2=\"195\" y2=\"115\"/><line x1=\"170\" y1=\"123\" x2=\"195\" y2=\"123\"/><line x1=\"176\" y1=\"75\" x2=\"176\" y2=\"150\"/><line x1=\"182\" y1=\"75\" x2=\"182\" y2=\"150\"/><line x1=\"188\" y1=\"75\" x2=\"188\" y2=\"150\"/><rect x=\"205\" y=\"65\" width=\"29\" height=\"85\"/><line x1=\"205\" y1=\"75\" x2=\"234\" y2=\"75\"/><line x1=\"205\" y1=\"87\" x2=\"234\" y2=\"87\"/><line x1=\"205\" y1=\"99\" x2=\"234\" y2=\"99\"/><line x1=\"205\" y1=\"111\" x2=\"234\" y2=\"111\"/><line x1=\"205\" y1=\"123\" x2=\"234\" y2=\"123\"/><line x1=\"212\" y1=\"65\" x2=\"212\" y2=\"150\"/><line x1=\"219\" y1=\"65\" x2=\"219\" y2=\"150\"/><line x1=\"226\" y1=\"65\" x2=\"226\" y2=\"150\"/><line x1=\"233\" y1=\"65\" x2=\"233\" y2=\"150\"/></g></pattern></defs><rect width=\"1400\" height=\"160\" fill=\"white\"/><rect width=\"1400\" height=\"160\" fill=\"url(%23cityscape)\"/></svg>')",
           backgroundRepeat: "repeat-x",
           backgroundPosition: "center bottom",
-          padding: "12px 28px",
+          padding: "8px 28px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 24,
+          gap: 12,
           boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          borderBottom: `2px solid ${C.red}`
+          borderBottom: `2px solid ${C.red}`,
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          height: 56
         }}>
           {/* Logos */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 48 }} />
-            <div style={{ width: 2, height: 48, background: C.red, opacity: 0.3 }}></div>
-            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 44 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
+            <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 36 }} />
+            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 32 }} />
           </div>
           
           {/* Abas */}
-          <div style={{ display: "flex", gap: 2, flex: 1 }}>
+          <div style={{ display: "flex", gap: 2 }}>
             {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
+              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 3, padding: "4px 10px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: 0.3, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
             ))}
           </div>
 
-          {/* Menu Dropdown */}
-          <MenuDropdown tab={tab} loading={loading} />
-        </div>
+          {/* Separador */}
+          <div style={{ width: 1, height: 24, background: C.border, margin: "0 2px" }}></div>
 
-        {/* ─── BARRA DE CONTEXTO ─── REMOVIDA - INFORMAÇÃO REDUNDANTE */}
-
-        {/* ─── BARRA DE CONTROLES ─── */}
-        <div style={{ background: C.white, padding: "12px 28px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", borderBottom: `1px solid ${C.border}` }}>
-          {/* Ano */}
-          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => (e.currentTarget.style.borderColor = C.red)} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
+          {/* Controles */}
+          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
             {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
           
-          {/* Filial */}
-          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => (e.currentTarget.style.borderColor = C.red)} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
+          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
             {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
           </select>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
-            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>PERÍODO:</span>
-            
-            {/* Mês Inicial */}
-            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (mesesDisponiveis.length > 0) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
-              {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
-            </select>
+          <span style={{ fontSize: 9, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.3, fontWeight: 600, textTransform: "uppercase" }}>Período:</span>
+          
+          <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, height: 32 }}>
+            {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
+          </select>
 
-            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>até</span>
+          <span style={{ fontSize: 9, color: C.gray500, fontFamily: "'Barlow',sans-serif", fontWeight: 600 }}>–</span>
 
-            {/* Mês Final */}
-            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, transition: "all 0.15s" }} onMouseOver={(e) => { if (mesesDisponiveis.length > 0) e.currentTarget.style.borderColor = C.red; }} onMouseOut={(e) => (e.currentTarget.style.borderColor = C.border)}>
-              {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
-            </select>
-          </div>
+          <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, height: 32 }}>
+            {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
+          </select>
 
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-            {(tab === "dre" || tab === "dfc") && (
-              <button 
-                onClick={() => setModoAnual(!modoAnual)} 
-                style={{ 
-                  background: modoAnual ? C.red : C.white, 
-                  color: modoAnual ? C.white : C.dark, 
-                  border: `1px solid ${modoAnual ? C.red : C.border}`, 
-                  borderRadius: 4, 
-                  padding: "8px 14px", 
-                  cursor: "pointer", 
-                  fontFamily: "'Barlow Condensed',sans-serif", 
-                  fontWeight: 700, 
-                  fontSize: 12, 
-                  letterSpacing: 1,
-                  transition: "all 0.15s"
-                }}
-                onMouseOver={(e) => { if (!modoAnual) { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.background = C.redLight; } }}
-                onMouseOut={(e) => { if (!modoAnual) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; } }}
-              >
-                {modoAnual ? "ANUAL" : "MENSAL"}
-              </button>
-            )}
-            
+          {/* Spacer */}
+          <div style={{ flex: 1 }}></div>
+
+          {/* Botões de ação */}
+          {(tab === "dre" || tab === "dfc") && (
             <button 
-              onClick={fetchDados} 
-              disabled={loading} 
+              onClick={() => setModoAnual(!modoAnual)} 
               style={{ 
-                background: loading ? C.gray100 : C.white, 
-                color: loading ? C.gray300 : C.red, 
-                border: `1px solid ${loading ? C.gray100 : C.border}`, 
-                borderRadius: 4, 
-                padding: "8px 12px", 
-                cursor: loading ? "default" : "pointer", 
-                fontFamily: "'Barlow',sans-serif", 
-                fontSize: 13, 
-                fontWeight: 600,
+                background: modoAnual ? C.red : C.white, 
+                color: modoAnual ? C.white : C.dark, 
+                border: `1px solid ${modoAnual ? C.red : C.border}`, 
+                borderRadius: 3, 
+                padding: "4px 10px", 
+                cursor: "pointer", 
+                fontFamily: "'Barlow Condensed',sans-serif", 
+                fontWeight: 700, 
+                fontSize: 10, 
+                letterSpacing: 0.3,
+                textTransform: "uppercase",
+                height: 32,
                 transition: "all 0.15s"
               }}
-              onMouseOver={(e) => { if (!loading) { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.background = C.redLight; } }}
-              onMouseOut={(e) => { if (!loading) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; } }}
             >
-              {loading ? "..." : "↻ Atualizar"}
+              {modoAnual ? "Anual" : "Mensal"}
             </button>
-          </div>
+          )}
+          
+          <button 
+            onClick={fetchDados} 
+            disabled={loading} 
+            style={{ 
+              background: loading ? C.gray100 : C.white, 
+              color: loading ? C.gray300 : C.red, 
+              border: `1px solid ${loading ? C.gray100 : C.border}`, 
+              borderRadius: 3, 
+              padding: "4px 10px", 
+              cursor: loading ? "default" : "pointer", 
+              fontFamily: "'Barlow',sans-serif", 
+              fontSize: 11, 
+              fontWeight: 600,
+              height: 32,
+              transition: "all 0.15s"
+            }}
+          >
+            {loading ? "..." : "↻"}
+          </button>
+
+          {/* Menu Dropdown */}
+          <MenuDropdown tab={tab} loading={loading} />
         </div>
 
         <div style={{ padding: "24px 28px", maxWidth: 1400, margin: "0 auto" }}>
