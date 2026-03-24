@@ -219,91 +219,81 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
   const currentColor = getColor(percentage);
   const displayPct = ((value / max) * 100);
   
+  // Calcula o arc path até o ponto atual da agulha
+  const arcPercentage = percentage / 150;
+  const largeArc = arcPercentage > 0.5 ? 1 : 0;
+  const endAngleRad = (arcPercentage * Math.PI);
+  const endX = 160 + 120 * Math.cos(endAngleRad);
+  const endY = 170 - 120 * Math.sin(endAngleRad);
+  
   return (
-    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 440 }}>
-      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, color: C.dark, textTransform: "uppercase", marginBottom: 28, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.8 }}>
-        <span style={{ width: 4, height: 16, background: C.red, borderRadius: 2 }}></span>
+    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 360 }}>
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.5 }}>
+        <span style={{ width: 3, height: 14, background: C.red, borderRadius: 2 }}></span>
         {label}
       </div>
       
-      <svg width="320" height="200" viewBox="0 0 320 200" style={{ marginBottom: 12 }}>
-        {/* Define the gauge track - smooth arc from -90 to 90 degrees */}
-        <defs>
-          <linearGradient id="gaugeGradient" x1="0%" y1="100%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={C.red} />
-            <stop offset="33%" stopColor={C.gold} />
-            <stop offset="66%" stopColor={C.green} />
-          </linearGradient>
-        </defs>
-        
-        {/* Background track - full arc */}
+      <svg width="280" height="170" viewBox="0 0 280 170" style={{ marginBottom: 8 }}>
+        {/* Background track - light gray */}
         <path 
           d="M 50 170 A 120 120 0 0 1 270 170" 
           fill="none" 
           stroke={C.gray100} 
-          strokeWidth="24" 
+          strokeWidth="22" 
           strokeLinecap="round" 
         />
         
-        {/* Colored gauge track */}
+        {/* Active colored track - grows as percentage increases */}
         <path 
-          d="M 50 170 A 120 120 0 0 1 270 170" 
+          d={`M 50 170 A 120 120 0 ${largeArc} 1 ${endX} ${endY}`}
           fill="none" 
-          stroke="url(#gaugeGradient)" 
-          strokeWidth="24" 
+          stroke={currentColor} 
+          strokeWidth="22" 
           strokeLinecap="round" 
         />
         
-        {/* Zone separators (subtle) */}
-        <line x1="93" y1="160" x2="93" y2="148" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
-        <line x1="160" y1="50" x2="160" y2="38" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
-        <line x1="227" y1="160" x2="227" y2="148" stroke={C.white} strokeWidth="3" strokeLinecap="round" />
-        
-        {/* Marker labels */}
-        <text x="45" y="195" fontSize="14" fontWeight="700" fill={C.gray700} textAnchor="middle">0%</text>
-        <text x="160" y="35" fontSize="14" fontWeight="700" fill={C.gray700} textAnchor="middle">100%</text>
-        <text x="275" y="195" fontSize="14" fontWeight="700" fill={C.gray700} textAnchor="middle">150%</text>
+        {/* Markers */}
+        <text x="50" y="190" fontSize="12" fontWeight="700" fill={C.gray500} textAnchor="middle">0%</text>
+        <text x="160" y="25" fontSize="12" fontWeight="700" fill={C.gray500} textAnchor="middle">100%</text>
+        <text x="270" y="190" fontSize="12" fontWeight="700" fill={C.gray500} textAnchor="middle">150%</text>
         
         {/* Needle */}
         <g transform={`rotate(${angle}, 160, 170)`}>
           {/* Shadow */}
-          <line x1="160" y1="170" x2="160" y2="50" stroke="rgba(0,0,0,0.1)" strokeWidth="8" strokeLinecap="round" />
+          <line x1="160" y1="170" x2="160" y2="55" stroke="rgba(0,0,0,0.08)" strokeWidth="7" strokeLinecap="round" />
           
           {/* Main needle */}
-          <line x1="160" y1="170" x2="160" y2="50" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
+          <line x1="160" y1="170" x2="160" y2="55" stroke={currentColor} strokeWidth="5" strokeLinecap="round" />
           
-          {/* Center pivot - outer circle */}
-          <circle cx="160" cy="170" r="12" fill={C.white} stroke={currentColor} strokeWidth="2" />
-          
-          {/* Center pivot - middle dot */}
-          <circle cx="160" cy="170" r="6" fill={currentColor} />
+          {/* Center pivot */}
+          <circle cx="160" cy="170" r="11" fill={C.white} stroke={currentColor} strokeWidth="2" />
+          <circle cx="160" cy="170" r="5" fill={currentColor} />
         </g>
       </svg>
       
       {/* Value display */}
-      <div style={{ textAlign: "center", marginTop: 12 }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 64, fontWeight: 900, color: currentColor, letterSpacing: -2, lineHeight: 0.9 }}>
-          {displayPct.toFixed(1).replace(".",",")}
-          <span style={{ fontSize: 36, fontWeight: 700, opacity: 0.85, marginLeft: 4 }}>%</span>
+      <div style={{ textAlign: "center", marginTop: 6 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 48, fontWeight: 900, color: currentColor, letterSpacing: -1.5, lineHeight: 0.95 }}>
+          {displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 28, fontWeight: 700, opacity: 0.85, marginLeft: 2 }}>%</span>
         </div>
-        <div style={{ fontSize: 13, color: C.gray700, marginTop: 10, fontWeight: 500, fontFamily: "'Barlow',sans-serif" }}>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(value)}</span> de <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(max)}</span>
+        <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500, fontFamily: "'Barlow',sans-serif" }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(value)}</span> / <span style={{ fontFamily: "'JetBrains Mono',monospace", color: C.dark }}>{fmtK(max)}</span>
         </div>
       </div>
       
       {/* Legend */}
-      <div style={{ display: "flex", gap: 24, marginTop: 24, fontSize: 12, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 18, width: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.red }}></div>
-          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark, fontSize: 12 }}>Risco</span>
+      <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 12, width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: C.red }}></div>
+          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark }}>Risco</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.gold }}></div>
-          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark, fontSize: 12 }}>Atenção</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: C.gold }}></div>
+          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark }}>Atenção</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <div style={{ width: 16, height: 16, borderRadius: "50%", background: C.green }}></div>
-          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark, fontSize: 12 }}>Saudável</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: C.green }}></div>
+          <span style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, color: C.dark }}>Saudável</span>
         </div>
       </div>
     </div>
