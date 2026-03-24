@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import supabase from "@/lib/supabaseClient";
@@ -701,6 +701,7 @@ function MenuDropdown({ tab, loading }: any) {
   const [usuarioModalAberto, setUsuarioModalAberto] = useState(false);
   const [usuario, setUsuario] = useState<any>(null);
   const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     { id: "overview", label: "Visão Geral" },
@@ -723,6 +724,22 @@ function MenuDropdown({ tab, loading }: any) {
     };
     carregarUsuario();
   }, []);
+
+  useEffect(() => {
+    const handleClickFora = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuAberto(false);
+      }
+    };
+
+    if (menuAberto) {
+      document.addEventListener('mousedown', handleClickFora);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickFora);
+    };
+  }, [menuAberto]);
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -778,7 +795,7 @@ function MenuDropdown({ tab, loading }: any) {
 
   return (
     <>
-      <div style={{ position: "relative" }}>
+      <div ref={menuRef} style={{ position: "relative" }}>
         <button 
           onClick={() => setMenuAberto(!menuAberto)} 
           style={{ 
