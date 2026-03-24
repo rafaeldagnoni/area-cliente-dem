@@ -91,34 +91,38 @@ export default function SelecionarModuloPage() {
   };
 
   const getIconeModulo = (slug: string) => {
-    switch (slug) {
-      case "financeiro":
-        return (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6h1.5zm0 0h3V9h-3z" />
-            <path d="M7 12h10M12 7v10" stroke="currentColor" strokeWidth="2" />
-          </svg>
-        );
-      case "comercial":
-        return (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-            <polyline points="13 2 13 9 20 9" />
-            <path d="M9 14h2m-2 4h2m4-4h2m-2 4h2M3 14l3 3-3 3" />
-          </svg>
-        );
-      case "operacoes":
-        return (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="12" cy="12" r="1" />
-            <path d="M12 3v2m0 12v2M4.22 4.22l1.41 1.41m8.34 8.34l1.41 1.41M3 12h2m12 0h2M4.22 19.78l1.41-1.41m8.34-8.34l1.41-1.41" />
-            <path d="M9 5h6v14H9z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
+  switch (slug) {
+    case "financeiro":
+      return (
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 1v22m11-11H1" />
+          <path d="M4.22 4.22l12.56 12.56m0-12.56L4.22 16.78" />
+          <circle cx="12" cy="12" r="10" />
+        </svg>
+      );
+    case "comercial":
+      return (
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 3H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4" />
+          <path d="M15 3h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4" />
+          <path d="M9 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4" />
+          <path d="M15 13h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4" />
+          <line x1="7" y1="9" x2="7" y2="13" />
+          <line x1="17" y1="9" x2="17" y2="13" />
+        </svg>
+      );
+    case "operacoes":
+      return (
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+          <circle cx="12" cy="5" r="1" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
 
   const getCorModulo = (slug: string) => {
     switch (slug) {
