@@ -225,28 +225,28 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
         <span style={{ width: 3, height: 14, background: C.red, borderRadius: 2 }}></span>
         {label}
       </div>
-      <svg width="200" height="120" viewBox="0 0 200 120">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke={C.gray100} strokeWidth="16" strokeLinecap="round" />
-        <path d="M 20 100 A 80 80 0 0 1 68 28" fill="none" stroke={C.red} strokeWidth="16" opacity="0.3" />
-        <path d="M 68 28 A 80 80 0 0 1 100 20" fill="none" stroke={C.gold} strokeWidth="16" opacity="0.3" />
-        <path d="M 100 20 A 80 80 0 0 1 180 100" fill="none" stroke={C.green} strokeWidth="16" strokeLinecap="round" opacity="0.3" />
-        <g transform={`rotate(${angle}, 100, 100)`}>
-          <line x1="100" y1="100" x2="100" y2="35" stroke={currentColor} strokeWidth="4" strokeLinecap="round" />
-          <circle cx="100" cy="100" r="8" fill={currentColor} />
-          <circle cx="100" cy="100" r="4" fill={C.white} />
+      <svg width="220" height="140" viewBox="0 0 220 140">
+        <path d="M 30 120 A 90 90 0 0 1 190 120" fill="none" stroke={C.gray100} strokeWidth="16" strokeLinecap="round" />
+        <path d="M 30 120 A 90 90 0 0 1 73 28" fill="none" stroke={C.red} strokeWidth="16" opacity="0.3" />
+        <path d="M 73 28 A 90 90 0 0 1 110 18" fill="none" stroke={C.gold} strokeWidth="16" opacity="0.3" />
+        <path d="M 110 18 A 90 90 0 0 1 190 120" fill="none" stroke={C.green} strokeWidth="16" strokeLinecap="round" opacity="0.3" />
+        <g transform={`rotate(${angle}, 110, 120)`}>
+          <line x1="110" y1="120" x2="110" y2="35" stroke={currentColor} strokeWidth="5" strokeLinecap="round" />
+          <circle cx="110" cy="120" r="9" fill={currentColor} />
+          <circle cx="110" cy="120" r="5" fill={C.white} />
         </g>
-        <text x="20" y="115" fontSize="10" fill={C.gray500} textAnchor="middle">0%</text>
-        <text x="100" y="18" fontSize="10" fill={C.gray500} textAnchor="middle">100%</text>
-        <text x="180" y="115" fontSize="10" fill={C.gray500} textAnchor="middle">150%</text>
+        <text x="30" y="138" fontSize="11" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
+        <text x="110" y="16" fontSize="11" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
+        <text x="190" y="138" fontSize="11" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
       </svg>
-      <div style={{ marginTop: -20, textAlign: "center" }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 28, fontWeight: 700, color: currentColor }}>{displayPct.toFixed(1).replace(".",",")}%</div>
-        <div style={{ fontSize: 11, color: C.gray500, marginTop: 4 }}>{fmtBRL(value)} / {fmtBRL(max)}</div>
+      <div style={{ marginTop: -12, textAlign: "center" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 36, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 24, opacity: 0.8 }}>%</span></div>
+        <div style={{ fontSize: 11, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
       </div>
-      <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 10 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: C.red }}></span>Risco</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: C.green }}></span>Saudável</span>
+      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 10, justifyContent: "center", flexWrap: "wrap" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: "50%", background: C.red }}></span>Risco</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: "50%", background: C.green }}></span>Saudável</span>
       </div>
     </div>
   );
@@ -641,6 +641,61 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   );
 }
 
+// ─── ORÇADO VS REALIZADO VIEW ─────────────────────────────────────────────────
+function OrcadoRealizadoView({ ano, mesInicial, mesFinal }: { ano: number; mesInicial: number; mesFinal: number }) {
+  const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
+  
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 8, padding: 20, color: C.blue }}>
+        <div style={{ fontFamily: "'Barlow',sans-serif", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🔄 Orçado vs Realizado</div>
+        <div style={{ fontSize: 13 }}>
+          Período: <strong>{periodoLabel} / {ano}</strong>
+        </div>
+        <div style={{ fontSize: 12, marginTop: 8, opacity: 0.8 }}>
+          Este dashboard será preenchido com dados de orçamento vs realizado após você fornecer a fonte dos dados.
+        </div>
+      </div>
+      
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ background: C.white, border: `2px dashed ${C.blue}`, borderRadius: 8, padding: 24, textAlign: "center", color: C.gray500, minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>📊</div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Orçamento vs Realizado</div>
+          <div style={{ fontSize: 11, marginTop: 8, maxWidth: 200 }}>Gráfico comparativo será exibido aqui</div>
+        </div>
+        
+        <div style={{ background: C.white, border: `2px dashed ${C.blue}`, borderRadius: 8, padding: 24, textAlign: "center", color: C.gray500, minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>📈</div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Variação Mensal</div>
+          <div style={{ fontSize: 11, marginTop: 8, maxWidth: 200 }}>% de desvio orçamento vs realizado</div>
+        </div>
+      </div>
+
+      <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
+        <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>KPI's — Desvio Orçado vs Realizado</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: C.blue, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Receita</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.blue }}>-</div>
+          </div>
+          <div style={{ background: C.orangeLight, border: `1px solid ${C.orange}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: C.orange, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Custos</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.orange }}>-</div>
+          </div>
+          <div style={{ background: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: C.gold, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Despesas</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.gold }}>-</div>
+          </div>
+          <div style={{ background: C.greenLight, border: `1px solid ${C.green}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: C.green, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Resultado</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.green }}>-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── MENU DROPDOWN ────────────────────────────────────────────────────────────
 function MenuDropdown({ tab, loading }: any) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -652,8 +707,9 @@ function MenuDropdown({ tab, loading }: any) {
     { id: "overview", label: "Visão Geral" },
     { id: "dre", label: "DRE" },
     { id: "dfc", label: "DFC" },
-    { id: "despesas", label: "Despesas" },
     { id: "receitas", label: "Receitas" },
+    { id: "despesas", label: "Despesas" },
+    { id: "orcado-realizado", label: "Orçado vs Realizado" },
   ];
 
   useEffect(() => {
@@ -1136,6 +1192,7 @@ export default function Tech4ConDashboard() {
           {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
           {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} />}
           {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} />}
+          {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} />}
         </div>
       </div>
       
