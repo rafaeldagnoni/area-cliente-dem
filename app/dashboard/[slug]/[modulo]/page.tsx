@@ -220,33 +220,33 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
   const displayPct = ((value / max) * 100);
   
   return (
-    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 340 }}>
       <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.5 }}>
         <span style={{ width: 3, height: 14, background: C.red, borderRadius: 2 }}></span>
         {label}
       </div>
-      <svg width="220" height="140" viewBox="0 0 220 140">
-        <path d="M 30 120 A 90 90 0 0 1 190 120" fill="none" stroke={C.gray100} strokeWidth="16" strokeLinecap="round" />
-        <path d="M 30 120 A 90 90 0 0 1 73 28" fill="none" stroke={C.red} strokeWidth="16" opacity="0.3" />
-        <path d="M 73 28 A 90 90 0 0 1 110 18" fill="none" stroke={C.gold} strokeWidth="16" opacity="0.3" />
-        <path d="M 110 18 A 90 90 0 0 1 190 120" fill="none" stroke={C.green} strokeWidth="16" strokeLinecap="round" opacity="0.3" />
-        <g transform={`rotate(${angle}, 110, 120)`}>
-          <line x1="110" y1="120" x2="110" y2="35" stroke={currentColor} strokeWidth="5" strokeLinecap="round" />
-          <circle cx="110" cy="120" r="9" fill={currentColor} />
-          <circle cx="110" cy="120" r="5" fill={C.white} />
+      <svg width="260" height="160" viewBox="0 0 260 160" style={{ marginBottom: 8 }}>
+        <path d="M 40 140 A 110 110 0 0 1 220 140" fill="none" stroke={C.gray100} strokeWidth="18" strokeLinecap="round" />
+        <path d="M 40 140 A 110 110 0 0 1 88 20" fill="none" stroke={C.red} strokeWidth="18" opacity="0.3" />
+        <path d="M 88 20 A 110 110 0 0 1 130 8" fill="none" stroke={C.gold} strokeWidth="18" opacity="0.3" />
+        <path d="M 130 8 A 110 110 0 0 1 220 140" fill="none" stroke={C.green} strokeWidth="18" strokeLinecap="round" opacity="0.3" />
+        <g transform={`rotate(${angle}, 130, 140)`}>
+          <line x1="130" y1="140" x2="130" y2="35" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
+          <circle cx="130" cy="140" r="11" fill={currentColor} />
+          <circle cx="130" cy="140" r="6" fill={C.white} />
         </g>
-        <text x="30" y="138" fontSize="11" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
-        <text x="110" y="16" fontSize="11" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
-        <text x="190" y="138" fontSize="11" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
+        <text x="40" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
+        <text x="130" y="12" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
+        <text x="220" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
       </svg>
-      <div style={{ marginTop: -12, textAlign: "center" }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 36, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 24, opacity: 0.8 }}>%</span></div>
-        <div style={{ fontSize: 11, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 42, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 28, opacity: 0.8 }}>%</span></div>
+        <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
       </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 10, justifyContent: "center", flexWrap: "wrap" }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: "50%", background: C.red }}></span>Risco</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: "50%", background: C.green }}></span>Saudável</span>
+      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.red }}></span>Risco</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.green }}></span>Saudável</span>
       </div>
     </div>
   );
@@ -458,13 +458,13 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
         <GaugeChart value={receitaBrutaPeriodo} max={pontoEquilibrio} label="Faturamento vs Ponto de Equilíbrio" />
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Composição — {periodoLabel}</div>
-          <ResponsiveContainer width="100%" height={180}>
-            <PieChart><Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} innerRadius={35} paddingAngle={2}>{pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie><Tooltip formatter={(v: any) => fmtBRL(v)} /><Legend wrapperStyle={{ fontSize: 10 }} /></PieChart>
+          <ResponsiveContainer width="100%" height={240}>
+            <PieChart><Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} paddingAngle={2}>{pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie><Tooltip formatter={(v: any) => fmtBRL(v)} /><Legend wrapperStyle={{ fontSize: 10 }} /></PieChart>
           </ResponsiveContainer>
         </div>
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Faturamento Mensal</div>
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartData}><defs><linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={C.red} stopOpacity={0.3}/><stop offset="95%" stopColor={C.red} stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Area type="monotone" dataKey="Receita" stroke={C.red} strokeWidth={2} fill="url(#colorReceita)" /></AreaChart>
           </ResponsiveContainer>
         </div>
@@ -1087,13 +1087,14 @@ export default function Tech4ConDashboard() {
           padding: "8px 28px",
           display: "flex",
           alignItems: "center",
-          gap: 12,
+          gap: 8,
           boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
           borderBottom: `2px solid ${C.red}`,
           position: "sticky",
           top: 0,
           zIndex: 100,
-          height: 56
+          height: 56,
+          overflow: "auto"
         }}>
           {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
@@ -1102,9 +1103,9 @@ export default function Tech4ConDashboard() {
           </div>
           
           {/* Abas */}
-          <div style={{ display: "flex", gap: 2 }}>
+          <div style={{ display: "flex", gap: 1 }}>
             {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 3, padding: "4px 10px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: 0.3, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
+              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 3, padding: "3px 8px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 0.2, textTransform: "uppercase", transition: "all 0.15s", whiteSpace: "nowrap" }}>{t.label}</button>
             ))}
           </div>
 
