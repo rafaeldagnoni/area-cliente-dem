@@ -50,7 +50,7 @@ export default function SelectCompanyPage() {
 
       if (list.length === 1) {
         await setActiveCompany(user.id, list[0]);
-        router.replace(`/dashboard/${list[0].slug}`);
+        router.replace(`/selecionar-modulo/${list[0].slug}`);
         return;
       }
 
@@ -88,7 +88,7 @@ export default function SelectCompanyPage() {
     }
 
     await setActiveCompany(user.id, company);
-    router.replace(`/dashboard/${company.slug}`);
+    router.replace(`/selecionar-modulo/${company.slug}`);
   };
 
   const handleLogout = async () => {
