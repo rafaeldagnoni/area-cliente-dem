@@ -1025,7 +1025,7 @@ export default function Tech4ConDashboard() {
         {/* ─── HEADER PRINCIPAL ─── */}
         <div style={{ 
           background: C.white,
-          backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1200 200\"><defs><pattern id=\"buildings\" x=\"0\" y=\"0\" width=\"200\" height=\"200\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23E8E8E8\" stroke-width=\"1\" fill=\"none\"><rect x=\"10\" y=\"60\" width=\"30\" height=\"120\"/><line x1=\"10\" y1=\"70\" x2=\"40\" y2=\"70\"/><line x1=\"10\" y1=\"80\" x2=\"40\" y2=\"80\"/><line x1=\"10\" y1=\"90\" x2=\"40\" y2=\"90\"/><line x1=\"10\" y1=\"100\" x2=\"40\" y2=\"100\"/><line x1=\"10\" y1=\"110\" x2=\"40\" y2=\"110\"/><line x1=\"10\" y1=\"120\" x2=\"40\" y2=\"120\"/><rect x=\"50\" y=\"40\" width=\"35\" height=\"140\"/><line x1=\"50\" y1=\"50\" x2=\"85\" y2=\"50\"/><line x1=\"50\" y1=\"65\" x2=\"85\" y2=\"65\"/><line x1=\"50\" y1=\"80\" x2=\"85\" y2=\"80\"/><line x1=\"50\" y1=\"95\" x2=\"85\" y2=\"95\"/><line x1=\"50\" y1=\"110\" x2=\"85\" y2=\"110\"/><line x1=\"50\" y1=\"125\" x2=\"85\" y2=\"125\"/><rect x=\"95\" y=\"50\" width=\"30\" height=\"130\"/><line x1=\"95\" y1=\"60\" x2=\"125\" y2=\"60\"/><line x1=\"95\" y1=\"75\" x2=\"125\" y2=\"75\"/><line x1=\"95\" y1=\"90\" x2=\"125\" y2=\"90\"/><line x1=\"95\" y1=\"105\" x2=\"125\" y2=\"105\"/><line x1=\"95\" y1=\"120\" x2=\"125\" y2=\"120\"/><rect x=\"135\" y=\"70\" width=\"35\" height=\"110\"/><line x1=\"135\" y1=\"80\" x2=\"170\" y2=\"80\"/><line x1=\"135\" y1=\"95\" x2=\"170\" y2=\"95\"/><line x1=\"135\" y1=\"110\" x2=\"170\" y2=\"110\"/><line x1=\"135\" y1=\"125\" x2=\"170\" y2=\"125\"/></g></pattern></defs><rect width=\"1200\" height=\"200\" fill=\"white\"/><rect width=\"1200\" height=\"200\" fill=\"url(%23buildings)\" opacity=\"0.15\"/></svg>')",
+          backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1400 160\"><defs><pattern id=\"cityscape\" x=\"0\" y=\"0\" width=\"280\" height=\"160\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23D4D4D4\" stroke-width=\"0.8\" fill=\"none\" opacity=\"0.6\"><rect x=\"10\" y=\"80\" width=\"25\" height=\"70\"/><line x1=\"10\" y1=\"85\" x2=\"35\" y2=\"85\"/><line x1=\"10\" y1=\"90\" x2=\"35\" y2=\"90\"/><line x1=\"10\" y1=\"95\" x2=\"35\" y2=\"95\"/><line x1=\"10\" y1=\"100\" x2=\"35\" y2=\"100\"/><line x1=\"10\" y1=\"105\" x2=\"35\" y2=\"105\"/><line x1=\"10\" y1=\"110\" x2=\"35\" y2=\"110\"/><line x1=\"10\" y1=\"115\" x2=\"35\" y2=\"115\"/><line x1=\"10\" y1=\"120\" x2=\"35\" y2=\"120\"/><line x1=\"15\" y1=\"80\" x2=\"15\" y2=\"150\"/><line x1=\"25\" y1=\"80\" x2=\"25\" y2=\"150\"/><line x1=\"35\" y1=\"80\" x2=\"35\" y2=\"150\"/><rect x=\"45\" y=\"60\" width=\"30\" height=\"90\"/><line x1=\"45\" y1=\"70\" x2=\"75\" y2=\"70\"/><line x1=\"45\" y1=\"80\" x2=\"75\" y2=\"80\"/><line x1=\"45\" y1=\"90\" x2=\"75\" y2=\"90\"/><line x1=\"45\" y1=\"100\" x2=\"75\" y2=\"100\"/><line x1=\"45\" y1=\"110\" x2=\"75\" y2=\"110\"/><line x1=\"45\" y1=\"120\" x2=\"75\" y2=\"120\"/><line x1=\"52\" y1=\"60\" x2=\"52\" y2=\"150\"/><line x1=\"60\" y1=\"60\" x2=\"60\" y2=\"150\"/><line x1=\"68\" y1=\"60\" x2=\"68\" y2=\"150\"/><rect x=\"85\" y=\"70\" width=\"28\" height=\"80\"/><line x1=\"85\" y1=\"78\" x2=\"113\" y2=\"78\"/><line x1=\"85\" y1=\"86\" x2=\"113\" y2=\"86\"/><line x1=\"85\" y1=\"94\" x2=\"113\" y2=\"94\"/><line x1=\"85\" y1=\"102\" x2=\"113\" y2=\"102\"/><line x1=\"85\" y1=\"110\" x2=\"113\" y2=\"110\"/><line x1=\"85\" y1=\"118\" x2=\"113\" y2=\"118\"/><line x1=\"92\" y1=\"70\" x2=\"92\" y2=\"150\"/><line x1=\"99\" y1=\"70\" x2=\"99\" y2=\"150\"/><line x1=\"106\" y1=\"70\" x2=\"106\" y2=\"150\"/><rect x=\"125\" y=\"50\" width=\"32\" height=\"100\"/><line x1=\"125\" y1=\"60\" x2=\"157\" y2=\"60\"/><line x1=\"125\" y1=\"72\" x2=\"157\" y2=\"72\"/><line x1=\"125\" y1=\"84\" x2=\"157\" y2=\"84\"/><line x1=\"125\" y1=\"96\" x2=\"157\" y2=\"96\"/><line x1=\"125\" y1=\"108\" x2=\"157\" y2=\"108\"/><line x1=\"125\" y1=\"120\" x2=\"157\" y2=\"120\"/><line x1=\"132\" y1=\"50\" x2=\"132\" y2=\"150\"/><line x1=\"141\" y1=\"50\" x2=\"141\" y2=\"150\"/><line x1=\"150\" y1=\"50\" x2=\"150\" y2=\"150\"/><rect x=\"170\" y=\"75\" width=\"25\" height=\"75\"/><line x1=\"170\" y1=\"83\" x2=\"195\" y2=\"83\"/><line x1=\"170\" y1=\"91\" x2=\"195\" y2=\"91\"/><line x1=\"170\" y1=\"99\" x2=\"195\" y2=\"99\"/><line x1=\"170\" y1=\"107\" x2=\"195\" y2=\"107\"/><line x1=\"170\" y1=\"115\" x2=\"195\" y2=\"115\"/><line x1=\"170\" y1=\"123\" x2=\"195\" y2=\"123\"/><line x1=\"176\" y1=\"75\" x2=\"176\" y2=\"150\"/><line x1=\"182\" y1=\"75\" x2=\"182\" y2=\"150\"/><line x1=\"188\" y1=\"75\" x2=\"188\" y2=\"150\"/><rect x=\"205\" y=\"65\" width=\"29\" height=\"85\"/><line x1=\"205\" y1=\"75\" x2=\"234\" y2=\"75\"/><line x1=\"205\" y1=\"87\" x2=\"234\" y2=\"87\"/><line x1=\"205\" y1=\"99\" x2=\"234\" y2=\"99\"/><line x1=\"205\" y1=\"111\" x2=\"234\" y2=\"111\"/><line x1=\"205\" y1=\"123\" x2=\"234\" y2=\"123\"/><line x1=\"212\" y1=\"65\" x2=\"212\" y2=\"150\"/><line x1=\"219\" y1=\"65\" x2=\"219\" y2=\"150\"/><line x1=\"226\" y1=\"65\" x2=\"226\" y2=\"150\"/><line x1=\"233\" y1=\"65\" x2=\"233\" y2=\"150\"/></g></pattern></defs><rect width=\"1400\" height=\"160\" fill=\"white\"/><rect width=\"1400\" height=\"160\" fill=\"url(%23cityscape)\"/></svg>')",
           backgroundRepeat: "repeat-x",
           backgroundPosition: "center bottom",
           padding: "12px 28px",
@@ -1054,18 +1054,7 @@ export default function Tech4ConDashboard() {
           <MenuDropdown tab={tab} loading={loading} />
         </div>
 
-        {/* ─── BARRA DE CONTEXTO ─── */}
-        <div style={{ background: C.redLight, padding: "8px 28px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${C.border}` }}>
-          <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, fontWeight: 700 }}>CONTEXTO:</span>
-          <span style={{ color: C.dark, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>Ano {ano}</span>
-          <span style={{ color: C.gray300, fontSize: 11 }}>•</span>
-          <span style={{ color: C.dark, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600 }}>{filial}</span>
-          <span style={{ color: C.gray300, fontSize: 11 }}>•</span>
-          <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700 }}>{periodoLabel}</span>
-          <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }}>
-            {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
-          </span>
-        </div>
+        {/* ─── BARRA DE CONTEXTO ─── REMOVIDA - INFORMAÇÃO REDUNDANTE */}
 
         {/* ─── BARRA DE CONTROLES ─── */}
         <div style={{ background: C.white, padding: "12px 28px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", borderBottom: `1px solid ${C.border}` }}>
@@ -1154,9 +1143,14 @@ export default function Tech4ConDashboard() {
         </div>
       </div>
       
-      <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 28px", display: "flex", justifyContent: "space-between", background: C.white }}>
+      <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.white }}>
         <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>Tech4Con Produtos para Construção Civil LTDA · CNPJ 33.577.286/0001-21</span>
-        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>Fonte: Omie API via Google Sheets</span>
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>
+            {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
+          </span>
+          <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>Fonte: Omie API via Google Sheets</span>
+        </div>
       </div>
     </>
   );
