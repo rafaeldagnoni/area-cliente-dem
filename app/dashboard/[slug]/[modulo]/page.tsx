@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import supabase from "@/lib/supabaseClient";
 
 // ─── FONTES ───────────────────────────────────────────────────────────────────
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
@@ -12,6 +13,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X
 
 // ─── LOGO DO CLIENTE ──────────────────────────────────────────────────────────
 const LOGO_URL = "/logos/tech4con.png";
+const LOGO_DM_URL = "/logo-dm.png";
 
 // ─── PALETA TECH4CON ──────────────────────────────────────────────────────────
 const C = {
@@ -225,7 +227,7 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
       </div>
       <svg width="200" height="120" viewBox="0 0 200 120">
         <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke={C.gray100} strokeWidth="16" strokeLinecap="round" />
-        <path d="M 20 100 A 80 80 0 0 1 68 28" fill="none" stroke={C.red} strokeWidth="16" strokeLinecap="round" opacity="0.3" />
+        <path d="M 20 100 A 80 80 0 0 1 68 28" fill="none" stroke={C.red} strokeWidth="16" opacity="0.3" />
         <path d="M 68 28 A 80 80 0 0 1 100 20" fill="none" stroke={C.gold} strokeWidth="16" opacity="0.3" />
         <path d="M 100 20 A 80 80 0 0 1 180 100" fill="none" stroke={C.green} strokeWidth="16" strokeLinecap="round" opacity="0.3" />
         <g transform={`rotate(${angle}, 100, 100)`}>
@@ -639,6 +641,318 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   );
 }
 
+// ─── MENU DROPDOWN ────────────────────────────────────────────────────────────
+function MenuDropdown({ tab, loading }: any) {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [usuarioModalAberto, setUsuarioModalAberto] = useState(false);
+  const [usuario, setUsuario] = useState<any>(null);
+  const router = useRouter();
+
+  const tabs = [
+    { id: "overview", label: "Visão Geral" },
+    { id: "dre", label: "DRE" },
+    { id: "dfc", label: "DFC" },
+    { id: "despesas", label: "Despesas" },
+    { id: "receitas", label: "Receitas" },
+  ];
+
+  useEffect(() => {
+    const carregarUsuario = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUsuario({ 
+          email: user.email, 
+          name: user.user_metadata?.name || "Usuário" 
+        });
+      }
+    };
+    carregarUsuario();
+  }, []);
+
+  const handleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => console.error(err));
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+    setMenuAberto(false);
+  };
+
+  const handleGerarPDF = async () => {
+    try {
+      const { gerarPDF } = await import('@/lib/generatePDF');
+      const nomePagina = tabs.find(t => t.id === tab)?.label || 'Dashboard';
+      await gerarPDF(nomePagina);
+      setMenuAberto(false);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF');
+    }
+  };
+
+  const handleSair = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
+
+  const handleRedefinirSenha = async () => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(usuario?.email);
+      if (error) throw error;
+      alert('Email de redefinição enviado com sucesso!');
+      setUsuarioModalAberto(false);
+    } catch (error: any) {
+      alert('Erro: ' + error.message);
+    }
+  };
+
+  return (
+    <>
+      <div style={{ position: "relative" }}>
+        <button 
+          onClick={() => setMenuAberto(!menuAberto)} 
+          style={{ 
+            background: C.white, 
+            color: C.dark, 
+            border: "none", 
+            borderRadius: 4, 
+            padding: "6px 12px", 
+            cursor: "pointer", 
+            fontFamily: "'Barlow',sans-serif", 
+            fontWeight: 700, 
+            fontSize: 16,
+            transition: "all 0.15s"
+          }}
+        >
+          ⋯
+        </button>
+
+        {menuAberto && (
+          <div style={{ 
+            position: "absolute", 
+            top: 45, 
+            right: 0, 
+            background: C.white, 
+            border: `1px solid ${C.border}`, 
+            borderRadius: 8, 
+            minWidth: 220, 
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)", 
+            zIndex: 1000 
+          }}>
+            <button 
+              onClick={() => { router.push('/select-company'); setMenuAberto(false); }} 
+              style={{ 
+                width: "100%", 
+                textAlign: "left", 
+                padding: "12px 16px", 
+                border: "none", 
+                background: "none", 
+                cursor: "pointer", 
+                fontSize: 13, 
+                color: C.dark, 
+                borderBottom: `1px solid ${C.gray100}`,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
+            >
+              🏢 Selecionar Empresa
+            </button>
+
+            <button 
+              onClick={() => { window.history.back(); setMenuAberto(false); }} 
+              style={{ 
+                width: "100%", 
+                textAlign: "left", 
+                padding: "12px 16px", 
+                border: "none", 
+                background: "none", 
+                cursor: "pointer", 
+                fontSize: 13, 
+                color: C.dark, 
+                borderBottom: `1px solid ${C.gray100}`,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
+            >
+              📊 Selecionar Módulo
+            </button>
+
+            <button 
+              onClick={() => setUsuarioModalAberto(true)} 
+              style={{ 
+                width: "100%", 
+                textAlign: "left", 
+                padding: "12px 16px", 
+                border: "none", 
+                background: "none", 
+                cursor: "pointer", 
+                fontSize: 13, 
+                color: C.dark, 
+                borderBottom: `1px solid ${C.gray100}`,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
+            >
+              👤 Meu Usuário
+            </button>
+
+            <button 
+              onClick={handleFullscreen} 
+              style={{ 
+                width: "100%", 
+                textAlign: "left", 
+                padding: "12px 16px", 
+                border: "none", 
+                background: "none", 
+                cursor: "pointer", 
+                fontSize: 13, 
+                color: C.dark, 
+                borderBottom: `1px solid ${C.gray100}`,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
+            >
+              🖥️ Tela Cheia
+            </button>
+
+            <button 
+              onClick={handleGerarPDF} 
+              disabled={loading} 
+              style={{ 
+                width: "100%", 
+                textAlign: "left", 
+                padding: "12px 16px", 
+                border: "none", 
+                background: "none", 
+                cursor: loading ? "default" : "pointer", 
+                fontSize: 13, 
+                color: loading ? C.gray300 : C.dark, 
+                borderBottom: `1px solid ${C.gray100}`,
+                opacity: loading ? 0.5 : 1,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => { if (!loading) (e.currentTarget.style.background = C.gray50); }}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
+            >
+              🖨️ Gerar PDF
+            </button>
+
+            <button 
+              onClick={handleSair} 
+              style={{ 
+                width: "100%", 
+                textAlign: "left", 
+                padding: "12px 16px", 
+                border: "none", 
+                background: "none", 
+                cursor: "pointer", 
+                fontSize: 13, 
+                color: C.red,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.redLight)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
+            >
+              🚪 Sair
+            </button>
+          </div>
+        )}
+      </div>
+
+      {usuarioModalAberto && (
+        <div style={{ 
+          position: "fixed", 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: "rgba(0,0,0,0.5)", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          zIndex: 2000 
+        }}>
+          <div style={{ 
+            background: C.white, 
+            borderRadius: 12, 
+            padding: 32, 
+            maxWidth: 400, 
+            boxShadow: "0 8px 24px rgba(0,0,0,0.2)" 
+          }}>
+            <h2 style={{ fontFamily: "'Barlow',sans-serif", marginTop: 0 }}>Meu Usuário</h2>
+            
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 12, color: C.gray500, fontWeight: 600, textTransform: "uppercase" }}>Nome</label>
+              <p style={{ margin: "8px 0 0 0", fontSize: 14, color: C.dark }}>{usuario?.name}</p>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 12, color: C.gray500, fontWeight: 600, textTransform: "uppercase" }}>Email</label>
+              <p style={{ margin: "8px 0 0 0", fontSize: 14, color: C.dark }}>{usuario?.email}</p>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 12, color: C.gray500, fontWeight: 600, textTransform: "uppercase" }}>Módulos Disponíveis</label>
+              <p style={{ margin: "8px 0 0 0", fontSize: 13, color: C.dark }}>Financeiro, Comercial, Operações</p>
+            </div>
+
+            <button 
+              onClick={handleRedefinirSenha} 
+              style={{ 
+                width: "100%", 
+                padding: "10px 16px", 
+                background: C.red, 
+                color: C.white, 
+                border: "none", 
+                borderRadius: 6, 
+                cursor: "pointer", 
+                fontWeight: 600, 
+                marginBottom: 12,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "opacity 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.opacity = "0.9")}
+              onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              Redefinir Senha
+            </button>
+
+            <button 
+              onClick={() => setUsuarioModalAberto(false)} 
+              style={{ 
+                width: "100%", 
+                padding: "10px 16px", 
+                background: C.gray100, 
+                color: C.dark, 
+                border: "none", 
+                borderRadius: 6, 
+                cursor: "pointer", 
+                fontWeight: 600,
+                fontFamily: "'Barlow',sans-serif",
+                transition: "background 0.15s"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray300)}
+              onMouseOut={(e) => (e.currentTarget.style.background = C.gray100)}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
 export default function Tech4ConDashboard() {
   const [ano, setAno] = useState(2026);
@@ -693,61 +1007,70 @@ export default function Tech4ConDashboard() {
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        <div style={{ background: C.dark, padding: "28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <img src={LOGO_URL} alt="Tech4Con" style={{ height: 40 }} />
+        <div style={{ background: C.dark, padding: "20px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 32 }} />
+          
           <div style={{ display: "flex", gap: 2, flex: 1, marginLeft: 32 }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, border: "none", borderRadius: 4, padding: "6px 18px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer" }}>
-              {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-            <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer" }}>
-              {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f}>{f}</option>)}
-            </select>
-            <span style={{ color: C.gray300, fontSize: 12 }}>|</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>DE</span>
-              <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
-                {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
-              </select>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>ATÉ</span>
-              <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
-                {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
-              </select>
-            </div>
-            {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ background: modoAnual ? C.dark : C.white, color: modoAnual ? C.white : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 12px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>{modoAnual ? "▤ ANUAL" : "▤ MENSAL"}</button>}
-            <button onClick={fetchDados} disabled={loading} style={{ background: C.white, color: loading ? C.gray300 : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", cursor: loading ? "default" : "pointer", fontFamily: "'Barlow',sans-serif", fontSize: 12 }}>
-              {loading ? "..." : "↻"}
-            </button>
-          </div>
+
+          <MenuDropdown tab={tab} loading={loading} />
         </div>
+
         <div style={{ background: C.dark, padding: "6px 24px", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5 }}>{ano}</span>
+          <span style={{ color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5 }}>2026</span>
           <span style={{ color: C.gray500, fontSize: 11 }}>›</span>
-          <span style={{ color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5 }}>{filial.toUpperCase()}</span>
+          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: "none", background: "transparent", color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, cursor: "pointer" }}>
+            {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
           <span style={{ color: C.gray500, fontSize: 11 }}>›</span>
           <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.5 }}>{periodoLabel}</span>
           <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }}>
             {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
           </span>
         </div>
-        <div style={{ padding: "24px 24px", maxWidth: 1400, margin: "0 auto" }}>
+
+        <div style={{ padding: "24px 28px", display: "flex", alignItems: "center", gap: 8, background: C.dark }}>
+          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer" }}>
+            {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>DE</span>
+            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
+              {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
+            </select>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>ATÉ</span>
+            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
+              {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
+            </select>
+          </div>
+
+          {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ background: modoAnual ? C.dark : C.white, color: modoAnual ? C.white : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 12px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>{modoAnual ? "▤ ANUAL" : "▤ MENSAL"}</button>}
+          
+          <button onClick={fetchDados} disabled={loading} style={{ background: C.white, color: loading ? C.gray300 : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", cursor: loading ? "default" : "pointer", fontFamily: "'Barlow',sans-serif", fontSize: 12 }}>
+            {loading ? "..." : "↻"}
+          </button>
+        </div>
+
+        <div style={{ padding: "24px 28px", maxWidth: 1400, margin: "0 auto" }}>
           {error && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message={error} onRetry={fetchDados} />}
           {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner />}
           {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" />}
           {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} />}
-          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — ${ano} — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
-          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — ${ano} — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
+          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
+          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
           {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} />}
           {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} />}
         </div>
       </div>
-      <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 24px", display: "flex", justifyContent: "space-between", background: C.white }}>
+      
+      <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 28px", display: "flex", justifyContent: "space-between", background: C.white }}>
         <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>Tech4Con Produtos para Construção Civil LTDA · CNPJ 33.577.286/0001-21</span>
         <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>Fonte: Omie API via Google Sheets</span>
       </div>
