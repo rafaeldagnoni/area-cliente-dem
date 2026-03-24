@@ -680,9 +680,24 @@ function MenuDropdown({ tab, loading }: any) {
 
   const handleGerarPDF = async () => {
     try {
-      const { gerarPDF } = await import('@/lib/generatePDF');
+      const html2pdf = (await import('html2pdf.js')).default;
+      const elemento = document.querySelector('[style*="padding: 24px"]');
+      
+      if (!elemento) {
+        alert('Erro: Conteúdo não encontrado na página');
+        return;
+      }
+
       const nomePagina = tabs.find(t => t.id === tab)?.label || 'Dashboard';
-      await gerarPDF(nomePagina);
+      const opcoes = {
+        margin: 10,
+        filename: `Tech4Con_${nomePagina}_${new Date().toLocaleDateString('pt-BR')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+      };
+
+      html2pdf().set(opcoes).from(elemento).save();
       setMenuAberto(false);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
@@ -1007,53 +1022,57 @@ export default function Tech4ConDashboard() {
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        <div style={{ background: C.dark, padding: "20px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 32 }} />
+        <div style={{ background: C.dark, padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 40 }} />
+            <div style={{ width: 1, height: 40, background: C.gray500, opacity: 0.3 }}></div>
+            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 36 }} />
+          </div>
           
-          <div style={{ display: "flex", gap: 2, flex: 1, marginLeft: 32 }}>
+          <div style={{ display: "flex", gap: 2, flex: 1, marginLeft: 24 }}>
             {tabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, border: "none", borderRadius: 4, padding: "6px 18px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
+              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.white : "transparent", color: tab === t.id ? C.red : C.white, border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase", transition: "all 0.15s" }}>{t.label}</button>
             ))}
           </div>
 
           <MenuDropdown tab={tab} loading={loading} />
         </div>
 
-        <div style={{ background: C.dark, padding: "6px 24px", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5 }}>2026</span>
-          <span style={{ color: C.gray500, fontSize: 11 }}>›</span>
-          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: "none", background: "transparent", color: C.gray300, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, cursor: "pointer" }}>
+        <div style={{ background: C.dark, padding: "8px 24px", display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, fontWeight: 600 }}{ano}</span>
+          <span style={{ color: C.gray500, fontSize: 12 }}>›</span>
+          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: "none", background: "transparent", color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, cursor: "pointer", fontWeight: 600 }}>
             {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
           </select>
-          <span style={{ color: C.gray500, fontSize: 11 }}>›</span>
-          <span style={{ color: C.red, fontSize: 11, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.5 }}>{periodoLabel}</span>
-          <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }}>
+          <span style={{ color: C.gray500, fontSize: 12 }}>›</span>
+          <span style={{ color: C.red, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.5 }}>{periodoLabel}</span>
+          <span style={{ marginLeft: "auto", color: C.gray500, fontSize: 11, fontFamily: "'JetBrains Mono',monospace" }}>
             {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
           </span>
         </div>
 
-        <div style={{ padding: "24px 28px", display: "flex", alignItems: "center", gap: 8, background: C.dark }}>
-          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer" }}>
+        <div style={{ padding: "16px 28px", display: "flex", alignItems: "center", gap: 12, background: C.dark, flexWrap: "wrap" }}>
+          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600 }}>
             {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
           
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>DE</span>
-            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>DE</span>
+            <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600 }}>
               {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
             </select>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontSize: 10, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1 }}>ATÉ</span>
-            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 12, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 1, fontWeight: 600 }}>ATÉ</span>
+            <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 10px", fontFamily: "'Barlow',sans-serif", fontSize: 13, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600 }}>
               {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
             </select>
           </div>
 
-          {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ background: modoAnual ? C.dark : C.white, color: modoAnual ? C.white : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 12px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>{modoAnual ? "▤ ANUAL" : "▤ MENSAL"}</button>}
+          {(tab === "dre" || tab === "dfc") && <button onClick={() => setModoAnual(!modoAnual)} style={{ background: modoAnual ? C.dark : C.white, color: modoAnual ? C.white : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 14px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: 1 }}>{modoAnual ? "▤ ANUAL" : "▤ MENSAL"}</button>}
           
-          <button onClick={fetchDados} disabled={loading} style={{ background: C.white, color: loading ? C.gray300 : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "5px 10px", cursor: loading ? "default" : "pointer", fontFamily: "'Barlow',sans-serif", fontSize: 12 }}>
+          <button onClick={fetchDados} disabled={loading} style={{ background: C.white, color: loading ? C.gray300 : C.gray500, border: `1px solid ${C.border}`, borderRadius: 4, padding: "8px 12px", cursor: loading ? "default" : "pointer", fontFamily: "'Barlow',sans-serif", fontSize: 13, fontWeight: 600 }}>
             {loading ? "..." : "↻"}
           </button>
         </div>
