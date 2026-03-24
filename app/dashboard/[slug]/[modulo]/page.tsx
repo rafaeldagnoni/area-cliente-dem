@@ -1039,7 +1039,7 @@ export default function Tech4ConDashboard() {
         </div>
 
         <div style={{ background: C.dark, padding: "8px 24px", display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, fontWeight: 600 }}{ano}</span>
+          <span style={{ color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, fontWeight: 600 }}>{ano}</span>
           <span style={{ color: C.gray500, fontSize: 12 }}>›</span>
           <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: "none", background: "transparent", color: C.gray300, fontSize: 12, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.5, cursor: "pointer", fontWeight: 600 }}>
             {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
