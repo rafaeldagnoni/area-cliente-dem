@@ -1110,8 +1110,7 @@ export default function Tech4ConDashboard() {
           position: "sticky",
           top: 0,
           zIndex: 100,
-          height: 56,
-          overflow: "auto"
+          height: 56
         }}>
           {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
