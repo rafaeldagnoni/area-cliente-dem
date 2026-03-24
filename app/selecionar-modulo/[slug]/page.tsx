@@ -82,12 +82,55 @@ export default function SelecionarModuloPage() {
   };
 
   const handleVoltarParaEmpresas = () => {
-    router.push("/selecionar-empresa");
+    router.push("/select-company");
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace("/");
+  };
+
+  const getIconeModulo = (slug: string) => {
+    switch (slug) {
+      case "financeiro":
+        return (
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6h1.5zm0 0h3V9h-3z" />
+            <path d="M7 12h10M12 7v10" stroke="currentColor" strokeWidth="2" />
+          </svg>
+        );
+      case "comercial":
+        return (
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+            <polyline points="13 2 13 9 20 9" />
+            <path d="M9 14h2m-2 4h2m4-4h2m-2 4h2M3 14l3 3-3 3" />
+          </svg>
+        );
+      case "operacoes":
+        return (
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="1" />
+            <path d="M12 3v2m0 12v2M4.22 4.22l1.41 1.41m8.34 8.34l1.41 1.41M3 12h2m12 0h2M4.22 19.78l1.41-1.41m8.34-8.34l1.41-1.41" />
+            <path d="M9 5h6v14H9z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getCorModulo = (slug: string) => {
+    switch (slug) {
+      case "financeiro":
+        return "#2563eb"; // Azul
+      case "comercial":
+        return "#10b981"; // Verde
+      case "operacoes":
+        return "#f59e0b"; // Âmbar
+      default:
+        return "#6b7280";
+    }
   };
 
   if (loading) {
@@ -230,30 +273,68 @@ export default function SelecionarModuloPage() {
             </div>
           ) : (
             <div className="company-grid">
-              {modulos.map((modulo, index) => (
-                <div
-                  key={modulo.id}
-                  className="company-card fade-in-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => handleSelect(modulo)}
-                >
-                  <div className="company-card-name">{modulo.nome}</div>
-                  <div className="company-card-slug">/módulo/{modulo.slug}</div>
-
-                  <div className="company-card-arrow">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
+              {modulos.map((modulo, index) => {
+                const cor = getCorModulo(modulo.slug);
+                return (
+                  <div
+                    key={modulo.id}
+                    className="company-card fade-in-up"
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      textAlign: "center",
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                    onClick={() => handleSelect(modulo)}
+                  >
+                    {/* Fundo colorido no topo do card */}
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100px",
+                        background: `linear-gradient(135deg, ${cor}20, ${cor}10)`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "1rem",
+                        borderRadius: "8px 8px 0 0",
+                      }}
                     >
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
+                      <div
+                        style={{
+                          color: cor,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {getIconeModulo(modulo.slug)}
+                      </div>
+                    </div>
+
+                    {/* Texto do módulo */}
+                    <div className="company-card-name">{modulo.nome}</div>
+                    <div className="company-card-slug">/módulo/{modulo.slug}</div>
+
+                    {/* Seta */}
+                    <div className="company-card-arrow">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
