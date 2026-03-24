@@ -220,33 +220,85 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
   const displayPct = ((value / max) * 100);
   
   return (
-    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 340 }}>
-      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.5 }}>
-        <span style={{ width: 3, height: 14, background: C.red, borderRadius: 2 }}></span>
+    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 420, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 13, color: C.dark, textTransform: "uppercase", marginBottom: 24, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.8 }}>
+        <span style={{ width: 4, height: 16, background: C.red, borderRadius: 2 }}></span>
         {label}
       </div>
-      <svg width="260" height="160" viewBox="0 0 260 160" style={{ marginBottom: 8 }}>
-        <path d="M 40 140 A 110 110 0 0 1 220 140" fill="none" stroke={C.gray100} strokeWidth="18" strokeLinecap="round" />
-        <path d="M 40 140 A 110 110 0 0 1 88 20" fill="none" stroke={C.red} strokeWidth="18" opacity="0.3" />
-        <path d="M 88 20 A 110 110 0 0 1 130 8" fill="none" stroke={C.gold} strokeWidth="18" opacity="0.3" />
-        <path d="M 130 8 A 110 110 0 0 1 220 140" fill="none" stroke={C.green} strokeWidth="18" strokeLinecap="round" opacity="0.3" />
-        <g transform={`rotate(${angle}, 130, 140)`}>
-          <line x1="130" y1="140" x2="130" y2="35" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
-          <circle cx="130" cy="140" r="11" fill={currentColor} />
-          <circle cx="130" cy="140" r="6" fill={C.white} />
+      
+      <svg width="280" height="180" viewBox="0 0 280 180" style={{ marginBottom: 4 }}>
+        {/* Background track */}
+        <defs>
+          <linearGradient id="riskGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={C.red} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={C.red} stopOpacity="0.1" />
+          </linearGradient>
+          <linearGradient id="cautionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={C.gold} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={C.gold} stopOpacity="0.1" />
+          </linearGradient>
+          <linearGradient id="healthGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={C.green} stopOpacity="0.1" />
+            <stop offset="100%" stopColor={C.green} stopOpacity="0.25" />
+          </linearGradient>
+        </defs>
+        
+        {/* Background track light */}
+        <path d="M 45 165 A 120 120 0 0 1 235 165" fill="none" stroke={C.gray100} strokeWidth="20" strokeLinecap="round" />
+        
+        {/* Risk zone (0-80%) */}
+        <path d="M 45 165 A 120 120 0 0 1 109 21" fill="none" stroke="url(#riskGradient)" strokeWidth="20" strokeLinecap="round" />
+        
+        {/* Caution zone (80-100%) */}
+        <path d="M 109 21 A 120 120 0 0 1 140 12" fill="none" stroke="url(#cautionGradient)" strokeWidth="20" strokeLinecap="round" />
+        
+        {/* Health zone (100-150%) */}
+        <path d="M 140 12 A 120 120 0 0 1 235 165" fill="none" stroke="url(#healthGradient)" strokeWidth="20" strokeLinecap="round" />
+        
+        {/* Markers */}
+        <text x="45" y="180" fontSize="13" fontWeight="700" fill={C.gray500} textAnchor="middle">0%</text>
+        <text x="140" y="8" fontSize="13" fontWeight="700" fill={C.gray500} textAnchor="middle">100%</text>
+        <text x="235" y="180" fontSize="13" fontWeight="700" fill={C.gray500} textAnchor="middle">150%</text>
+        
+        {/* Needle group with shadow */}
+        <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.1))">
+          <g transform={`rotate(${angle}, 140, 165)`}>
+            {/* Needle */}
+            <line x1="140" y1="165" x2="140" y2="45" stroke={currentColor} strokeWidth="7" strokeLinecap="round" opacity="0.9" />
+            {/* Center circle - outer */}
+            <circle cx="140" cy="165" r="13" fill={currentColor} opacity="0.2" />
+            {/* Center circle - middle */}
+            <circle cx="140" cy="165" r="10" fill={currentColor} />
+            {/* Center circle - inner highlight */}
+            <circle cx="140" cy="165" r="7" fill={C.white} />
+          </g>
         </g>
-        <text x="40" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
-        <text x="130" y="12" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
-        <text x="220" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
       </svg>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 42, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 28, opacity: 0.8 }}>%</span></div>
-        <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
+      
+      {/* Value display */}
+      <div style={{ textAlign: "center", marginTop: 8 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 56, fontWeight: 900, color: currentColor, letterSpacing: -1.5, lineHeight: 1 }}>
+          {displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 32, fontWeight: 700, opacity: 0.9, marginLeft: 2 }}>%</span>
+        </div>
+        <div style={{ fontSize: 13, color: C.gray700, marginTop: 8, fontWeight: 500, fontFamily: "'Barlow',sans-serif", letterSpacing: 0.2 }}>
+          {fmtK(value)} de {fmtK(max)}
+        </div>
       </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap" }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.red }}></span>Risco</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.green }}></span>Saudável</span>
+      
+      {/* Legend */}
+      <div style={{ display: "flex", gap: 20, marginTop: 20, fontSize: 12, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 16, width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 14, height: 14, borderRadius: "50%", background: C.red, boxShadow: `0 2px 4px ${C.red}20` }}></div>
+          <span style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, color: C.dark }}>Risco &lt; 80%</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 14, height: 14, borderRadius: "50%", background: C.gold, boxShadow: `0 2px 4px ${C.gold}20` }}></div>
+          <span style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, color: C.dark }}>Atenção 80–100%</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 14, height: 14, borderRadius: "50%", background: C.green, boxShadow: `0 2px 4px ${C.green}20` }}></div>
+          <span style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600, color: C.dark }}>Saudável &gt; 100%</span>
+        </div>
       </div>
     </div>
   );
