@@ -226,21 +226,18 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
         {label}
       </div>
       <svg width="260" height="160" viewBox="0 0 260 160" style={{ marginBottom: 8 }}>
-        <path d="M 40 140 A 110 110 0 0 1 220 140" fill="none" stroke={C.gray100} strokeWidth="18" strokeLinecap="round" />
-        <path d="M 40 140 A 110 110 0 0 1 88 20" fill="none" stroke={C.red} strokeWidth="18" opacity="0.3" />
-        <path d="M 88 20 A 110 110 0 0 1 130 8" fill="none" stroke={C.gold} strokeWidth="18" opacity="0.3" />
-        <path d="M 130 8 A 110 110 0 0 1 220 140" fill="none" stroke={C.green} strokeWidth="18" strokeLinecap="round" opacity="0.3" />
+        <path d="M 50 135 A 100 100 0 0 1 210 135" fill="none" stroke={C.gray100} strokeWidth="18" strokeLinecap="round" />
         <g transform={`rotate(${angle}, 130, 140)`}>
-          <line x1="130" y1="140" x2="130" y2="35" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
+          <line x1="130" y1="140" x2="130" y2="40" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
           <circle cx="130" cy="140" r="11" fill={currentColor} />
           <circle cx="130" cy="140" r="6" fill={C.white} />
         </g>
-        <text x="40" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
-        <text x="130" y="12" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
-        <text x="220" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
+        <text x="50" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
+        <text x="130" y="18" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
+        <text x="210" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
       </svg>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 42, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 28, opacity: 0.8 }}>%</span></div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 36, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 24, opacity: 0.8 }}>%</span></div>
         <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
       </div>
       <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 12, width: "100%" }}>
