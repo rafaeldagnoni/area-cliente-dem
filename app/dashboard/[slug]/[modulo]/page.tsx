@@ -52,33 +52,37 @@ const C_TECH4CON = {
 
 // ─── PALETA LONDON COSMÉTICOS ────────────────────────────────────────────────
 const C_LONDON = {
-  red:        "#D4AF37",
-  redDark:    "#9B7F1F",
-  redLight:   "#F5F0E6",
-  redMid:     "#E8DCC8",
-  black:      "#0A0A0A",
-  dark:       "#1C1C1C",
-  gray900:    "#3A3A3A",
-  gray700:    "#555555",
+  red:        "#4A4A4A",
+  redDark:    "#333333",
+  redLight:   "#F5F5F5",
+  redMid:     "#E8E8E8",
+  black:      "#1A1A1A",
+  dark:       "#2A2A2A",
+  gray900:    "#3F3F3F",
+  gray700:    "#666666",
   gray500:    "#888888",
   gray300:    "#CCCCCC",
   gray100:    "#F5F5F5",
   gray50:     "#FAFAFA",
   white:      "#FFFFFF",
-  blue:       "#40916C",
-  blueDark:   "#2D6A4F",
-  blueLight:  "#D8F3DC",
-  green:      "#40916C",
-  greenLight: "#D8F3DC",
-  gold:       "#D4AF37",
-  goldLight:  "#F9F4E6",
-  orange:     "#8B7355",
-  orangeLight:"#F0ECEA",
+  blue:       "#5B7C99",
+  blueDark:   "#3D5271",
+  blueLight:  "#E8EEF5",
+  green:      "#5B7C99",
+  greenLight: "#E8EEF5",
+  gold:       "#D4D4D4",
+  goldLight:  "#F8F8F8",
+  orange:     "#808080",
+  orangeLight:"#F0F0F0",
   border:     "#D8D8D8",
-  borderDark: "#C4C4C4",
+  borderDark: "#CCCCCC",
 };
 
-const C = C_TECH4CON;
+// ─── PALETA DINÂMICA POR CLIENTE ──────────────────────────────────────────────
+function getPaletBySlug(slug: any): typeof C_TECH4CON {
+  if (slug === "london") return C_LONDON;
+  return C_TECH4CON;
+}
 
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
@@ -1084,7 +1088,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   
   // ─── VARIÁVEIS DINÂMICAS POR CLIENTE ──────────────────────────────────────
   const cfg = getConfig(slug);
-  const C = slug === "london" ? C_LONDON : C_TECH4CON;
+  const C = getPaletBySlug(slug);
   const API_URL_DYNAMIC = cfg.apiUrl;
   const LOGO_URL_DYNAMIC = cfg.logoUrl;
   const filiais_dynamic = cfg.filiais;
@@ -1144,9 +1148,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
         {/* ─── HEADER ÚNICO E COMPACTO ─── */}
         <div style={{ 
           background: C.white,
-          backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1400 160\"><defs><pattern id=\"cityscape\" x=\"0\" y=\"0\" width=\"280\" height=\"160\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23D4D4D4\" stroke-width=\"0.8\" fill=\"none\" opacity=\"0.6\"><rect x=\"10\" y=\"80\" width=\"25\" height=\"70\"/><line x1=\"10\" y1=\"85\" x2=\"35\" y2=\"85\"/><line x1=\"10\" y1=\"90\" x2=\"35\" y2=\"90\"/><line x1=\"10\" y1=\"95\" x2=\"35\" y2=\"95\"/><line x1=\"10\" y1=\"100\" x2=\"35\" y2=\"100\"/><line x1=\"10\" y1=\"105\" x2=\"35\" y2=\"105\"/><line x1=\"10\" y1=\"110\" x2=\"35\" y2=\"110\"/><line x1=\"10\" y1=\"115\" x2=\"35\" y2=\"115\"/><line x1=\"10\" y1=\"120\" x2=\"35\" y2=\"120\"/><line x1=\"15\" y1=\"80\" x2=\"15\" y2=\"150\"/><line x1=\"25\" y1=\"80\" x2=\"25\" y2=\"150\"/><line x1=\"35\" y1=\"80\" x2=\"35\" y2=\"150\"/><rect x=\"45\" y=\"60\" width=\"30\" height=\"90\"/><line x1=\"45\" y1=\"70\" x2=\"75\" y2=\"70\"/><line x1=\"45\" y1=\"80\" x2=\"75\" y2=\"80\"/><line x1=\"45\" y1=\"90\" x2=\"75\" y2=\"90\"/><line x1=\"45\" y1=\"100\" x2=\"75\" y2=\"100\"/><line x1=\"45\" y1=\"110\" x2=\"75\" y2=\"110\"/><line x1=\"45\" y1=\"120\" x2=\"75\" y2=\"120\"/><line x1=\"52\" y1=\"60\" x2=\"52\" y2=\"150\"/><line x1=\"60\" y1=\"60\" x2=\"60\" y2=\"150\"/><line x1=\"68\" y1=\"60\" x2=\"68\" y2=\"150\"/><rect x=\"85\" y=\"70\" width=\"28\" height=\"80\"/><line x1=\"85\" y1=\"78\" x2=\"113\" y2=\"78\"/><line x1=\"85\" y1=\"86\" x2=\"113\" y2=\"86\"/><line x1=\"85\" y1=\"94\" x2=\"113\" y2=\"94\"/><line x1=\"85\" y1=\"102\" x2=\"113\" y2=\"102\"/><line x1=\"85\" y1=\"110\" x2=\"113\" y2=\"110\"/><line x1=\"85\" y1=\"118\" x2=\"113\" y2=\"118\"/><line x1=\"92\" y1=\"70\" x2=\"92\" y2=\"150\"/><line x1=\"99\" y1=\"70\" x2=\"99\" y2=\"150\"/><line x1=\"106\" y1=\"70\" x2=\"106\" y2=\"150\"/><rect x=\"125\" y=\"50\" width=\"32\" height=\"100\"/><line x1=\"125\" y1=\"60\" x2=\"157\" y2=\"60\"/><line x1=\"125\" y1=\"72\" x2=\"157\" y2=\"72\"/><line x1=\"125\" y1=\"84\" x2=\"157\" y2=\"84\"/><line x1=\"125\" y1=\"96\" x2=\"157\" y2=\"96\"/><line x1=\"125\" y1=\"108\" x2=\"157\" y2=\"108\"/><line x1=\"125\" y1=\"120\" x2=\"157\" y2=\"120\"/><line x1=\"132\" y1=\"50\" x2=\"132\" y2=\"150\"/><line x1=\"141\" y1=\"50\" x2=\"141\" y2=\"150\"/><line x1=\"150\" y1=\"50\" x2=\"150\" y2=\"150\"/><rect x=\"170\" y=\"75\" width=\"25\" height=\"75\"/><line x1=\"170\" y1=\"83\" x2=\"195\" y2=\"83\"/><line x1=\"170\" y1=\"91\" x2=\"195\" y2=\"91\"/><line x1=\"170\" y1=\"99\" x2=\"195\" y2=\"99\"/><line x1=\"170\" y1=\"107\" x2=\"195\" y2=\"107\"/><line x1=\"170\" y1=\"115\" x2=\"195\" y2=\"115\"/><line x1=\"170\" y1=\"123\" x2=\"195\" y2=\"123\"/><line x1=\"176\" y1=\"75\" x2=\"176\" y2=\"150\"/><line x1=\"182\" y1=\"75\" x2=\"182\" y2=\"150\"/><line x1=\"188\" y1=\"75\" x2=\"188\" y2=\"150\"/><rect x=\"205\" y=\"65\" width=\"29\" height=\"85\"/><line x1=\"205\" y1=\"75\" x2=\"234\" y2=\"75\"/><line x1=\"205\" y1=\"87\" x2=\"234\" y2=\"87\"/><line x1=\"205\" y1=\"99\" x2=\"234\" y2=\"99\"/><line x1=\"205\" y1=\"111\" x2=\"234\" y2=\"111\"/><line x1=\"205\" y1=\"123\" x2=\"234\" y2=\"123\"/><line x1=\"212\" y1=\"65\" x2=\"212\" y2=\"150\"/><line x1=\"219\" y1=\"65\" x2=\"219\" y2=\"150\"/><line x1=\"226\" y1=\"65\" x2=\"226\" y2=\"150\"/><line x1=\"233\" y1=\"65\" x2=\"233\" y2=\"150\"/></g></pattern></defs><rect width=\"1400\" height=\"160\" fill=\"white\"/><rect width=\"1400\" height=\"160\" fill=\"url(%23cityscape)\"/></svg>')",
-          backgroundRepeat: "repeat-x",
-          backgroundPosition: "center bottom",
           padding: "8px 28px",
           display: "flex",
           alignItems: "center",
