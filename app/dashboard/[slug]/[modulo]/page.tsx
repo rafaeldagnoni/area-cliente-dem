@@ -16,7 +16,7 @@ const LOGO_URL = "/logos/tech4con.png";
 const LOGO_DM_URL = "/logo-dm.png";
 
 // ─── PALETA TECH4CON ──────────────────────────────────────────────────────────
-const C = {
+const C_TECH4CON = {
   red:        "#C8102E",
   redDark:    "#9E0B22",
   redLight:   "#FDEAEA",
@@ -42,6 +42,38 @@ const C = {
   border:     "#E2E2E2",
   borderDark: "#CCCCCC",
 };
+
+// ─── PALETA LONDON COSMÉTICOS ──────────────────────────────────────────────────
+const C_LONDON = {
+  red:        "#4A4A4A",
+  redDark:    "#333333",
+  redLight:   "#F5F5F5",
+  redMid:     "#E8E8E8",
+  black:      "#1A1A1A",
+  dark:       "#2A2A2A",
+  gray900:    "#3F3F3F",
+  gray700:    "#666666",
+  gray500:    "#888888",
+  gray300:    "#CCCCCC",
+  gray100:    "#F5F5F5",
+  gray50:     "#FAFAFA",
+  white:      "#FFFFFF",
+  blue:       "#5B7C99",
+  blueDark:   "#3D5271",
+  blueLight:  "#E8EEF5",
+  green:      "#5B7C99",
+  greenLight: "#E8EEF5",
+  gold:       "#D4D4D4",
+  goldLight:  "#F8F8F8",
+  orange:     "#808080",
+  orangeLight:"#F0F0F0",
+  border:     "#D8D8D8",
+  borderDark: "#CCCCCC",
+};
+
+function getPaletBySlug(slug: string) {
+  return slug === "london" ? C_LONDON : C_TECH4CON;
+}
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
 const fmtBRL = (v: number | null | undefined): string => {
@@ -178,7 +210,7 @@ const RECEITAS_KEYS = [
 function LoadingSpinner() {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 60 }}>
-      <div style={{ width: 32, height: 32, border: `3px solid ${C.gray100}`, borderTopColor: C.red, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      <div style={{ width: 32, height: 32, border: `3px solid #E0E0E0`, borderTopColor: "#C8102E", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -186,9 +218,9 @@ function LoadingSpinner() {
 
 function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div style={{ background: C.redLight, border: `1px solid ${C.red}`, borderRadius: 8, padding: 16, color: C.red, fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div style={{ background: "#FDEAEA", border: "1px solid #C8102E", borderRadius: 8, padding: 16, color: "#C8102E", fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <div><strong>Erro:</strong> {message}</div>
-      {onRetry && <button onClick={onRetry} style={{ padding: "4px 12px", background: C.red, color: C.white, border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Tentar novamente</button>}
+      {onRetry && <button onClick={onRetry} style={{ padding: "4px 12px", background: "#C8102E", color: "#FFFFFF", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Tentar novamente</button>}
     </div>
   );
 }
@@ -198,15 +230,15 @@ function KPICard({ label, valor, percentual, cor, small = false, showDiff = fals
   label: string; valor: number; percentual?: number; cor?: string; small?: boolean; showDiff?: boolean; subLabel?: string;
 }) {
   return (
-    <div style={{ background: cor ? `${cor}11` : C.white, border: `1px solid ${cor || C.border}`, borderRadius: 8, padding: small ? "12px 16px" : "16px 20px", minWidth: small ? 140 : 160, flex: 1 }}>
-      <div style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, fontSize: 10, letterSpacing: 0.5, color: cor || C.gray500, textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
-      <div style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 700, fontSize: small ? 18 : 22, color: C.dark }}>{fmtBRL(valor)}</div>
+    <div style={{ background: cor ? `${cor}11` : "#FFFFFF", border: `1px solid ${cor || "#E2E2E2"}`, borderRadius: 8, padding: small ? "12px 16px" : "16px 20px", minWidth: small ? 140 : 160, flex: 1 }}>
+      <div style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, fontSize: 10, letterSpacing: 0.5, color: cor || "#777777", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 700, fontSize: small ? 18 : 22, color: "#1A1A1A" }}>{fmtBRL(valor)}</div>
       {percentual !== undefined && (
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: showDiff ? (percentual >= 0 ? C.green : C.red) : C.gray500, marginTop: 4 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: showDiff ? (percentual >= 0 ? "#1A6B3C" : "#C8102E") : "#777777", marginTop: 4 }}>
           {showDiff && percentual > 0 ? "+" : ""}{percentual.toFixed(2).replace(".",",")}%
         </div>
       )}
-      {subLabel && <div style={{ fontFamily: "'Barlow',sans-serif", fontSize: 10, color: C.gray500, marginTop: 4 }}>{subLabel}</div>}
+      {subLabel && <div style={{ fontFamily: "'Barlow',sans-serif", fontSize: 10, color: "#777777", marginTop: 4 }}>{subLabel}</div>}
     </div>
   );
 }
@@ -215,37 +247,37 @@ function KPICard({ label, valor, percentual, cor, small = false, showDiff = fals
 function GaugeChart({ value, max, label }: { value: number; max: number; label: string }) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 150);
   const angle = (percentage / 150) * 180 - 90;
-  const getColor = (pct: number) => pct < 80 ? C.red : pct < 100 ? C.gold : C.green;
+  const getColor = (pct: number) => pct < 80 ? "#C8102E" : pct < 100 ? "#8B5E0A" : "#1A6B3C";
   const currentColor = getColor(percentage);
   const displayPct = ((value / max) * 100);
   
   return (
-    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 340 }}>
-      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.5 }}>
-        <span style={{ width: 3, height: 14, background: C.red, borderRadius: 2 }}></span>
+    <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 340 }}>
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: "#1A1A1A", textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.5 }}>
+        <span style={{ width: 3, height: 14, background: "#C8102E", borderRadius: 2 }}></span>
         {label}
       </div>
       <svg width="260" height="160" viewBox="0 0 260 160" style={{ marginBottom: 8 }}>
-        <path d="M 50 135 A 80 80 0 0 1 90 65" fill="none" stroke={C.red} strokeWidth="18" opacity="0.25" strokeLinecap="round" />
-        <path d="M 90 65 A 80 80 0 0 1 170 65" fill="none" stroke={C.gold} strokeWidth="18" opacity="0.25" strokeLinecap="round" />
-        <path d="M 170 65 A 80 80 0 0 1 210 135" fill="none" stroke={C.green} strokeWidth="18" opacity="0.25" strokeLinecap="round" />
+        <path d="M 50 135 A 80 80 0 0 1 90 65" fill="none" stroke="#C8102E" strokeWidth="18" opacity="0.25" strokeLinecap="round" />
+        <path d="M 90 65 A 80 80 0 0 1 170 65" fill="none" stroke="#8B5E0A" strokeWidth="18" opacity="0.25" strokeLinecap="round" />
+        <path d="M 170 65 A 80 80 0 0 1 210 135" fill="none" stroke="#1A6B3C" strokeWidth="18" opacity="0.25" strokeLinecap="round" />
         <g transform={`rotate(${angle}, 130, 140)`}>
           <line x1="130" y1="140" x2="130" y2="40" stroke={currentColor} strokeWidth="6" strokeLinecap="round" />
           <circle cx="130" cy="140" r="11" fill={currentColor} />
-          <circle cx="130" cy="140" r="6" fill={C.white} />
+          <circle cx="130" cy="140" r="6" fill="#FFFFFF" />
         </g>
-        <text x="50" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
-        <text x="130" y="12" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
-        <text x="210" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
+        <text x="50" y="158" fontSize="12" fontWeight="600" fill="#777777" textAnchor="middle">0%</text>
+        <text x="130" y="12" fontSize="12" fontWeight="600" fill="#777777" textAnchor="middle">100%</text>
+        <text x="210" y="158" fontSize="12" fontWeight="600" fill="#777777" textAnchor="middle">150%</text>
       </svg>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 36, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".",",")}<span style={{ fontSize: 24, opacity: 0.8 }}>%</span></div>
-        <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
+        <div style={{ fontSize: 12, color: "#444444", marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
       </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 12, width: "100%" }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.red }}></span>Risco</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.green }}></span>Saudável</span>
+      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap", borderTop: "1px solid #F0F0F0", paddingTop: 12, width: "100%" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#C8102E" }}></span>Risco</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#8B5E0A" }}></span>Atenção</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: "#1A6B3C" }}></span>Saudável</span>
       </div>
     </div>
   );
@@ -255,13 +287,13 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
 function Top5List({ title, items, cor, tipo }: { title: string; items: Array<{ nome: string; valor: number }>; cor: string; tipo: "despesa" | "receita"; }) {
   const total = items.reduce((acc, i) => acc + Math.abs(i.valor), 0);
   return (
-    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, flex: 1 }}>
-      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, letterSpacing: 0.5 }}>
+    <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: 20, flex: 1 }}>
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: "#1A1A1A", textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, letterSpacing: 0.5 }}>
         <span style={{ width: 3, height: 14, background: cor, borderRadius: 2 }}></span>
         {title}
       </div>
       {items.length === 0 ? (
-        <div style={{ color: C.gray500, fontSize: 12, textAlign: "center", padding: 20 }}>Sem dados no período</div>
+        <div style={{ color: "#777777", fontSize: 12, textAlign: "center", padding: 20 }}>Sem dados no período</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {items.slice(0, 5).map((item, i) => {
@@ -269,12 +301,12 @@ function Top5List({ title, items, cor, tipo }: { title: string; items: Array<{ n
             return (
               <div key={i}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: C.dark, fontWeight: 500 }}>{i + 1}. {item.nome}</span>
-                  <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: tipo === "despesa" ? C.red : C.green }}>
+                  <span style={{ fontSize: 12, color: "#1A1A1A", fontWeight: 500 }}>{i + 1}. {item.nome}</span>
+                  <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: tipo === "despesa" ? "#C8102E" : "#1A6B3C" }}>
                     {tipo === "despesa" ? "-" : "+"}{fmtBRL(Math.abs(item.valor))}
                   </span>
                 </div>
-                <div style={{ background: C.gray100, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                <div style={{ background: "#F0F0F0", borderRadius: 4, height: 6, overflow: "hidden" }}>
                   <div style={{ background: cor, height: "100%", width: `${pct}%`, borderRadius: 4 }} />
                 </div>
               </div>
@@ -313,17 +345,17 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
     <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Barlow',sans-serif" }}>
         <thead>
-          <tr style={{ background: C.dark }}>
-            <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600, fontSize: 12 }}>{titulo}</th>
+          <tr style={{ background: "#1A1A1A" }}>
+            <th style={{ padding: "10px 12px", textAlign: "left", color: "#FFFFFF", fontWeight: 600, fontSize: 12 }}>{titulo}</th>
             {mostrarAno ? (
               <>
-                {MESES_CURTO.map((m, i) => <th key={m} style={{ padding: "10px 8px", textAlign: "right", color: C.white, fontWeight: 500, fontSize: 11, background: (i >= mesInicial && i <= mesFinal) ? C.redDark : C.dark }}>{m}</th>)}
-                <th style={{ padding: "10px 8px", textAlign: "right", color: C.red, fontWeight: 700, fontSize: 11 }}>TOTAL</th>
+                {MESES_CURTO.map((m, i) => <th key={m} style={{ padding: "10px 8px", textAlign: "right", color: "#FFFFFF", fontWeight: 500, fontSize: 11, background: (i >= mesInicial && i <= mesFinal) ? "#9E0B22" : "#1A1A1A" }}>{m}</th>)}
+                <th style={{ padding: "10px 8px", textAlign: "right", color: "#C8102E", fontWeight: 700, fontSize: 11 }}>TOTAL</th>
               </>
             ) : (
               <>
-                <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 500, fontSize: 11, minWidth: 100 }}>VALOR</th>
-                <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 500, fontSize: 11, minWidth: 70 }}>%</th>
+                <th style={{ padding: "10px 12px", textAlign: "right", color: "#FFFFFF", fontWeight: 500, fontSize: 11, minWidth: 100 }}>VALOR</th>
+                <th style={{ padding: "10px 12px", textAlign: "right", color: "#FFFFFF", fontWeight: 500, fontSize: 11, minWidth: 70 }}>%</th>
               </>
             )}
           </tr>
@@ -335,27 +367,27 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
             const isDestaque = row.tipo === "destaque";
             const isResultado = row.tipo === "resultado";
             const isTotal = row.tipo === "total";
-            let bg = idx % 2 === 0 ? C.white : C.gray50;
-            if (isDestaque) bg = C.redLight;
-            else if (isResultado) bg = C.blueLight;
-            else if (isTotal) bg = C.greenLight;
+            let bg = idx % 2 === 0 ? "#FFFFFF" : "#F8F8F8";
+            if (isDestaque) bg = "#FDEAEA";
+            else if (isResultado) bg = "#EAF0F8";
+            else if (isTotal) bg = "#E6F4EC";
             const fontWeight = (isDestaque || isResultado || row.tipo === "subtotal" || isTotal) ? 600 : 400;
             const paddingLeft = 12 + (row.nivel || 0) * 16;
             return (
               <tr key={row.key} style={{ background: bg }}>
-                <td style={{ padding: `8px 12px 8px ${paddingLeft}px`, fontWeight, color: isDestaque ? C.redDark : C.dark, borderBottom: `1px solid ${C.gray100}` }}>{row.key}</td>
+                <td style={{ padding: `8px 12px 8px ${paddingLeft}px`, fontWeight, color: isDestaque ? "#9E0B22" : "#1A1A1A", borderBottom: "1px solid #F0F0F0" }}>{row.key}</td>
                 {mostrarAno ? (
                   <>
                     {MESES_CURTO.map((_, i) => {
                       const val = getValor(row.key, i);
-                      return <td key={i} style={{ padding: "8px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: val < 0 ? C.red : C.dark, borderBottom: `1px solid ${C.gray100}`, background: (i >= mesInicial && i <= mesFinal) ? `${C.red}08` : "transparent" }}>{fmtK(val)}</td>;
+                      return <td key={i} style={{ padding: "8px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: val < 0 ? "#C8102E" : "#1A1A1A", borderBottom: "1px solid #F0F0F0", background: (i >= mesInicial && i <= mesFinal) ? "rgba(200,16,46,0.08)" : "transparent" }}>{fmtK(val)}</td>;
                     })}
-                    <td style={{ padding: "8px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, color: getAnual(row.key) < 0 ? C.red : C.dark, borderBottom: `1px solid ${C.gray100}` }}>{fmtK(getAnual(row.key))}</td>
+                    <td style={{ padding: "8px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, color: getAnual(row.key) < 0 ? "#C8102E" : "#1A1A1A", borderBottom: "1px solid #F0F0F0" }}>{fmtK(getAnual(row.key))}</td>
                   </>
                 ) : (
                   <>
-                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: valorPeriodo < 0 ? C.red : C.dark, fontWeight, borderBottom: `1px solid ${C.gray100}` }}>{fmtBRL(valorPeriodo)}</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: C.gray500, borderBottom: `1px solid ${C.gray100}` }}>{pctPeriodo.toFixed(2).replace(".",",")}%</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: valorPeriodo < 0 ? "#C8102E" : "#1A1A1A", fontWeight, borderBottom: "1px solid #F0F0F0" }}>{fmtBRL(valorPeriodo)}</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#777777", borderBottom: "1px solid #F0F0F0" }}>{pctPeriodo.toFixed(2).replace(".",",")}%</td>
                   </>
                 )}
               </tr>
@@ -429,52 +461,52 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
     { name: "Gastos Fixos", value: Math.abs(gastosFixosPeriodo) },
     { name: "Lucro", value: Math.max(0, lucroLiqPeriodo) },
   ].filter(d => d.value > 0);
-  const PIE_COLORS = [C.red, C.orange, C.blue, C.green];
+  const PIE_COLORS = ["#C8102E", "#C4622D", "#1B4F8A", "#1A6B3C"];
   
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
-    return <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>{payload.map((p: any, i: number) => <div key={i} style={{ color: p.color }}>{p.name}: {fmtBRL(p.value)}</div>)}</div>;
+    return <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>{payload.map((p: any, i: number) => <div key={i} style={{ color: p.color }}>{p.name}: {fmtBRL(p.value)}</div>)}</div>;
   };
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Faturamento" valor={receitaBrutaPeriodo} percentual={100} cor={C.red} />
-        <KPICard label="Margem Bruta" valor={margemBrutaPeriodo} percentual={pctMargemBruta} cor={C.gold} />
-        <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} />
-        <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.blue} />
-        <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={pctPontoEquilibrio} cor={C.gray700} showDiff={true} />
+        <KPICard label="Faturamento" valor={receitaBrutaPeriodo} percentual={100} cor="#C8102E" />
+        <KPICard label="Margem Bruta" valor={margemBrutaPeriodo} percentual={pctMargemBruta} cor="#8B5E0A" />
+        <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor="#C4622D" />
+        <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor="#1B4F8A" />
+        <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor="#1A6B3C" />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={pctPontoEquilibrio} cor="#444444" showDiff={true} />
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Variação MoM" valor={receitaMesAtual} percentual={variacaoMoM} cor={variacaoMoM >= 0 ? C.green : C.red} showDiff={true} subLabel={`vs ${MESES_CURTO[mesAnterior]}: ${fmtBRL(receitaMesAnterior)}`} />
-        <KPICard label="Saldo Inicial" valor={saldoInicial} cor={C.blue} subLabel={`Em ${MESES_CURTO[mesInicial]}`} />
-        <KPICard label="Liquidez Período" valor={liquidezPeriodo} percentual={saldoInicial ? (liquidezPeriodo / saldoInicial) * 100 : 0} cor={liquidezPeriodo >= 0 ? C.green : C.red} showDiff={true} />
-        <KPICard label="Saldo Final" valor={saldoFinal} cor={saldoFinal >= 0 ? C.blue : C.red} subLabel={`Projetado em ${MESES_CURTO[mesFinal]}`} />
+        <KPICard label="Variação MoM" valor={receitaMesAtual} percentual={variacaoMoM} cor={variacaoMoM >= 0 ? "#1A6B3C" : "#C8102E"} showDiff={true} subLabel={`vs ${MESES_CURTO[mesAnterior]}: ${fmtBRL(receitaMesAnterior)}`} />
+        <KPICard label="Saldo Inicial" valor={saldoInicial} cor="#1B4F8A" subLabel={`Em ${MESES_CURTO[mesInicial]}`} />
+        <KPICard label="Liquidez Período" valor={liquidezPeriodo} percentual={saldoInicial ? (liquidezPeriodo / saldoInicial) * 100 : 0} cor={liquidezPeriodo >= 0 ? "#1A6B3C" : "#C8102E"} showDiff={true} />
+        <KPICard label="Saldo Final" valor={saldoFinal} cor={saldoFinal >= 0 ? "#1B4F8A" : "#C8102E"} subLabel={`Projetado em ${MESES_CURTO[mesFinal]}`} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
         <GaugeChart value={receitaBrutaPeriodo} max={pontoEquilibrio} label="Faturamento vs Ponto de Equilíbrio" />
-        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Composição — {periodoLabel}</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: 20 }}>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: "#1A1A1A", textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Composição — {periodoLabel}</div>
           <ResponsiveContainer width="100%" height={240}>
             <PieChart><Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} paddingAngle={2}>{pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie><Tooltip formatter={(v: any) => fmtBRL(v)} /><Legend wrapperStyle={{ fontSize: 10 }} /></PieChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Faturamento Mensal</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: 20 }}>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: "#1A1A1A", textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Faturamento Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData}><defs><linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={C.red} stopOpacity={0.3}/><stop offset="95%" stopColor={C.red} stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Area type="monotone" dataKey="Receita" stroke={C.red} strokeWidth={2} fill="url(#colorReceita)" /></AreaChart>
+            <AreaChart data={chartData}><defs><linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#C8102E" stopOpacity={0.3}/><stop offset="95%" stopColor="#C8102E" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" /><XAxis dataKey="mes" tick={{ fill: "#777777", fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: "#777777", fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Area type="monotone" dataKey="Receita" stroke="#C8102E" strokeWidth={2} fill="url(#colorReceita)" /></AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
-        <Top5List title="Top 5 Despesas" items={top5Despesas} cor={C.red} tipo="despesa" />
-        <Top5List title="Top 5 Receitas" items={top5Receitas} cor={C.green} tipo="receita" />
-        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>EBITDA Mensal</div>
+        <Top5List title="Top 5 Despesas" items={top5Despesas} cor="#C8102E" tipo="despesa" />
+        <Top5List title="Top 5 Receitas" items={top5Receitas} cor="#1A6B3C" tipo="receita" />
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: 20 }}>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: "#1A1A1A", textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>EBITDA Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>{chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : (d.inRange ? C.red : C.gray300)} />)}</Bar></BarChart>
+            <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" /><XAxis dataKey="mes" tick={{ fill: "#777777", fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: "#777777", fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>{chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? "#C8102E" : (d.inRange ? "#C8102E" : "#BBBBBB")} />)}</Bar></BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -516,46 +548,46 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} />
-        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} />
-        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} />
+        <KPICard label="Pendente" valor={totalPendente} cor="#C8102E" subLabel={`${qtdPendente} lançamentos`} />
+        <KPICard label="Liquidado" valor={totalLiquidado} cor="#1A6B3C" subLabel={`${qtdLiquidado} lançamentos`} />
+        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor="#1B4F8A" subLabel={`${lancamentos.length} lançamentos`} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {(["todos", "Pendente", "Liquidado"] as const).map(s => (
-          <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? C.red : C.border}`, background: filtroStatus === s ? C.red : C.white, color: filtroStatus === s ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+          <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? "#C8102E" : "#E2E2E2"}`, background: filtroStatus === s ? "#C8102E" : "#FFFFFF", color: filtroStatus === s ? "#FFFFFF" : "#1A1A1A", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
             {s === "todos" ? "Todos" : s}
           </button>
         ))}
       </div>
-      <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
-            <tr style={{ background: C.dark }}>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
-              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Emissão</th>
-              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Pagamento</th>
-              <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 600 }}>Valor</th>
-              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Status</th>
+            <tr style={{ background: "#1A1A1A" }}>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: "#FFFFFF", fontWeight: 600 }}>Categoria</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: "#FFFFFF", fontWeight: 600 }}>Documento</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: "#FFFFFF", fontWeight: 600 }}>Emissão</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: "#FFFFFF", fontWeight: 600 }}>Pagamento</th>
+              <th style={{ padding: "10px 12px", textAlign: "right", color: "#FFFFFF", fontWeight: 600 }}>Valor</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: "#FFFFFF", fontWeight: 600 }}>Status</th>
             </tr>
           </thead>
           <tbody>
             {filtrados.slice(0, 50).map((l, i) => (
-              <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento || "-"}</td>
-                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.red, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
+              <tr key={i} style={{ background: i % 2 === 0 ? "#FFFFFF" : "#F8F8F8" }}>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #F0F0F0", color: "#777777" }}>{l.categoria_descrição}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #F0F0F0", fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #F0F0F0", fontSize: 11 }}>{l.data_emissao || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #F0F0F0", fontSize: 11 }}>{l.data_pagamento || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: "#C8102E", borderBottom: "1px solid #F0F0F0", fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #F0F0F0" }}>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? "#E6F4EC" : "#FDEAEA", color: l.status_titulo === "Liquidado" ? "#1A6B3C" : "#C8102E" }}>{l.status_titulo}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filtrados.length > 50 && <div style={{ padding: 12, textAlign: "center", color: C.gray500, fontSize: 12 }}>Mostrando 50 de {filtrados.length} lançamentos</div>}
-        {filtrados.length === 0 && <div style={{ padding: 40, textAlign: "center", color: C.gray500 }}>Nenhum lançamento encontrado</div>}
+        {filtrados.length > 50 && <div style={{ padding: 12, textAlign: "center", color: "#777777", fontSize: 12 }}>Mostrando 50 de {filtrados.length} lançamentos</div>}
+        {filtrados.length === 0 && <div style={{ padding: 40, textAlign: "center", color: "#777777" }}>Nenhum lançamento encontrado</div>}
       </div>
     </div>
   );
@@ -595,46 +627,46 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} />
-        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} />
-        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} />
+        <KPICard label="Pendente" valor={totalPendente} cor="#C8102E" subLabel={`${qtdPendente} lançamentos`} />
+        <KPICard label="Liquidado" valor={totalLiquidado} cor="#1A6B3C" subLabel={`${qtdLiquidado} lançamentos`} />
+        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor="#1B4F8A" subLabel={`${lancamentos.length} lançamentos`} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {(["todos", "Pendente", "Liquidado"] as const).map(s => (
-          <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? C.green : C.border}`, background: filtroStatus === s ? C.green : C.white, color: filtroStatus === s ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+          <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? "#1A6B3C" : "#E2E2E2"}`, background: filtroStatus === s ? "#1A6B3C" : "#FFFFFF", color: filtroStatus === s ? "#FFFFFF" : "#1A1A1A", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
             {s === "todos" ? "Todos" : s}
           </button>
         ))}
       </div>
-      <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
-            <tr style={{ background: C.dark }}>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
-              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Emissão</th>
-              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Recebimento</th>
-              <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 600 }}>Valor</th>
-              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Status</th>
+            <tr style={{ background: "#1A1A1A" }}>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: "#FFFFFF", fontWeight: 600 }}>Categoria</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: "#FFFFFF", fontWeight: 600 }}>Documento</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: "#FFFFFF", fontWeight: 600 }}>Emissão</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: "#FFFFFF", fontWeight: 600 }}>Recebimento</th>
+              <th style={{ padding: "10px 12px", textAlign: "right", color: "#FFFFFF", fontWeight: 600 }}>Valor</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: "#FFFFFF", fontWeight: 600 }}>Status</th>
             </tr>
           </thead>
           <tbody>
             {filtrados.slice(0, 50).map((l, i) => (
-              <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento || "-"}</td>
-                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.green, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
+              <tr key={i} style={{ background: i % 2 === 0 ? "#FFFFFF" : "#F8F8F8" }}>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #F0F0F0", color: "#777777" }}>{l.categoria_descrição}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #F0F0F0", fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #F0F0F0", fontSize: 11 }}>{l.data_emissao || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #F0F0F0", fontSize: 11 }}>{l.data_recebimento || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: "#1A6B3C", borderBottom: "1px solid #F0F0F0", fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #F0F0F0" }}>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? "#E6F4EC" : "#FDEAEA", color: l.status_titulo === "Liquidado" ? "#1A6B3C" : "#C8102E" }}>{l.status_titulo}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filtrados.length > 50 && <div style={{ padding: 12, textAlign: "center", color: C.gray500, fontSize: 12 }}>Mostrando 50 de {filtrados.length} lançamentos</div>}
-        {filtrados.length === 0 && <div style={{ padding: 40, textAlign: "center", color: C.gray500 }}>Nenhum lançamento encontrado</div>}
+        {filtrados.length > 50 && <div style={{ padding: 12, textAlign: "center", color: "#777777", fontSize: 12 }}>Mostrando 50 de {filtrados.length} lançamentos</div>}
+        {filtrados.length === 0 && <div style={{ padding: 40, textAlign: "center", color: "#777777" }}>Nenhum lançamento encontrado</div>}
       </div>
     </div>
   );
@@ -646,7 +678,7 @@ function OrcadoRealizadoView({ ano, mesInicial, mesFinal }: { ano: number; mesIn
   
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 8, padding: 20, color: C.blue }}>
+      <div style={{ background: "#EAF0F8", border: "1px solid #1B4F8A", borderRadius: 8, padding: 20, color: "#1B4F8A" }}>
         <div style={{ fontFamily: "'Barlow',sans-serif", fontSize: 14, fontWeight: 600, marginBottom: 8 }}>🔄 Orçado vs Realizado</div>
         <div style={{ fontSize: 13 }}>
           Período: <strong>{periodoLabel} / {ano}</strong>
@@ -657,37 +689,37 @@ function OrcadoRealizadoView({ ano, mesInicial, mesFinal }: { ano: number; mesIn
       </div>
       
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div style={{ background: C.white, border: `2px dashed ${C.blue}`, borderRadius: 8, padding: 24, textAlign: "center", color: C.gray500, minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: "#FFFFFF", border: "2px dashed #1B4F8A", borderRadius: 8, padding: 24, textAlign: "center", color: "#777777", minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>📊</div>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Orçamento vs Realizado</div>
           <div style={{ fontSize: 11, marginTop: 8, maxWidth: 200 }}>Gráfico comparativo será exibido aqui</div>
         </div>
         
-        <div style={{ background: C.white, border: `2px dashed ${C.blue}`, borderRadius: 8, padding: 24, textAlign: "center", color: C.gray500, minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: "#FFFFFF", border: "2px dashed #1B4F8A", borderRadius: 8, padding: 24, textAlign: "center", color: "#777777", minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>📈</div>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Variação Mensal</div>
           <div style={{ fontSize: 11, marginTop: 8, maxWidth: 200 }}>% de desvio orçamento vs realizado</div>
         </div>
       </div>
 
-      <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-        <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>KPI's — Desvio Orçado vs Realizado</div>
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E2E2", borderRadius: 8, padding: 20 }}>
+        <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: "#1A1A1A", textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>KPI's — Desvio Orçado vs Realizado</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-          <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.blue, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Receita</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.blue }}>-</div>
+          <div style={{ background: "#EAF0F8", border: "1px solid #1B4F8A", borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "#1B4F8A", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Receita</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#1B4F8A" }}>-</div>
           </div>
-          <div style={{ background: C.orangeLight, border: `1px solid ${C.orange}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.orange, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Custos</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.orange }}>-</div>
+          <div style={{ background: "#F7E5DD", border: "1px solid #C4622D", borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "#C4622D", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Custos</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#C4622D" }}>-</div>
           </div>
-          <div style={{ background: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.gold, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Despesas</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.gold }}>-</div>
+          <div style={{ background: "#FDF3E3", border: "1px solid #8B5E0A", borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "#8B5E0A", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Despesas</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#8B5E0A" }}>-</div>
           </div>
-          <div style={{ background: C.greenLight, border: `1px solid ${C.green}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.green, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Resultado</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.green }}>-</div>
+          <div style={{ background: "#E6F4EC", border: "1px solid #1A6B3C", borderRadius: 6, padding: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "#1A6B3C", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Resultado</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#1A6B3C" }}>-</div>
           </div>
         </div>
       </div>
@@ -799,8 +831,8 @@ function MenuDropdown({ tab, loading }: any) {
         <button 
           onClick={() => setMenuAberto(!menuAberto)} 
           style={{ 
-            background: C.red, 
-            color: C.white, 
+            background: "#C8102E", 
+            color: "#FFFFFF", 
             border: "none", 
             borderRadius: 4, 
             padding: "8px 12px", 
@@ -819,8 +851,8 @@ function MenuDropdown({ tab, loading }: any) {
             position: "absolute", 
             top: 45, 
             right: 0, 
-            background: C.white, 
-            border: `1px solid ${C.border}`, 
+            background: "#FFFFFF", 
+            border: "1px solid #E2E2E2", 
             borderRadius: 8, 
             minWidth: 220, 
             boxShadow: "0 4px 12px rgba(0,0,0,0.15)", 
@@ -836,12 +868,12 @@ function MenuDropdown({ tab, loading }: any) {
                 background: "none", 
                 cursor: "pointer", 
                 fontSize: 13, 
-                color: C.dark, 
-                borderBottom: `1px solid ${C.gray100}`,
+                color: "#1A1A1A", 
+                borderBottom: "1px solid #F0F0F0",
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#F8F8F8")}
               onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🏢 Selecionar Empresa
@@ -857,12 +889,12 @@ function MenuDropdown({ tab, loading }: any) {
                 background: "none", 
                 cursor: "pointer", 
                 fontSize: 13, 
-                color: C.dark, 
-                borderBottom: `1px solid ${C.gray100}`,
+                color: "#1A1A1A", 
+                borderBottom: "1px solid #F0F0F0",
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#F8F8F8")}
               onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               📊 Selecionar Módulo
@@ -878,12 +910,12 @@ function MenuDropdown({ tab, loading }: any) {
                 background: "none", 
                 cursor: "pointer", 
                 fontSize: 13, 
-                color: C.dark, 
-                borderBottom: `1px solid ${C.gray100}`,
+                color: "#1A1A1A", 
+                borderBottom: "1px solid #F0F0F0",
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#F8F8F8")}
               onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               👤 Meu Usuário
@@ -899,12 +931,12 @@ function MenuDropdown({ tab, loading }: any) {
                 background: "none", 
                 cursor: "pointer", 
                 fontSize: 13, 
-                color: C.dark, 
-                borderBottom: `1px solid ${C.gray100}`,
+                color: "#1A1A1A", 
+                borderBottom: "1px solid #F0F0F0",
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#F8F8F8")}
               onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🖥️ Tela Cheia
@@ -921,13 +953,13 @@ function MenuDropdown({ tab, loading }: any) {
                 background: "none", 
                 cursor: loading ? "default" : "pointer", 
                 fontSize: 13, 
-                color: loading ? C.gray300 : C.dark, 
-                borderBottom: `1px solid ${C.gray100}`,
+                color: loading ? "#BBBBBB" : "#1A1A1A", 
+                borderBottom: "1px solid #F0F0F0",
                 opacity: loading ? 0.5 : 1,
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => { if (!loading) (e.currentTarget.style.background = C.gray50); }}
+              onMouseOver={(e) => { if (!loading) (e.currentTarget.style.background = "#F8F8F8"); }}
               onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🖨️ Gerar PDF
@@ -943,11 +975,11 @@ function MenuDropdown({ tab, loading }: any) {
                 background: "none", 
                 cursor: "pointer", 
                 fontSize: 13, 
-                color: C.red,
+                color: "#C8102E",
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.redLight)}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#FDEAEA")}
               onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🚪 Sair
@@ -970,7 +1002,7 @@ function MenuDropdown({ tab, loading }: any) {
           zIndex: 2000 
         }}>
           <div style={{ 
-            background: C.white, 
+            background: "#FFFFFF", 
             borderRadius: 12, 
             padding: 32, 
             maxWidth: 400, 
@@ -979,18 +1011,18 @@ function MenuDropdown({ tab, loading }: any) {
             <h2 style={{ fontFamily: "'Barlow',sans-serif", marginTop: 0 }}>Meu Usuário</h2>
             
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, color: C.gray500, fontWeight: 600, textTransform: "uppercase" }}>Nome</label>
-              <p style={{ margin: "8px 0 0 0", fontSize: 14, color: C.dark }}>{usuario?.name}</p>
+              <label style={{ fontSize: 12, color: "#777777", fontWeight: 600, textTransform: "uppercase" }}>Nome</label>
+              <p style={{ margin: "8px 0 0 0", fontSize: 14, color: "#1A1A1A" }}>{usuario?.name}</p>
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, color: C.gray500, fontWeight: 600, textTransform: "uppercase" }}>Email</label>
-              <p style={{ margin: "8px 0 0 0", fontSize: 14, color: C.dark }}>{usuario?.email}</p>
+              <label style={{ fontSize: 12, color: "#777777", fontWeight: 600, textTransform: "uppercase" }}>Email</label>
+              <p style={{ margin: "8px 0 0 0", fontSize: 14, color: "#1A1A1A" }}>{usuario?.email}</p>
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, color: C.gray500, fontWeight: 600, textTransform: "uppercase" }}>Módulos Disponíveis</label>
-              <p style={{ margin: "8px 0 0 0", fontSize: 13, color: C.dark }}>Financeiro, Comercial, Operações</p>
+              <label style={{ fontSize: 12, color: "#777777", fontWeight: 600, textTransform: "uppercase" }}>Módulos Disponíveis</label>
+              <p style={{ margin: "8px 0 0 0", fontSize: 13, color: "#1A1A1A" }}>Financeiro, Comercial, Operações</p>
             </div>
 
             <button 
@@ -998,8 +1030,8 @@ function MenuDropdown({ tab, loading }: any) {
               style={{ 
                 width: "100%", 
                 padding: "10px 16px", 
-                background: C.red, 
-                color: C.white, 
+                background: "#C8102E", 
+                color: "#FFFFFF", 
                 border: "none", 
                 borderRadius: 6, 
                 cursor: "pointer", 
@@ -1019,8 +1051,8 @@ function MenuDropdown({ tab, loading }: any) {
               style={{ 
                 width: "100%", 
                 padding: "10px 16px", 
-                background: C.gray100, 
-                color: C.dark, 
+                background: "#F0F0F0", 
+                color: "#1A1A1A", 
                 border: "none", 
                 borderRadius: 6, 
                 cursor: "pointer", 
@@ -1028,8 +1060,8 @@ function MenuDropdown({ tab, loading }: any) {
                 fontFamily: "'Barlow',sans-serif",
                 transition: "background 0.15s"
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.gray300)}
-              onMouseOut={(e) => (e.currentTarget.style.background = C.gray100)}
+              onMouseOver={(e) => (e.currentTarget.style.background = "#BBBBBB")}
+              onMouseOut={(e) => (e.currentTarget.style.background = "#F0F0F0")}
             >
               Fechar
             </button>
@@ -1041,7 +1073,10 @@ function MenuDropdown({ tab, loading }: any) {
 }
 
 // ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
-export default function Tech4ConDashboard() {
+export default function Dashboard({ params }: { params: { slug: string; modulo: string } }) {
+  const slug = params.slug;
+  const C = getPaletBySlug(slug);
+  
   const [ano, setAno] = useState(2026);
   const [filial, setFilial] = useState("Consolidado");
   const [mesInicial, setMesInicial] = useState(0);
@@ -1098,9 +1133,6 @@ export default function Tech4ConDashboard() {
         {/* ─── HEADER ÚNICO E COMPACTO ─── */}
         <div style={{ 
           background: C.white,
-          backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1400 160\"><defs><pattern id=\"cityscape\" x=\"0\" y=\"0\" width=\"280\" height=\"160\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23D4D4D4\" stroke-width=\"0.8\" fill=\"none\" opacity=\"0.6\"><rect x=\"10\" y=\"80\" width=\"25\" height=\"70\"/><line x1=\"10\" y1=\"85\" x2=\"35\" y2=\"85\"/><line x1=\"10\" y1=\"90\" x2=\"35\" y2=\"90\"/><line x1=\"10\" y1=\"95\" x2=\"35\" y2=\"95\"/><line x1=\"10\" y1=\"100\" x2=\"35\" y2=\"100\"/><line x1=\"10\" y1=\"105\" x2=\"35\" y2=\"105\"/><line x1=\"10\" y1=\"110\" x2=\"35\" y2=\"110\"/><line x1=\"10\" y1=\"115\" x2=\"35\" y2=\"115\"/><line x1=\"10\" y1=\"120\" x2=\"35\" y2=\"120\"/><line x1=\"15\" y1=\"80\" x2=\"15\" y2=\"150\"/><line x1=\"25\" y1=\"80\" x2=\"25\" y2=\"150\"/><line x1=\"35\" y1=\"80\" x2=\"35\" y2=\"150\"/><rect x=\"45\" y=\"60\" width=\"30\" height=\"90\"/><line x1=\"45\" y1=\"70\" x2=\"75\" y2=\"70\"/><line x1=\"45\" y1=\"80\" x2=\"75\" y2=\"80\"/><line x1=\"45\" y1=\"90\" x2=\"75\" y2=\"90\"/><line x1=\"45\" y1=\"100\" x2=\"75\" y2=\"100\"/><line x1=\"45\" y1=\"110\" x2=\"75\" y2=\"110\"/><line x1=\"45\" y1=\"120\" x2=\"75\" y2=\"120\"/><line x1=\"52\" y1=\"60\" x2=\"52\" y2=\"150\"/><line x1=\"60\" y1=\"60\" x2=\"60\" y2=\"150\"/><line x1=\"68\" y1=\"60\" x2=\"68\" y2=\"150\"/><rect x=\"85\" y=\"70\" width=\"28\" height=\"80\"/><line x1=\"85\" y1=\"78\" x2=\"113\" y2=\"78\"/><line x1=\"85\" y1=\"86\" x2=\"113\" y2=\"86\"/><line x1=\"85\" y1=\"94\" x2=\"113\" y2=\"94\"/><line x1=\"85\" y1=\"102\" x2=\"113\" y2=\"102\"/><line x1=\"85\" y1=\"110\" x2=\"113\" y2=\"110\"/><line x1=\"85\" y1=\"118\" x2=\"113\" y2=\"118\"/><line x1=\"92\" y1=\"70\" x2=\"92\" y2=\"150\"/><line x1=\"99\" y1=\"70\" x2=\"99\" y2=\"150\"/><line x1=\"106\" y1=\"70\" x2=\"106\" y2=\"150\"/><rect x=\"125\" y=\"50\" width=\"32\" height=\"100\"/><line x1=\"125\" y1=\"60\" x2=\"157\" y2=\"60\"/><line x1=\"125\" y1=\"72\" x2=\"157\" y2=\"72\"/><line x1=\"125\" y1=\"84\" x2=\"157\" y2=\"84\"/><line x1=\"125\" y1=\"96\" x2=\"157\" y2=\"96\"/><line x1=\"125\" y1=\"108\" x2=\"157\" y2=\"108\"/><line x1=\"125\" y1=\"120\" x2=\"157\" y2=\"120\"/><line x1=\"132\" y1=\"50\" x2=\"132\" y2=\"150\"/><line x1=\"141\" y1=\"50\" x2=\"141\" y2=\"150\"/><line x1=\"150\" y1=\"50\" x2=\"150\" y2=\"150\"/><rect x=\"170\" y=\"75\" width=\"25\" height=\"75\"/><line x1=\"170\" y1=\"83\" x2=\"195\" y2=\"83\"/><line x1=\"170\" y1=\"91\" x2=\"195\" y2=\"91\"/><line x1=\"170\" y1=\"99\" x2=\"195\" y2=\"99\"/><line x1=\"170\" y1=\"107\" x2=\"195\" y2=\"107\"/><line x1=\"170\" y1=\"115\" x2=\"195\" y2=\"115\"/><line x1=\"170\" y1=\"123\" x2=\"195\" y2=\"123\"/><line x1=\"176\" y1=\"75\" x2=\"176\" y2=\"150\"/><line x1=\"182\" y1=\"75\" x2=\"182\" y2=\"150\"/><line x1=\"188\" y1=\"75\" x2=\"188\" y2=\"150\"/><rect x=\"205\" y=\"65\" width=\"29\" height=\"85\"/><line x1=\"205\" y1=\"75\" x2=\"234\" y2=\"75\"/><line x1=\"205\" y1=\"87\" x2=\"234\" y2=\"87\"/><line x1=\"205\" y1=\"99\" x2=\"234\" y2=\"99\"/><line x1=\"205\" y1=\"111\" x2=\"234\" y2=\"111\"/><line x1=\"205\" y1=\"123\" x2=\"234\" y2=\"123\"/><line x1=\"212\" y1=\"65\" x2=\"212\" y2=\"150\"/><line x1=\"219\" y1=\"65\" x2=\"219\" y2=\"150\"/><line x1=\"226\" y1=\"65\" x2=\"226\" y2=\"150\"/><line x1=\"233\" y1=\"65\" x2=\"233\" y2=\"150\"/></g></pattern></defs><rect width=\"1400\" height=\"160\" fill=\"white\"/><rect width=\"1400\" height=\"160\" fill=\"url(%23cityscape)\"/></svg>')",
-          backgroundRepeat: "repeat-x",
-          backgroundPosition: "center bottom",
           padding: "8px 28px",
           display: "flex",
           alignItems: "center",
