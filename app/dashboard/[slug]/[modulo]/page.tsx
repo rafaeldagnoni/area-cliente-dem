@@ -8,6 +8,13 @@ import supabase from "@/lib/supabaseClient";
 // ─── FONTES ───────────────────────────────────────────────────────────────────
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
 
+// ─── CONFIGURAÇÕES POR CLIENTE ────────────────────────────────────────────────
+const CLIENTS = {
+  tech4con: { apiUrl: "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X5z88QMnJ-XQE3C-CjghVFRYa8ZJmhib9UNbRwmlPjt4I/exec", logoUrl: "/logos/tech4con.png", filiais: ["Consolidado", "Fibra", "Químicos"] },
+  london: { apiUrl: "https://script.google.com/macros/s/AKfycbwimbVcQAuVg6aJQxULDQ_CrCRhetqgzM_ehG-SPIH_NbKSwxzN7e8c3jCj9aVYdYVc/exec", logoUrl: "/logos/london.png", filiais: ["London", "INC SP", "INC RS"] },
+};
+const getConfig = (slug: any) => CLIENTS[typeof slug === "string" ? slug : "tech4con"] || CLIENTS.tech4con;
+
 // ─── API CONFIG ───────────────────────────────────────────────────────────────
 const API_URL = "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X5z88QMnJ-XQE3C-CjghVFRYa8ZJmhib9UNbRwmlPjt4I/exec";
 
@@ -16,7 +23,7 @@ const LOGO_URL = "/logos/tech4con.png";
 const LOGO_DM_URL = "/logo-dm.png";
 
 // ─── PALETA TECH4CON ──────────────────────────────────────────────────────────
-const C = {
+const C_TECH4CON = {
   red:        "#C8102E",
   redDark:    "#9E0B22",
   redLight:   "#FDEAEA",
@@ -41,7 +48,38 @@ const C = {
   orangeLight:"#F7E5DD",
   border:     "#E2E2E2",
   borderDark: "#CCCCCC",
+
+
+// ─── PALETA LONDON COSMÉTICOS ────────────────────────────────────────────────
+const C_LONDON = {
+  red:        "#D4AF37",
+  redDark:    "#9B7F1F",
+  redLight:   "#F5F0E6",
+  redMid:     "#E8DCC8",
+  black:      "#0A0A0A",
+  dark:       "#1C1C1C",
+  gray900:    "#3A3A3A",
+  gray700:    "#555555",
+  gray500:    "#888888",
+  gray300:    "#CCCCCC",
+  gray100:    "#F5F5F5",
+  gray50:     "#FAFAFA",
+  white:      "#FFFFFF",
+  blue:       "#40916C",
+  blueDark:   "#2D6A4F",
+  blueLight:  "#D8F3DC",
+  green:      "#40916C",
+  greenLight: "#D8F3DC",
+  gold:       "#D4AF37",
+  goldLight:  "#F9F4E6",
+  orange:     "#8B7355",
+  orangeLight:"#F0ECEA",
+  border:     "#D8D8D8",
+  borderDark: "#C4C4C4",
 };
+
+const C = C_TECH4CON;
+
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
 const fmtBRL = (v: number | null | undefined): string => {
@@ -1041,9 +1079,17 @@ function MenuDropdown({ tab, loading }: any) {
 }
 
 // ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
-export default function Tech4ConDashboard() {
+export default function Dashboard({ params }: { params: { slug: string; modulo: string } }) {
+  const { slug, modulo } = params;
+  
+  // ─── VARIÁVEIS DINÂMICAS POR CLIENTE ──────────────────────────────────────
+  const cfg = getConfig(slug);
+  const C = slug === "london" ? C_LONDON : C_TECH4CON;
+  const API_URL_DYNAMIC = cfg.apiUrl;
+  const LOGO_URL_DYNAMIC = cfg.logoUrl;
+  const filiais_dynamic = cfg.filiais;
   const [ano, setAno] = useState(2026);
-  const [filial, setFilial] = useState("Consolidado");
+  const [filial, setFilial] = useState(filiais_dynamic[0]);
   const [mesInicial, setMesInicial] = useState(0);
   const [mesFinal, setMesFinal] = useState(0);
   const [modoAnual, setModoAnual] = useState(false);
@@ -1058,7 +1104,7 @@ export default function Tech4ConDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}?ano=${ano}&filial=${filial}`);
+      const res = await fetch(`${API_URL_DYNAMIC}?ano=${ano}&filial=${filial}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Erro desconhecido");
@@ -1115,7 +1161,7 @@ export default function Tech4ConDashboard() {
           {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
             <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 36 }} />
-            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 32 }} />
+            <img src={LOGO_URL_DYNAMIC} alt={slug === "london" ? "London Cosméticos" : "Tech4Con"} style={{ height: 32 }} />
           </div>
           
           {/* Abas */}
@@ -1134,7 +1180,7 @@ export default function Tech4ConDashboard() {
           </select>
           
           <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
-            {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
+            {filiais_dynamic.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
 
           <span style={{ fontSize: 9, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.3, fontWeight: 600, textTransform: "uppercase" }}>Período:</span>
@@ -1207,14 +1253,14 @@ export default function Tech4ConDashboard() {
           {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} />}
           {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
           {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
-          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} />}
-          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} />}
+          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL_DYNAMIC} />}
+          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL_DYNAMIC} />}
           {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} />}
         </div>
       </div>
       
       <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.white }}>
-        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>Tech4Con Produtos para Construção Civil LTDA · CNPJ 33.577.286/0001-21</span>
+        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>{slug === "london" ? "London Cosméticos" : "Tech4Con Produtos para Construção Civil LTDA · CNPJ 33.577.286/0001-21"}</span>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>
             {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
