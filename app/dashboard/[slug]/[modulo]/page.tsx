@@ -48,7 +48,7 @@ const C_TECH4CON = {
   orangeLight:"#F7E5DD",
   border:     "#E2E2E2",
   borderDark: "#CCCCCC",
-
+};
 
 // ─── PALETA LONDON COSMÉTICOS ────────────────────────────────────────────────
 const C_LONDON = {
