@@ -217,7 +217,7 @@ const RECEITAS_KEYS = [
 ];
 
 // ─── COMPONENTES AUXILIARES ──────────────────────────────────────────────────
-function LoadingSpinner() {
+function LoadingSpinner({ C }: { C: any }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 60 }}>
       <div style={{ width: 32, height: 32, border: `3px solid ${C.gray100}`, borderTopColor: C.red, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
@@ -226,7 +226,7 @@ function LoadingSpinner() {
   );
 }
 
-function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => void }) {
+function ErrorMessage({ message, onRetry, C }: { message: string; onRetry?: () => void; C: any }) {
   return (
     <div style={{ background: C.redLight, border: `1px solid ${C.red}`, borderRadius: 8, padding: 16, color: C.red, fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <div><strong>Erro:</strong> {message}</div>
@@ -329,10 +329,10 @@ function Top5List({ title, items, cor, tipo }: { title: string; items: Array<{ n
 }
 
 // ─── TABELA FINANCEIRA ───────────────────────────────────────────────────────
-function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno }: {
-  rows: Array<{ key: string; nivel: number; tipo?: string }>; dados: any; mesInicial: number; mesFinal: number; titulo: string; mostrarAno: boolean;
+function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno, C }: {
+  rows: Array<{ key: string; nivel: number; tipo?: string }>; dados: any; mesInicial: number; mesFinal: number; titulo: string; mostrarAno: boolean; C: any;
 }) {
-  if (!dados || !dados.contas) return <LoadingSpinner />;
+  if (!dados || !dados.contas) return <LoadingSpinner C={C} />;
   
   const getValor = (key: string, mesIdx: number): number => dados.contas[key]?.valores?.[mesIdx] || 0;
   const getValorPeriodo = (key: string): number => {
@@ -410,8 +410,8 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
 }
 
 // ─── OVERVIEW VIEW ───────────────────────────────────────────────────────────
-function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial: number; mesFinal: number }) {
-  if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner />;
+function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInicial: number; mesFinal: number; C: any }) {
+  if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner C={C} />;
   
   const getValorPeriodoDRE = (key: string): number => {
     const conta = dados.dre.contas[key];
@@ -525,7 +525,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
 }
 
 // ─── DESPESAS VIEW (CONTAS A PAGAR) ────────────────────────────────────────────
-function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
+function DespesasView({ ano, apiUrl, C }: { ano: number; apiUrl: string; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -546,8 +546,8 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
     fetchData();
   }, [ano, apiUrl]);
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) return <LoadingSpinner C={C} />;
+  if (error) return <ErrorMessage message={error} C={C} />;
 
   const filtrados = filtroStatus === "todos" ? lancamentos : lancamentos.filter(l => l.status_titulo === filtroStatus);
   const totalPendente = lancamentos.filter(l => l.status_titulo === "Pendente").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
@@ -604,7 +604,7 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
 }
 
 // ─── RECEITAS VIEW (CONTAS A RECEBER) ──────────────────────────────────────────
-function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
+function ReceitasView({ ano, apiUrl, C }: { ano: number; apiUrl: string; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -625,8 +625,8 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
     fetchData();
   }, [ano, apiUrl]);
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) return <LoadingSpinner C={C} />;
+  if (error) return <ErrorMessage message={error} C={C} />;
 
   const filtrados = filtroStatus === "todos" ? lancamentos : lancamentos.filter(l => l.status_titulo === filtroStatus);
   const totalPendente = lancamentos.filter(l => l.status_titulo === "Pendente").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
@@ -683,7 +683,7 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
 }
 
 // ─── ORÇADO VS REALIZADO VIEW ─────────────────────────────────────────────────
-function OrcadoRealizadoView({ ano, mesInicial, mesFinal }: { ano: number; mesInicial: number; mesFinal: number }) {
+function OrcadoRealizadoView({ ano, mesInicial, mesFinal, C }: { ano: number; mesInicial: number; mesFinal: number; C: any }) {
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
   
   return (
@@ -1248,15 +1248,15 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
         </div>
 
         <div style={{ padding: "24px 28px", maxWidth: 1400, margin: "0 auto" }}>
-          {error && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message={error} onRetry={fetchDados} />}
-          {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner />}
-          {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" />}
-          {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} />}
-          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
-          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
-          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL_DYNAMIC} />}
-          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL_DYNAMIC} />}
-          {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} />}
+          {error && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message={error} onRetry={fetchDados} C={C} />}
+          {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner C={C} />}
+          {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" C={C} />}
+          {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
+          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
+          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
+          {tab === "despesas" {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL_DYNAMIC} />}{tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL_DYNAMIC} />} <DespesasView ano={ano} apiUrl={API_URL_DYNAMIC} C={C} />
+          {tab === "receitas" {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL_DYNAMIC} />}{tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL_DYNAMIC} />} <ReceitasView ano={ano} apiUrl={API_URL_DYNAMIC} C={C} />
+          {!loading && !error && tab === "orcado-realizado" && ><OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
         </div>
       </div>
       
