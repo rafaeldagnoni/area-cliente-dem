@@ -72,7 +72,7 @@ const C_LONDON = {
 };
 
 function getPaletBySlug(slug: string) {
-  return slug === "london" ? C_LONDON : C_TECH4CON;
+  return slug.toLowerCase() === "london" ? C_LONDON : C_TECH4CON;
 }
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
