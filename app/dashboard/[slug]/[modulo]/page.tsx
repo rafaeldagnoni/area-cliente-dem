@@ -5,7 +5,66 @@ import { useRouter } from "next/navigation";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import supabase from "@/lib/supabaseClient";
 
-// ─── FONTES ───────────────────────────────────────────────────────────────────
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import supabase from "@/lib/supabaseClient";
+
+const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
+
+const API_URL = "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X5z88QMnJ-XQE3C-CjghVFRYa8ZJmhib9UNbRwmlPjt4I/exec";
+
+const LOGO_URL = "/logos/tech4con.png";
+const LOGO_DM_URL = "/logo-dm.png";
+
+const C_TECH4CON = {
+    red: "#C8102E",
+    dark: "#1A1A1A",
+    gray900: "#222222",
+    gray700: "#444444",
+    gray500: "#777777",
+    gray300: "#BBBBBB",
+    gray100: "#F0F0F0",
+    gray50: "#F8F8F8",
+    white: "#FFFFFF",
+};
+
+const C_LONDON = {
+    red: "#4A4A4A",
+    dark: "#2A2A2A",
+    gray900: "#3F3F3F",
+    gray700: "#666666",
+    gray500: "#888888",
+    gray300: "#CCCCCC",
+    gray100: "#F5F5F5",
+    gray50: "#FAFAFA",
+    white: "#FFFFFF",
+};
+
+export default function Dashboard({ params }: { params: { slug: string; modulo: string } }) {
+    const slug = params.slug;
+    const C = slug === "london" ? C_LONDON : C_TECH4CON;
+    
+    return (
+          <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow'" }}>
+                  <div style={{ background: C.white, padding: "20px", borderBottom: `2px solid ${C.red}`, textAlign: "center" }}>
+                            <h1 style={{ margin: 0, color: C.dark }}>
+                              {slug === "london" ? "London Cosméticos" : "Tech4Con"}
+                            </h1>h1>
+                            <p style={{ color: C.gray500, margin: "8px 0 0 0" }}>
+                              {slug === "london" ? "Paleta cinza" : "Paleta vermelha"}
+                            </p>p>
+                  </div>div>
+                  <div style={{ padding: "40px 20px", textAlign: "center" }}>
+                            <p style={{ fontSize: 18, color: C.dark }}>
+                                        Dashboard configurado para: <strong>{slug}</strong>strong>
+                            </p>p>
+                  </div>div>
+          </div>div>
+        );
+}</strong>// ─── FONTES ───────────────────────────────────────────────────────────────────
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
 
 // ─── API CONFIG ───────────────────────────────────────────────────────────────
