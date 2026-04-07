@@ -11,12 +11,11 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;6
 // ─── API CONFIG ───────────────────────────────────────────────────────────────
 const API_URL = "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X5z88QMnJ-XQE3C-CjghVFRYa8ZJmhib9UNbRwmlPjt4I/exec";
 
-// ─── LOGO DO CLIENTE ──────────────────────────────────────────────────────────
-const LOGO_URL = "/logos/tech4con.png";
+// ─── LOGO DM (COMPARTILHADO) ──────────────────────────────────────────────────
 const LOGO_DM_URL = "/logo-dm.png";
 
-// ─── PALETA TECH4CON ──────────────────────────────────────────────────────────
-const C = {
+// ─── PALETAS DE CORES ─────────────────────────────────────────────────────────
+const C_TECH4CON = {
   red:        "#C8102E",
   redDark:    "#9E0B22",
   redLight:   "#FDEAEA",
@@ -42,6 +41,78 @@ const C = {
   border:     "#E2E2E2",
   borderDark: "#CCCCCC",
 };
+
+const C_LONDON = {
+  red:        "#4A4A4A",
+  redDark:    "#333333",
+  redLight:   "#F5F5F5",
+  redMid:     "#E8E8E8",
+  black:      "#1A1A1A",
+  dark:       "#2A2A2A",
+  gray900:    "#3F3F3F",
+  gray700:    "#666666",
+  gray500:    "#888888",
+  gray300:    "#CCCCCC",
+  gray100:    "#F5F5F5",
+  gray50:     "#FAFAFA",
+  white:      "#FFFFFF",
+  blue:       "#5B7C99",
+  blueDark:   "#3D5271",
+  blueLight:  "#E8EEF5",
+  green:      "#5B7C99",
+  greenLight: "#E8EEF5",
+  gold:       "#D4D4D4",
+  goldLight:  "#F8F8F8",
+  orange:     "#808080",
+  orangeLight:"#F0F0F0",
+  border:     "#D8D8D8",
+  borderDark: "#CCCCCC",
+};
+
+// ─── CONFIGURAÇÃO CENTRAL DE EMPRESAS ──────────────────────────────────────────
+const EMPRESAS_CONFIG: { [key: string]: any } = {
+  tech4con: {
+    aliases: ["tech4con", "tech4-con", "tech4_con"],
+    nome: "Tech4Con",
+    nomeCompleto: "Tech4Con Produtos para Construção Civil LTDA",
+    cnpj: "33.577.286/0001-21",
+    logo: "/logos/tech4con.png",
+    logoDM: LOGO_DM_URL,
+    apiIdentifier: "tech4con",
+    filiais: ["Consolidado", "Fibra", "Químicos"],
+    paleta: C_TECH4CON,
+  },
+  london: {
+    aliases: ["london", "london-cosmeticos", "london_cosmeticos", "londoncosmeticos"],
+    nome: "London",
+    nomeCompleto: "London Cosméticos LTDA",
+    cnpj: "[CNPJ a confirmar]",
+    logo: "/logos/london.png",
+    logoDM: LOGO_DM_URL,
+    apiIdentifier: "london",
+    filiais: ["Consolidado"],
+    paleta: C_LONDON,
+  },
+};
+
+// ─── HELPERS DE NORMALIZAÇÃO E RESOLUÇÃO ──────────────────────────────────────
+function normalizeSlug(slug: string): string {
+  return slug?.toLowerCase().trim().replace(/[-_]/g, "") || "";
+}
+
+function resolveEmpresa(slug: string) {
+  const normalizado = normalizeSlug(slug);
+  
+  for (const [key, config] of Object.entries(EMPRESAS_CONFIG)) {
+    if (config.aliases.some((alias: string) => normalizeSlug(alias) === normalizado)) {
+      console.log("✅ [EMPRESA RESOLVIDA]", { slug, normalizado, empresa: key, nome: config.nome });
+      return config;
+    }
+  }
+  
+  console.warn("⚠️ [EMPRESA NÃO ENCONTRADA]", { slug, normalizado, fallback: "tech4con" });
+  return EMPRESAS_CONFIG.tech4con;
+}
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
 const fmtBRL = (v: number | null | undefined): string => {
@@ -175,7 +246,7 @@ const RECEITAS_KEYS = [
 ];
 
 // ─── COMPONENTES AUXILIARES ──────────────────────────────────────────────────
-function LoadingSpinner() {
+function LoadingSpinner({ C }: { C: any }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 60 }}>
       <div style={{ width: 32, height: 32, border: `3px solid ${C.gray100}`, borderTopColor: C.red, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
@@ -184,7 +255,7 @@ function LoadingSpinner() {
   );
 }
 
-function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => void }) {
+function ErrorMessage({ message, onRetry, C }: { message: string; onRetry?: () => void; C: any }) {
   return (
     <div style={{ background: C.redLight, border: `1px solid ${C.red}`, borderRadius: 8, padding: 16, color: C.red, fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <div><strong>Erro:</strong> {message}</div>
@@ -194,8 +265,8 @@ function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => v
 }
 
 // ─── KPI CARD ────────────────────────────────────────────────────────────────
-function KPICard({ label, valor, percentual, cor, small = false, showDiff = false, subLabel }: { 
-  label: string; valor: number; percentual?: number; cor?: string; small?: boolean; showDiff?: boolean; subLabel?: string;
+function KPICard({ label, valor, percentual, cor, small = false, showDiff = false, subLabel, C }: { 
+  label: string; valor: number; percentual?: number; cor?: string; small?: boolean; showDiff?: boolean; subLabel?: string; C: any;
 }) {
   return (
     <div style={{ background: cor ? `${cor}11` : C.white, border: `1px solid ${cor || C.border}`, borderRadius: 8, padding: small ? "12px 16px" : "16px 20px", minWidth: small ? 140 : 160, flex: 1 }}>
@@ -212,7 +283,7 @@ function KPICard({ label, valor, percentual, cor, small = false, showDiff = fals
 }
 
 // ─── GAUGE CHART ─────────────────────────────────────────────────────────────
-function GaugeChart({ value, max, label }: { value: number; max: number; label: string }) {
+function GaugeChart({ value, max, label, C }: { value: number; max: number; label: string; C: any }) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 150);
   const angle = (percentage / 150) * 180 - 90;
   const getColor = (pct: number) => pct < 80 ? C.red : pct < 100 ? C.gold : C.green;
@@ -252,7 +323,7 @@ function GaugeChart({ value, max, label }: { value: number; max: number; label: 
 }
 
 // ─── TOP 5 LIST ──────────────────────────────────────────────────────────────
-function Top5List({ title, items, cor, tipo }: { title: string; items: Array<{ nome: string; valor: number }>; cor: string; tipo: "despesa" | "receita"; }) {
+function Top5List({ title, items, cor, tipo, C }: { title: string; items: Array<{ nome: string; valor: number }>; cor: string; tipo: "despesa" | "receita"; C: any }) {
   const total = items.reduce((acc, i) => acc + Math.abs(i.valor), 0);
   return (
     <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, flex: 1 }}>
@@ -287,10 +358,10 @@ function Top5List({ title, items, cor, tipo }: { title: string; items: Array<{ n
 }
 
 // ─── TABELA FINANCEIRA ───────────────────────────────────────────────────────
-function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno }: {
-  rows: Array<{ key: string; nivel: number; tipo?: string }>; dados: any; mesInicial: number; mesFinal: number; titulo: string; mostrarAno: boolean;
+function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno, C }: {
+  rows: Array<{ key: string; nivel: number; tipo?: string }>; dados: any; mesInicial: number; mesFinal: number; titulo: string; mostrarAno: boolean; C: any;
 }) {
-  if (!dados || !dados.contas) return <LoadingSpinner />;
+  if (!dados || !dados.contas) return <LoadingSpinner C={C} />;
   
   const getValor = (key: string, mesIdx: number): number => dados.contas[key]?.valores?.[mesIdx] || 0;
   const getValorPeriodo = (key: string): number => {
@@ -368,8 +439,8 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
 }
 
 // ─── OVERVIEW VIEW ───────────────────────────────────────────────────────────
-function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial: number; mesFinal: number }) {
-  if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner />;
+function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInicial: number; mesFinal: number; C: any }) {
+  if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner C={C} />;
   
   const getValorPeriodoDRE = (key: string): number => {
     const conta = dados.dre.contas[key];
@@ -440,21 +511,21 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Faturamento" valor={receitaBrutaPeriodo} percentual={100} cor={C.red} />
-        <KPICard label="Margem Bruta" valor={margemBrutaPeriodo} percentual={pctMargemBruta} cor={C.gold} />
-        <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} />
-        <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.blue} />
-        <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} />
-        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={pctPontoEquilibrio} cor={C.gray700} showDiff={true} />
+        <KPICard label="Faturamento" valor={receitaBrutaPeriodo} percentual={100} cor={C.red} C={C} />
+        <KPICard label="Margem Bruta" valor={margemBrutaPeriodo} percentual={pctMargemBruta} cor={C.gold} C={C} />
+        <KPICard label="Margem Contrib." valor={margemContribPeriodo} percentual={pctMargemContrib} cor={C.orange} C={C} />
+        <KPICard label="EBITDA" valor={ebitdaPeriodo} percentual={pctEbitda} cor={C.blue} C={C} />
+        <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} C={C} />
+        <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={pctPontoEquilibrio} cor={C.gray700} showDiff={true} C={C} />
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Variação MoM" valor={receitaMesAtual} percentual={variacaoMoM} cor={variacaoMoM >= 0 ? C.green : C.red} showDiff={true} subLabel={`vs ${MESES_CURTO[mesAnterior]}: ${fmtBRL(receitaMesAnterior)}`} />
-        <KPICard label="Saldo Inicial" valor={saldoInicial} cor={C.blue} subLabel={`Em ${MESES_CURTO[mesInicial]}`} />
-        <KPICard label="Liquidez Período" valor={liquidezPeriodo} percentual={saldoInicial ? (liquidezPeriodo / saldoInicial) * 100 : 0} cor={liquidezPeriodo >= 0 ? C.green : C.red} showDiff={true} />
-        <KPICard label="Saldo Final" valor={saldoFinal} cor={saldoFinal >= 0 ? C.blue : C.red} subLabel={`Projetado em ${MESES_CURTO[mesFinal]}`} />
+        <KPICard label="Variação MoM" valor={receitaMesAtual} percentual={variacaoMoM} cor={variacaoMoM >= 0 ? C.green : C.red} showDiff={true} subLabel={`vs ${MESES_CURTO[mesAnterior]}: ${fmtBRL(receitaMesAnterior)}`} C={C} />
+        <KPICard label="Saldo Inicial" valor={saldoInicial} cor={C.blue} subLabel={`Em ${MESES_CURTO[mesInicial]}`} C={C} />
+        <KPICard label="Liquidez Período" valor={liquidezPeriodo} percentual={saldoInicial ? (liquidezPeriodo / saldoInicial) * 100 : 0} cor={liquidezPeriodo >= 0 ? C.green : C.red} showDiff={true} C={C} />
+        <KPICard label="Saldo Final" valor={saldoFinal} cor={saldoFinal >= 0 ? C.blue : C.red} subLabel={`Projetado em ${MESES_CURTO[mesFinal]}`} C={C} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
-        <GaugeChart value={receitaBrutaPeriodo} max={pontoEquilibrio} label="Faturamento vs Ponto de Equilíbrio" />
+        <GaugeChart value={receitaBrutaPeriodo} max={pontoEquilibrio} label="Faturamento vs Ponto de Equilíbrio" C={C} />
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Composição — {periodoLabel}</div>
           <ResponsiveContainer width="100%" height={240}>
@@ -469,8 +540,8 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
-        <Top5List title="Top 5 Despesas" items={top5Despesas} cor={C.red} tipo="despesa" />
-        <Top5List title="Top 5 Receitas" items={top5Receitas} cor={C.green} tipo="receita" />
+        <Top5List title="Top 5 Despesas" items={top5Despesas} cor={C.red} tipo="despesa" C={C} />
+        <Top5List title="Top 5 Receitas" items={top5Receitas} cor={C.green} tipo="receita" C={C} />
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>EBITDA Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
@@ -483,7 +554,7 @@ function OverviewView({ dados, mesInicial, mesFinal }: { dados: any; mesInicial:
 }
 
 // ─── DESPESAS VIEW (CONTAS A PAGAR) ────────────────────────────────────────────
-function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
+function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: string; empresaConfig: any; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -494,7 +565,7 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
         if (json.success) setLancamentos(json.lancamentos || []);
         else throw new Error(json.error || "Erro ao carregar");
@@ -502,10 +573,10 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
       finally { setLoading(false); }
     };
     fetchData();
-  }, [ano, apiUrl]);
+  }, [ano, apiUrl, empresaConfig.apiIdentifier]);
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) return <LoadingSpinner C={C} />;
+  if (error) return <ErrorMessage message={error} C={C} />;
 
   const filtrados = filtroStatus === "todos" ? lancamentos : lancamentos.filter(l => l.status_titulo === filtroStatus);
   const totalPendente = lancamentos.filter(l => l.status_titulo === "Pendente").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
@@ -516,9 +587,9 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} />
-        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} />
-        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} />
+        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} C={C} />
+        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} C={C} />
+        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} C={C} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {(["todos", "Pendente", "Liquidado"] as const).map(s => (
@@ -562,7 +633,7 @@ function DespesasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
 }
 
 // ─── RECEITAS VIEW (CONTAS A RECEBER) ──────────────────────────────────────────
-function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
+function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: string; empresaConfig: any; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -573,7 +644,7 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}`);
+        const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
         if (json.success) setLancamentos(json.lancamentos || []);
         else throw new Error(json.error || "Erro ao carregar");
@@ -581,10 +652,10 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
       finally { setLoading(false); }
     };
     fetchData();
-  }, [ano, apiUrl]);
+  }, [ano, apiUrl, empresaConfig.apiIdentifier]);
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) return <LoadingSpinner C={C} />;
+  if (error) return <ErrorMessage message={error} C={C} />;
 
   const filtrados = filtroStatus === "todos" ? lancamentos : lancamentos.filter(l => l.status_titulo === filtroStatus);
   const totalPendente = lancamentos.filter(l => l.status_titulo === "Pendente").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
@@ -595,9 +666,9 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} />
-        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} />
-        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} />
+        <KPICard label="Pendente" valor={totalPendente} cor={C.red} subLabel={`${qtdPendente} lançamentos`} C={C} />
+        <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} C={C} />
+        <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} C={C} />
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {(["todos", "Pendente", "Liquidado"] as const).map(s => (
@@ -641,7 +712,7 @@ function ReceitasView({ ano, apiUrl }: { ano: number; apiUrl: string }) {
 }
 
 // ─── ORÇADO VS REALIZADO VIEW ─────────────────────────────────────────────────
-function OrcadoRealizadoView({ ano, mesInicial, mesFinal }: { ano: number; mesInicial: number; mesFinal: number }) {
+function OrcadoRealizadoView({ ano, mesInicial, mesFinal, C }: { ano: number; mesInicial: number; mesFinal: number; C: any }) {
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
   
   return (
@@ -696,7 +767,7 @@ function OrcadoRealizadoView({ ano, mesInicial, mesFinal }: { ano: number; mesIn
 }
 
 // ─── MENU DROPDOWN ────────────────────────────────────────────────────────────
-function MenuDropdown({ tab, loading }: any) {
+function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [usuarioModalAberto, setUsuarioModalAberto] = useState(false);
   const [usuario, setUsuario] = useState<any>(null);
@@ -763,7 +834,7 @@ function MenuDropdown({ tab, loading }: any) {
       const nomePagina = tabs.find(t => t.id === tab)?.label || 'Dashboard';
       const opcoes = {
         margin: 10,
-        filename: `Tech4Con_${nomePagina}_${new Date().toLocaleDateString('pt-BR')}.pdf`,
+        filename: `${empresaConfig.nome}_${nomePagina}_${new Date().toLocaleDateString('pt-BR')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
@@ -1041,7 +1112,17 @@ function MenuDropdown({ tab, loading }: any) {
 }
 
 // ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
-export default function Tech4ConDashboard() {
+export default function Dashboard({ params }: { params: { slug: string; modulo: string } }) {
+  const slug = params.slug;
+  const empresaConfig = resolveEmpresa(slug);
+  const C = empresaConfig.paleta;
+  
+  console.log("🚀 [DASHBOARD INICIADO]", { 
+    slug, 
+    empresa: empresaConfig.nome, 
+    corPrimaria: C.red 
+  });
+  
   const [ano, setAno] = useState(2026);
   const [filial, setFilial] = useState("Consolidado");
   const [mesInicial, setMesInicial] = useState(0);
@@ -1058,7 +1139,7 @@ export default function Tech4ConDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}?ano=${ano}&filial=${filial}`);
+      const res = await fetch(`${API_URL}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Erro desconhecido");
@@ -1077,7 +1158,7 @@ export default function Tech4ConDashboard() {
       }
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
-  }, [ano, filial, mesInicial, mesFinal]);
+  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier]);
 
   useEffect(() => { fetchDados(); }, [fetchDados]);
 
@@ -1095,12 +1176,9 @@ export default function Tech4ConDashboard() {
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        {/* ─── HEADER ÚNICO E COMPACTO ─── */}
+        {/* ─── HEADER ─── */}
         <div style={{ 
           background: C.white,
-          backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1400 160\"><defs><pattern id=\"cityscape\" x=\"0\" y=\"0\" width=\"280\" height=\"160\" patternUnits=\"userSpaceOnUse\"><g stroke=\"%23D4D4D4\" stroke-width=\"0.8\" fill=\"none\" opacity=\"0.6\"><rect x=\"10\" y=\"80\" width=\"25\" height=\"70\"/><line x1=\"10\" y1=\"85\" x2=\"35\" y2=\"85\"/><line x1=\"10\" y1=\"90\" x2=\"35\" y2=\"90\"/><line x1=\"10\" y1=\"95\" x2=\"35\" y2=\"95\"/><line x1=\"10\" y1=\"100\" x2=\"35\" y2=\"100\"/><line x1=\"10\" y1=\"105\" x2=\"35\" y2=\"105\"/><line x1=\"10\" y1=\"110\" x2=\"35\" y2=\"110\"/><line x1=\"10\" y1=\"115\" x2=\"35\" y2=\"115\"/><line x1=\"10\" y1=\"120\" x2=\"35\" y2=\"120\"/><line x1=\"15\" y1=\"80\" x2=\"15\" y2=\"150\"/><line x1=\"25\" y1=\"80\" x2=\"25\" y2=\"150\"/><line x1=\"35\" y1=\"80\" x2=\"35\" y2=\"150\"/><rect x=\"45\" y=\"60\" width=\"30\" height=\"90\"/><line x1=\"45\" y1=\"70\" x2=\"75\" y2=\"70\"/><line x1=\"45\" y1=\"80\" x2=\"75\" y2=\"80\"/><line x1=\"45\" y1=\"90\" x2=\"75\" y2=\"90\"/><line x1=\"45\" y1=\"100\" x2=\"75\" y2=\"100\"/><line x1=\"45\" y1=\"110\" x2=\"75\" y2=\"110\"/><line x1=\"45\" y1=\"120\" x2=\"75\" y2=\"120\"/><line x1=\"52\" y1=\"60\" x2=\"52\" y2=\"150\"/><line x1=\"60\" y1=\"60\" x2=\"60\" y2=\"150\"/><line x1=\"68\" y1=\"60\" x2=\"68\" y2=\"150\"/><rect x=\"85\" y=\"70\" width=\"28\" height=\"80\"/><line x1=\"85\" y1=\"78\" x2=\"113\" y2=\"78\"/><line x1=\"85\" y1=\"86\" x2=\"113\" y2=\"86\"/><line x1=\"85\" y1=\"94\" x2=\"113\" y2=\"94\"/><line x1=\"85\" y1=\"102\" x2=\"113\" y2=\"102\"/><line x1=\"85\" y1=\"110\" x2=\"113\" y2=\"110\"/><line x1=\"85\" y1=\"118\" x2=\"113\" y2=\"118\"/><line x1=\"92\" y1=\"70\" x2=\"92\" y2=\"150\"/><line x1=\"99\" y1=\"70\" x2=\"99\" y2=\"150\"/><line x1=\"106\" y1=\"70\" x2=\"106\" y2=\"150\"/><rect x=\"125\" y=\"50\" width=\"32\" height=\"100\"/><line x1=\"125\" y1=\"60\" x2=\"157\" y2=\"60\"/><line x1=\"125\" y1=\"72\" x2=\"157\" y2=\"72\"/><line x1=\"125\" y1=\"84\" x2=\"157\" y2=\"84\"/><line x1=\"125\" y1=\"96\" x2=\"157\" y2=\"96\"/><line x1=\"125\" y1=\"108\" x2=\"157\" y2=\"108\"/><line x1=\"125\" y1=\"120\" x2=\"157\" y2=\"120\"/><line x1=\"132\" y1=\"50\" x2=\"132\" y2=\"150\"/><line x1=\"141\" y1=\"50\" x2=\"141\" y2=\"150\"/><line x1=\"150\" y1=\"50\" x2=\"150\" y2=\"150\"/><rect x=\"170\" y=\"75\" width=\"25\" height=\"75\"/><line x1=\"170\" y1=\"83\" x2=\"195\" y2=\"83\"/><line x1=\"170\" y1=\"91\" x2=\"195\" y2=\"91\"/><line x1=\"170\" y1=\"99\" x2=\"195\" y2=\"99\"/><line x1=\"170\" y1=\"107\" x2=\"195\" y2=\"107\"/><line x1=\"170\" y1=\"115\" x2=\"195\" y2=\"115\"/><line x1=\"170\" y1=\"123\" x2=\"195\" y2=\"123\"/><line x1=\"176\" y1=\"75\" x2=\"176\" y2=\"150\"/><line x1=\"182\" y1=\"75\" x2=\"182\" y2=\"150\"/><line x1=\"188\" y1=\"75\" x2=\"188\" y2=\"150\"/><rect x=\"205\" y=\"65\" width=\"29\" height=\"85\"/><line x1=\"205\" y1=\"75\" x2=\"234\" y2=\"75\"/><line x1=\"205\" y1=\"87\" x2=\"234\" y2=\"87\"/><line x1=\"205\" y1=\"99\" x2=\"234\" y2=\"99\"/><line x1=\"205\" y1=\"111\" x2=\"234\" y2=\"111\"/><line x1=\"205\" y1=\"123\" x2=\"234\" y2=\"123\"/><line x1=\"212\" y1=\"65\" x2=\"212\" y2=\"150\"/><line x1=\"219\" y1=\"65\" x2=\"219\" y2=\"150\"/><line x1=\"226\" y1=\"65\" x2=\"226\" y2=\"150\"/><line x1=\"233\" y1=\"65\" x2=\"233\" y2=\"150\"/></g></pattern></defs><rect width=\"1400\" height=\"160\" fill=\"white\"/><rect width=\"1400\" height=\"160\" fill=\"url(%23cityscape)\"/></svg>')",
-          backgroundRepeat: "repeat-x",
-          backgroundPosition: "center bottom",
           padding: "8px 28px",
           display: "flex",
           alignItems: "center",
@@ -1114,8 +1192,8 @@ export default function Tech4ConDashboard() {
         }}>
           {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
-            <img src={LOGO_DM_URL} alt="D&M Consultoria" style={{ height: 36 }} />
-            <img src={LOGO_URL} alt="Tech4Con" style={{ height: 32 }} />
+            <img src={empresaConfig.logoDM} alt="D&M Consultoria" style={{ height: 36 }} />
+            <img src={empresaConfig.logo} alt={empresaConfig.nome} style={{ height: 32 }} />
           </div>
           
           {/* Abas */}
@@ -1134,7 +1212,7 @@ export default function Tech4ConDashboard() {
           </select>
           
           <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
-            {["Consolidado", "Fibra", "Químicos"].map(f => <option key={f} value={f}>{f}</option>)}
+            {empresaConfig.filiais.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
 
           <span style={{ fontSize: 9, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.3, fontWeight: 600, textTransform: "uppercase" }}>Período:</span>
@@ -1197,24 +1275,24 @@ export default function Tech4ConDashboard() {
           </button>
 
           {/* Menu Dropdown */}
-          <MenuDropdown tab={tab} loading={loading} />
+          <MenuDropdown tab={tab} loading={loading} empresaConfig={empresaConfig} C={C} />
         </div>
 
         <div style={{ padding: "24px 28px", maxWidth: 1400, margin: "0 auto" }}>
-          {error && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message={error} onRetry={fetchDados} />}
-          {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner />}
-          {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" />}
-          {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} />}
-          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
-          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} /></div>}
-          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} />}
-          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} />}
-          {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} />}
+          {error && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message={error} onRetry={fetchDados} C={C} />}
+          {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner C={C} />}
+          {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" C={C} />}
+          {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
+          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
+          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
+          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} empresaConfig={empresaConfig} C={C} />}
+          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} empresaConfig={empresaConfig} C={C} />}
+          {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
         </div>
       </div>
       
       <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.white }}>
-        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>Tech4Con Produtos para Construção Civil LTDA · CNPJ 33.577.286/0001-21</span>
+        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>{empresaConfig.nomeCompleto} · CNPJ {empresaConfig.cnpj}</span>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>
             {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
