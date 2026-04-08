@@ -4,115 +4,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import supabase from "@/lib/supabaseClient";
+import { resolveEmpresa, getApiUrlForEmpresa } from "@/lib/empresasConfig";
 
 // ─── FONTES ───────────────────────────────────────────────────────────────────
 const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap";
-
-// ─── API CONFIG ───────────────────────────────────────────────────────────────
-const API_URL = "https://script.google.com/macros/s/AKfycbx-VAR5oGvAaAeeNS2M3D6X5z88QMnJ-XQE3C-CjghVFRYa8ZJmhib9UNbRwmlPjt4I/exec";
-
-// ─── LOGO DM (COMPARTILHADO) ──────────────────────────────────────────────────
-const LOGO_DM_URL = "/logo-dm.png";
-
-// ─── PALETAS DE CORES ─────────────────────────────────────────────────────────
-const C_TECH4CON = {
-  red:        "#C8102E",
-  redDark:    "#9E0B22",
-  redLight:   "#FDEAEA",
-  redMid:     "#F5C6CB",
-  black:      "#0F0F0F",
-  dark:       "#1A1A1A",
-  gray900:    "#222222",
-  gray700:    "#444444",
-  gray500:    "#777777",
-  gray300:    "#BBBBBB",
-  gray100:    "#F0F0F0",
-  gray50:     "#F8F8F8",
-  white:      "#FFFFFF",
-  blue:       "#1B4F8A",
-  blueDark:   "#1A3D6F",
-  blueLight:  "#EAF0F8",
-  green:      "#1A6B3C",
-  greenLight: "#E6F4EC",
-  gold:       "#8B5E0A",
-  goldLight:  "#FDF3E3",
-  orange:     "#C4622D",
-  orangeLight:"#F7E5DD",
-  border:     "#E2E2E2",
-  borderDark: "#CCCCCC",
-};
-
-const C_LONDON = {
-  red:        "#4A4A4A",
-  redDark:    "#333333",
-  redLight:   "#F5F5F5",
-  redMid:     "#E8E8E8",
-  black:      "#1A1A1A",
-  dark:       "#2A2A2A",
-  gray900:    "#3F3F3F",
-  gray700:    "#666666",
-  gray500:    "#888888",
-  gray300:    "#CCCCCC",
-  gray100:    "#F5F5F5",
-  gray50:     "#FAFAFA",
-  white:      "#FFFFFF",
-  blue:       "#5B7C99",
-  blueDark:   "#3D5271",
-  blueLight:  "#E8EEF5",
-  green:      "#5B7C99",
-  greenLight: "#E8EEF5",
-  gold:       "#D4D4D4",
-  goldLight:  "#F8F8F8",
-  orange:     "#808080",
-  orangeLight:"#F0F0F0",
-  border:     "#D8D8D8",
-  borderDark: "#CCCCCC",
-};
-
-// ─── CONFIGURAÇÃO CENTRAL DE EMPRESAS ──────────────────────────────────────────
-const EMPRESAS_CONFIG: { [key: string]: any } = {
-  tech4con: {
-    aliases: ["tech4con", "tech4-con", "tech4_con"],
-    nome: "Tech4Con",
-    nomeCompleto: "Tech4Con Produtos para Construção Civil LTDA",
-    cnpj: "33.577.286/0001-21",
-    logo: "/logos/tech4con.png",
-    logoDM: LOGO_DM_URL,
-    apiIdentifier: "tech4con",
-    filiais: ["Consolidado", "Fibra", "Químicos"],
-    paleta: C_TECH4CON,
-  },
-  london: {
-    aliases: ["london", "london-cosmeticos", "london_cosmeticos", "londoncosmeticos"],
-    nome: "London",
-    nomeCompleto: "London Cosméticos LTDA",
-    cnpj: "[CNPJ a confirmar]",
-    logo: "/logos/london.png",
-    logoDM: LOGO_DM_URL,
-    apiIdentifier: "london",
-    filiais: ["Consolidado"],
-    paleta: C_LONDON,
-  },
-};
-
-// ─── HELPERS DE NORMALIZAÇÃO E RESOLUÇÃO ──────────────────────────────────────
-function normalizeSlug(slug: string): string {
-  return slug?.toLowerCase().trim().replace(/[-_]/g, "") || "";
-}
-
-function resolveEmpresa(slug: string) {
-  const normalizado = normalizeSlug(slug);
-  
-  for (const [key, config] of Object.entries(EMPRESAS_CONFIG)) {
-    if (config.aliases.some((alias: string) => normalizeSlug(alias) === normalizado)) {
-      console.log("✅ [EMPRESA RESOLVIDA]", { slug, normalizado, empresa: key, nome: config.nome });
-      return config;
-    }
-  }
-  
-  console.warn("⚠️ [EMPRESA NÃO ENCONTRADA]", { slug, normalizado, fallback: "tech4con" });
-  return EMPRESAS_CONFIG.tech4con;
-}
 
 // ─── FORMATADORES ─────────────────────────────────────────────────────────────
 const fmtBRL = (v: number | null | undefined): string => {
@@ -1116,6 +1011,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const slug = params.slug;
   const empresaConfig = resolveEmpresa(slug);
   const C = empresaConfig.paleta;
+  const apiUrl = getApiUrlForEmpresa(slug);
   
   console.log("🚀 [DASHBOARD INICIADO]", { 
     slug, 
@@ -1139,7 +1035,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
+      const res = await fetch(`${apiUrl}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Erro desconhecido");
@@ -1158,7 +1054,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       }
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
-  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier]);
+  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier, apiUrl]);
 
   useEffect(() => { fetchDados(); }, [fetchDados]);
 
@@ -1285,8 +1181,8 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
           {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
           {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
-          {tab === "despesas" && <DespesasView ano={ano} apiUrl={API_URL} empresaConfig={empresaConfig} C={C} />}
-          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={API_URL} empresaConfig={empresaConfig} C={C} />}
+          {tab === "despesas" && <DespesasView ano={ano} apiUrl={apiUrl} empresaConfig={empresaConfig} C={C} />}
+          {tab === "receitas" && <ReceitasView ano={ano} apiUrl={apiUrl} empresaConfig={empresaConfig} C={C} />}
           {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
         </div>
       </div>
