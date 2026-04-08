@@ -1,10 +1,3 @@
-// ═══════════════════════════════════════════════════════════════════════════════
-// CONFIGURAÇÃO CENTRAL POR EMPRESA - COM APIS DINÂMICAS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-// Este é o arquivo que deve ser importado em app/dashboard/[slug]/[modulo]/page.tsx
-// Path sugerido: lib/empresasConfig.ts
-
 export interface EmpresaConfig {
   // Identificadores
   aliases: string[];                    // ["tech4con", "tech4-con", "tech4_con"]
@@ -253,4 +246,4 @@ export function getAvailableEmpresas(): Array<{ slug: string; nome: string }> {
     slug,
     nome: config.nome,
   }));
-}id
+}
