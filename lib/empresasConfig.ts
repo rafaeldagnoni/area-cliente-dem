@@ -107,7 +107,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     cnpj: "[CNPJ a confirmar]",
     logo: "/logos/london.png",
     logoDM: LOGO_DM_URL,
-    apiUrl: "PENDENTE_API_LONDON_FRANQUEADAS",
+    apiUrl: "https://script.google.com/macros/s/AKfycbyO1UDvK0G5kQLTRd8aUm2dxa92CKh4X5TGCZlOmyd0dq8wN8zdWljiNh2t7eMV2huJ/exec",
     apiIdentifier: "london-franqueadas",
     filiais: ["Consolidado", "INC RS", "INC SP"],
     paleta: C_LONDON,
