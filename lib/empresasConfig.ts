@@ -1,6 +1,10 @@
 // ─── LOGO DM (COMPARTILHADO) ──────────────────────────────────────────────────
 const LOGO_DM_URL = "/logo-dm.png";
 
+// ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+const SUPABASE_URL = "https://qzqaagsbjfsdoxcvhqpc.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6cWFhZ3NiamZzZG94Y3ZocXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTg2NTIsImV4cCI6MjA4ODEzNDY1Mn0.S-UZlehMcEbTt2hGXa9T6MHnAhHzX2Y9I6DD0q9G9Nw";
+
 // ─── PALETAS DE CORES ─────────────────────────────────────────────────────────
 export const C_TECH4CON = {
   red:        "#C8102E",
@@ -70,6 +74,9 @@ export interface EmpresaConfig {
   paleta: typeof C_TECH4CON | typeof C_LONDON;
   modulosDisponiveis?: string[];
   estruturaDados?: string;
+  usaCache?: boolean;
+  supabaseUrl?: string;
+  supabaseKey?: string;
 }
 
 // ─── CONFIGURAÇÃO CENTRAL DE EMPRESAS ──────────────────────────────────────────
@@ -85,6 +92,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     apiIdentifier: "tech4con",
     filiais: ["Consolidado", "Fibra", "Químicos"],
     paleta: C_TECH4CON,
+    usaCache: false,
   },
   "london-marca": {
     aliases: ["london-marca", "london_marca", "londonmarca"],
@@ -99,20 +107,24 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     paleta: C_LONDON,
     modulosDisponiveis: ["financeiro"],
     estruturaDados: "london",
+    usaCache: false,
   },
-  "london-franquias": {
-    aliases: ["london-franquias", "london_franquias", "londonfranquias"],
-    nome: "London franquias",
-    nomeCompleto: "London franquias",
+  "london-franqueadas": {
+    aliases: ["london-franqueadas", "london_franqueadas", "londonfranqueadas"],
+    nome: "London Franqueadas",
+    nomeCompleto: "London Franqueadas",
     cnpj: "[CNPJ a confirmar]",
     logo: "/logos/london.png",
     logoDM: LOGO_DM_URL,
     apiUrl: "https://script.google.com/macros/s/AKfycbyO1UDvK0G5kQLTRd8aUm2dxa92CKh4X5TGCZlOmyd0dq8wN8zdWljiNh2t7eMV2huJ/exec",
-    apiIdentifier: "london-franquias",
+    apiIdentifier: "london-franqueadas",
     filiais: ["Consolidado", "INC RS", "INC SP"],
     paleta: C_LONDON,
     modulosDisponiveis: ["financeiro"],
     estruturaDados: "london",
+    usaCache: true,
+    supabaseUrl: SUPABASE_URL,
+    supabaseKey: SUPABASE_KEY,
   },
 };
 
