@@ -1031,14 +1031,43 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [mesesDisponiveis, setMesesDisponiveis] = useState<Array<{ idx: number; label: string }>>([]);
 
+  // Função auxiliar para buscar do Supabase Cache
+  const buscarDoCache = async (tipo: string, ano: number, filial: string) => {
+    const { data, error } = await supabase
+      .from("cache_financeiro")
+      .select("*")
+      .eq("empresa_slug", empresaConfig.apiIdentifier)
+      .eq("filial", filial)
+      .eq("ano", ano)
+      .eq("tipo", tipo)
+      .single();
+
+    if (error) {
+      console.error(`Erro ao buscar ${tipo}:`, error);
+      return null;
+    }
+
+    return data;
+  };
+
   const fetchDados = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiUrl}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error || "Erro desconhecido");
+      // Buscar DRE e DFC do cache Supabase
+      const dre = await buscarDoCache("dre", ano, filial);
+      const dfc = await buscarDoCache("dfc", ano, filial);
+
+      if (!dre || !dfc) {
+        throw new Error("Dados não encontrados no cache");
+      }
+
+      const json = {
+        success: true,
+        dre: dre.dados,
+        dfc: dfc.dados
+      };
+
       setDados(json);
       setUltimaAtualizacao(new Date());
       
@@ -1052,7 +1081,21 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           setMesFinal(meses[meses.length - 1].idx);
         }
       }
-    } catch (e: any) { setError(e.message); }
+    } catch (e: any) { 
+      setError(e.message); 
+      // Se falhar no cache, tenta a API original como fallback
+      console.warn("Cache falhou, tentando API original...");
+      try {
+        const res = await fetch(`${apiUrl}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || "Erro desconhecido");
+        setDados(json);
+        setError(null);
+      } catch (fallbackError) {
+        setError((fallbackError as any).message);
+      }
+    }
     finally { setLoading(false); }
   }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier, apiUrl]);
 
@@ -1151,8 +1194,24 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           )}
           
           <button 
-            onClick={fetchDados} 
+            onClick={async () => {
+              setLoading(true);
+              try {
+                // Chama a API com parâmetro de atualização manual
+                const response = await fetch(`${apiUrl}?atualizar_cache=true`);
+                if (response.ok) {
+                  // Aguarda 1 segundo pra cache ser populado, depois recarrega
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  fetchDados();
+                }
+              } catch (e) {
+                console.error("Erro ao atualizar cache:", e);
+              } finally {
+                setLoading(false);
+              }
+            }}
             disabled={loading} 
+            title="Atualizar cache manualmente"
             style={{ 
               background: loading ? C.gray100 : C.white, 
               color: loading ? C.gray300 : C.red, 
@@ -1167,7 +1226,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
               transition: "all 0.15s"
             }}
           >
-            {loading ? "..." : "↻"}
+            {loading ? "Atualizando..." : "🔄"}
           </button>
 
           {/* Menu Dropdown */}
