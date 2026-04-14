@@ -69,10 +69,8 @@ const DRE_ROWS = [
   { key: "Viagens e Hospedagens", nivel: 1 },
   { key: "Ebitda", nivel: 0, tipo: "destaque" },
   { key: "Receitas Financeiras", nivel: 0, tipo: "subtotal" },
-  { key: "Depósitos Judiciais", nivel: 1 },
   { key: "Outras receitas financeiras", nivel: 1 },
   { key: "Despesas Financeiras", nivel: 0, tipo: "subtotal" },
-  { key: "Depreciação", nivel: 1 },
   { key: "Despesas bancárias", nivel: 1 },
   { key: "Juros e multas", nivel: 1 },
   { key: "Outras despesas financeiras", nivel: 1 },
@@ -359,10 +357,12 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const margemContribPeriodo = getValorPeriodoDRE("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodoDRE("Ebitda");
   const gastosFixosPeriodo = getValorPeriodoDRE("Gastos fixos (custos fixos + despesas fixas)");
+  const receitasFinanceirasPeriodo = getValorPeriodoDRE("Receitas Financeiras");
   const despesasFinanceirasPeriodo = getValorPeriodoDRE("Despesas Financeiras");
+  const resultadoOperacionalBrutoPeriodo = getValorPeriodoDRE("Resultado operacional bruto");
   const impostosLucroPeriodo = getValorPeriodoDRE("Impostos Sob Lucro");
+  const resultadoOperacionalLiquidoPeriodo = getValorPeriodoDRE("Resultado operacional líquido");
   const distribuicaoLucroPeriodo = getValorPeriodoDRE("Distribuição de Lucro");
-  const investimentosPeriodo = getValorPeriodoDRE("Investimentos e Financiamentos");
   const lucroLiqPeriodo = getValorPeriodoDRE("Resultado pós distribuição de lucros");
 
   const pctMargemBruta = receitaBrutaPeriodo ? (margemBrutaPeriodo / receitaBrutaPeriodo) * 100 : 0;
@@ -371,7 +371,7 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const pctLucro = receitaBrutaPeriodo ? (lucroLiqPeriodo / receitaBrutaPeriodo) * 100 : 0;
 
   const margemContribUnitaria = receitaBrutaPeriodo > 0 ? (margemContribPeriodo / receitaBrutaPeriodo) : 0;
-  const custosTotaisAlem = Math.abs(gastosFixosPeriodo) + Math.abs(despesasFinanceirasPeriodo) + Math.abs(impostosLucroPeriodo) + Math.abs(distribuicaoLucroPeriodo) + Math.abs(investimentosPeriodo);
+  const custosTotaisAlem = Math.abs(gastosFixosPeriodo) + Math.abs(despesasFinanceirasPeriodo) + Math.abs(impostosLucroPeriodo) + Math.abs(distribuicaoLucroPeriodo);
   const pontoEquilibrio = margemContribUnitaria > 0 ? (custosTotaisAlem / margemContribUnitaria) : 0;
   const pctPontoEquilibrio = pontoEquilibrio > 0 ? ((receitaBrutaPeriodo - pontoEquilibrio) / pontoEquilibrio) * 100 : 0;
 
