@@ -95,22 +95,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     usaCache: false,
   },
   "london-franqueadas": {
-  aliases: ["london-franqueadas", "london_franqueadas", "londonfranqueadas", "london-franquias"],
-    nome: "London Marca",
-    nomeCompleto: "London Marca",
-    cnpj: "[CNPJ a confirmar]",
-    logo: "/logos/london.png",
-    logoDM: LOGO_DM_URL,
-    apiUrl: "PENDENTE_API_LONDON_MARCA",
-    apiIdentifier: "london-marca",
-    filiais: ["Consolidado"],
-    paleta: C_LONDON,
-    modulosDisponiveis: ["financeiro"],
-    estruturaDados: "london",
-    usaCache: false,
-  },
-  "london-franqueadas": {
-    aliases: ["london-franqueadas", "london_franqueadas", "londonfranqueadas"],
+    aliases: ["london-franqueadas", "london_franqueadas", "londonfranqueadas", "london-franquias"],
     nome: "London Franqueadas",
     nomeCompleto: "London Franqueadas",
     cnpj: "[CNPJ a confirmar]",
@@ -133,7 +118,7 @@ export function normalizeSlug(slug: string): string {
   return slug?.toLowerCase().trim().replace(/[-_]/g, "") || "";
 }
 
-export function resolveEmpresa(slug: string): EmpresaConfig {
+export function resolveEmpresa(slug: string): EmpresaConfig | null {
   const normalizado = normalizeSlug(slug);
   
   for (const [key, config] of Object.entries(EMPRESAS_CONFIG)) {
@@ -143,11 +128,11 @@ export function resolveEmpresa(slug: string): EmpresaConfig {
     }
   }
   
-  console.warn("⚠️ [EMPRESA NÃO ENCONTRADA]", { slug, normalizado, fallback: "tech4con" });
-  return EMPRESAS_CONFIG.tech4con;
+  console.error("❌ [EMPRESA NÃO ENCONTRADA]", { slug, normalizado });
+  return null;
 }
 
 export function getApiUrlForEmpresa(slug: string): string {
   const empresa = resolveEmpresa(slug);
-  return empresa.apiUrl;
+  return empresa?.apiUrl || "";
 }
