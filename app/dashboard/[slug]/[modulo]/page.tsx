@@ -68,15 +68,21 @@ const addArrays = (...arrays: number[][]): number[] => {
   return out;
 };
 
-const subtractAbsArrays = (base: number[], ...arraysToSubtract: number[][]): number[] => {
+const subtractArrays = (base: number[], ...arraysToSubtract: number[][]): number[] => {
   const out = getArray12(base);
   for (const arr of arraysToSubtract) {
     const safe = getArray12(arr);
     for (let i = 0; i < 12; i++) {
-      out[i] -= Math.abs(Number(safe[i] || 0));
+      out[i] -= Number(safe[i] || 0);
     }
   }
   return out;
+};
+
+const hasAnyNonZero = (arr?: number[]) => getArray12(arr).some(v => Number(v || 0) !== 0);
+
+const preferOriginalOrCalculated = (original: number[], calculated: number[]) => {
+  return hasAnyNonZero(original) ? getArray12(original) : getArray12(calculated);
 };
 
 const cloneContas = (contas?: ContasMap): ContasMap => {
@@ -115,7 +121,7 @@ const enrichDRE = (dre: any) => {
   const lojaVirtual = getContaValores(contas, "Loja Virtual");
 
   const devolucaoNF = getContaValores(contas, "Devolução ou Cancelamento NF", ["Devolucao ou Cancelamento NF"]);
-  const impostosVendas = getContaValores(contas, "Impostos (Federais, Estaduais, Municipais)", [
+  const impostosVendasDetalhe = getContaValores(contas, "Impostos (Federais, Estaduais, Municipais)", [
     "Impostos Federais Estaduais Municipais",
   ]);
 
@@ -160,31 +166,51 @@ const enrichDRE = (dre: any) => {
 
   const csll = getContaValores(contas, "CSLL");
   const irpj = getContaValores(contas, "IRPJ");
-  const distribuicaoLucro = getContaValores(contas, "Distribuição de Lucro", ["Distribuicao de Lucro"]);
+  const distribuicaoLucroDetalhe = getContaValores(contas, "Distribuição de Lucro", ["Distribuicao de Lucro"]);
 
   const receitaVendasOriginal = getContaValores(contas, "Receita de Vendas");
-  const receitaVendasRecalculada = addArrays(receitaOutros, receitaServico, receitaVendaRevenda, lojaVirtual);
-  const receitaVendas = receitaVendasOriginal.some(v => v !== 0) ? receitaVendasOriginal : receitaVendasRecalculada;
+  const deducoesOriginal = getContaValores(contas, "Deduções de Vendas");
+  const cpvOriginal = getContaValores(contas, "Custo dos Produtos Vendidos");
+  const despesasVariaveisOriginal = getContaValores(contas, "Despesas Variáveis");
+  const gastosFixosOriginal = getContaValores(contas, "Gastos fixos (custos fixos + despesas fixas)");
+  const receitasFinanceirasOriginal = getContaValores(contas, "Receitas Financeiras");
+  const despesasFinanceirasOriginal = getContaValores(contas, "Despesas Financeiras");
+  const impostosSobLucroOriginal = getContaValores(contas, "Impostos Sob Lucro");
+  const distribuicaoLucroOriginal = getContaValores(contas, "Distribuição de Lucro");
 
-  const deducoesVendas = addArrays(devolucaoNF, impostosVendas);
-  const receitaLiquida = subtractAbsArrays(receitaVendas, deducoesVendas);
+  const receitaVendasCalculada = addArrays(receitaOutros, receitaServico, receitaVendaRevenda, lojaVirtual);
+  const receitaVendas = preferOriginalOrCalculated(receitaVendasOriginal, receitaVendasCalculada);
 
-  const custoProdutosVendidos = addArrays(cmv, custosVarOper, devolucaoMP, maoObraTerceirizada);
-  const margemBruta = subtractAbsArrays(receitaLiquida, custoProdutosVendidos);
+  const deducoesCalculadas = addArrays(devolucaoNF, impostosVendasDetalhe);
+  const deducoesVendas = preferOriginalOrCalculated(deducoesOriginal, deducoesCalculadas);
 
-  const despesasVariaveis = addArrays(comissoes, fretes, gastosVeiculos, manutencaoEquip, outrosVar, taxaBoletos);
-  const margemContribuicao = subtractAbsArrays(margemBruta, despesasVariaveis);
+  const custoProdutosVendidosCalculado = addArrays(cmv, custosVarOper, devolucaoMP, maoObraTerceirizada);
+  const custoProdutosVendidos = preferOriginalOrCalculated(cpvOriginal, custoProdutosVendidosCalculado);
 
-  const gastosFixos = addArrays(gastoPessoalAdm, gastoPessoalProd, despesasOper, usoConsumo, viagens);
-  const ebitda = subtractAbsArrays(margemContribuicao, gastosFixos);
+  const despesasVariaveisCalculadas = addArrays(comissoes, fretes, gastosVeiculos, manutencaoEquip, outrosVar, taxaBoletos);
+  const despesasVariaveis = preferOriginalOrCalculated(despesasVariaveisOriginal, despesasVariaveisCalculadas);
 
-  const receitasFinanceiras = addArrays(outrasReceitasFinanceiras);
-  const despesasFinanceiras = addArrays(despesasBancarias, jurosMultas, outrasDespesasFinanceiras);
+  const gastosFixosCalculados = addArrays(gastoPessoalAdm, gastoPessoalProd, despesasOper, usoConsumo, viagens);
+  const gastosFixos = preferOriginalOrCalculated(gastosFixosOriginal, gastosFixosCalculados);
 
-  const resultadoOperacionalBruto = subtractAbsArrays(addArrays(ebitda, receitasFinanceiras), despesasFinanceiras);
-  const impostosSobLucro = addArrays(csll, irpj);
-  const resultadoOperacionalLiquido = subtractAbsArrays(resultadoOperacionalBruto, impostosSobLucro);
-  const resultadoPosDistribuicao = subtractAbsArrays(resultadoOperacionalLiquido, distribuicaoLucro);
+  const receitasFinanceirasCalculadas = addArrays(outrasReceitasFinanceiras);
+  const receitasFinanceiras = preferOriginalOrCalculated(receitasFinanceirasOriginal, receitasFinanceirasCalculadas);
+
+  const despesasFinanceirasCalculadas = addArrays(despesasBancarias, jurosMultas, outrasDespesasFinanceiras);
+  const despesasFinanceiras = preferOriginalOrCalculated(despesasFinanceirasOriginal, despesasFinanceirasCalculadas);
+
+  const impostosSobLucroCalculados = addArrays(csll, irpj);
+  const impostosSobLucro = preferOriginalOrCalculated(impostosSobLucroOriginal, impostosSobLucroCalculados);
+
+  const distribuicaoLucro = preferOriginalOrCalculated(distribuicaoLucroOriginal, distribuicaoLucroDetalhe);
+
+  const receitaLiquida = subtractArrays(receitaVendas, deducoesVendas);
+  const margemBruta = subtractArrays(receitaLiquida, custoProdutosVendidos);
+  const margemContribuicao = subtractArrays(margemBruta, despesasVariaveis);
+  const ebitda = subtractArrays(margemContribuicao, gastosFixos);
+  const resultadoOperacionalBruto = subtractArrays(addArrays(ebitda, receitasFinanceiras), despesasFinanceiras);
+  const resultadoOperacionalLiquido = subtractArrays(resultadoOperacionalBruto, impostosSobLucro);
+  const resultadoPosDistribuicao = subtractArrays(resultadoOperacionalLiquido, distribuicaoLucro);
 
   setConta(contas, "Receita de Vendas", receitaVendas);
   setConta(contas, "Deduções de Vendas", deducoesVendas);
@@ -196,11 +222,12 @@ const enrichDRE = (dre: any) => {
   setConta(contas, "Gastos fixos (custos fixos + despesas fixas)", gastosFixos);
   setConta(contas, "Receitas Financeiras", receitasFinanceiras);
   setConta(contas, "Despesas Financeiras", despesasFinanceiras);
-  setConta(contas, "Resultado operacional bruto", resultadoOperacionalBruto);
   setConta(contas, "Impostos Sob Lucro", impostosSobLucro);
+  setConta(contas, "Distribuição de Lucro", distribuicaoLucro);
+  setConta(contas, "Ebitda", ebitda);
+  setConta(contas, "Resultado operacional bruto", resultadoOperacionalBruto);
   setConta(contas, "Resultado operacional líquido", resultadoOperacionalLiquido);
   setConta(contas, "Resultado pós distribuição de lucros", resultadoPosDistribuicao);
-  setConta(contas, "Ebitda", ebitda);
 
   return {
     ...dre,
@@ -457,7 +484,9 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
   const receitaBrutaPeriodo = getValorPeriodo("Receita de Vendas") || getValorPeriodo("Receitas");
   const receitaLiquidaPeriodo = getValorPeriodo("Receita líquida");
   const getPctPeriodo = (key: string, valor: number): number => {
-    if (key === "Ebitda") return receitaLiquidaPeriodo ? (valor / receitaLiquidaPeriodo) * 100 : 0;
+    if (["Margem bruta", "Despesas Variáveis", "Margem líquida (margem de contribuição)", "Gastos fixos (custos fixos + despesas fixas)", "Ebitda", "Receitas Financeiras", "Despesas Financeiras", "Resultado operacional bruto", "Impostos Sob Lucro", "Resultado operacional líquido", "Distribuição de Lucro", "Resultado pós distribuição de lucros"].includes(key)) {
+      return receitaLiquidaPeriodo ? (valor / receitaLiquidaPeriodo) * 100 : 0;
+    }
     return receitaBrutaPeriodo ? (valor / receitaBrutaPeriodo) * 100 : 0;
   };
   const rowsExistentes = rows.filter(row => dados.contas[row.key] || ["Receita de Vendas", "Receita líquida", "Margem bruta", "Ebitda", "Saldo Inicial", "Saldo"].includes(row.key));
@@ -546,18 +575,15 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const margemContribPeriodo = getValorPeriodoDRE("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodoDRE("Ebitda");
   const gastosFixosPeriodo = getValorPeriodoDRE("Gastos fixos (custos fixos + despesas fixas)");
-  const receitasFinanceirasPeriodo = getValorPeriodoDRE("Receitas Financeiras");
   const despesasFinanceirasPeriodo = getValorPeriodoDRE("Despesas Financeiras");
-  const resultadoOperacionalBrutoPeriodo = getValorPeriodoDRE("Resultado operacional bruto");
   const impostosLucroPeriodo = getValorPeriodoDRE("Impostos Sob Lucro");
-  const resultadoOperacionalLiquidoPeriodo = getValorPeriodoDRE("Resultado operacional líquido");
   const distribuicaoLucroPeriodo = getValorPeriodoDRE("Distribuição de Lucro");
   const lucroLiqPeriodo = getValorPeriodoDRE("Resultado pós distribuição de lucros");
 
-  const pctMargemBruta = receitaBrutaPeriodo ? (margemBrutaPeriodo / receitaBrutaPeriodo) * 100 : 0;
-  const pctMargemContrib = receitaBrutaPeriodo ? (margemContribPeriodo / receitaBrutaPeriodo) * 100 : 0;
+  const pctMargemBruta = receitaLiquidaPeriodo ? (margemBrutaPeriodo / receitaLiquidaPeriodo) * 100 : 0;
+  const pctMargemContrib = receitaLiquidaPeriodo ? (margemContribPeriodo / receitaLiquidaPeriodo) * 100 : 0;
   const pctEbitda = receitaLiquidaPeriodo ? (ebitdaPeriodo / receitaLiquidaPeriodo) * 100 : 0;
-  const pctLucro = receitaBrutaPeriodo ? (lucroLiqPeriodo / receitaBrutaPeriodo) * 100 : 0;
+  const pctLucro = receitaLiquidaPeriodo ? (lucroLiqPeriodo / receitaLiquidaPeriodo) * 100 : 0;
 
   const margemContribUnitaria = receitaBrutaPeriodo > 0 ? (margemContribPeriodo / receitaBrutaPeriodo) : 0;
   const custosTotaisAlem = Math.abs(gastosFixosPeriodo) + Math.abs(despesasFinanceirasPeriodo) + Math.abs(impostosLucroPeriodo) + Math.abs(distribuicaoLucroPeriodo);
@@ -619,7 +645,7 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Faturamento Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData}><defs><linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={C.red} stopOpacity={0.3} /><stop offset="95%" stopColor={C.red} stopOpacity={0} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Area type="monotone" dataKey="Receita" stroke={C.red} strokeWidth={2} fill="url(#colorReceita)" /></AreaChart>
+            <AreaChart data={chartData}><defs><linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={C.red} stopOpacity={0.3}/><stop offset="95%" stopColor={C.red} stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Area type="monotone" dataKey="Receita" stroke={C.red} strokeWidth={2} fill="url(#colorReceita)" /></AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -629,7 +655,7 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
           <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>EBITDA Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>{chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : (d.inRange ? C.red : C.gray300)} />)}</Bar></BarChart>
+            <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>{chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : (d.inRange ? C.red : C.gray300)} />)}</Bar></BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -1200,7 +1226,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const slug = params.slug;
   const empresaConfig = resolveEmpresa(slug);
 
-  // ✅ VALIDAÇÃO CRÍTICA: Se empresa não foi encontrada, mostrar erro
   if (!empresaConfig) {
     return (
       <div style={{
@@ -1281,7 +1306,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
     setError(null);
     console.log("🔄 FETCHDADOS CHAMADO", { ano, filial, mesInicial, mesFinal });
     try {
-      // Buscar DRE e DFC do cache Supabase
       const dre = await buscarDoCache("dre", ano, filial);
       const dfc = await buscarDoCache("dfc", ano, filial);
       console.log("📊 DADOS DO CACHE", { dreEncontrada: !!dre, dfcEncontrada: !!dfc, ano, filial });
@@ -1311,7 +1335,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       }
     } catch (e: any) {
       setError(e.message);
-      // Se falhar no cache, tenta a API original como fallback
       console.warn("Cache falhou, tentando API original...");
       try {
         const res = await fetch(`${apiUrl}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
@@ -1364,23 +1387,19 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           zIndex: 100,
           height: 56
         }}>
-          {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
             <img src={empresaConfig.logoDM} alt="D&M Consultoria" style={{ height: 36 }} />
             <img src={empresaConfig.logo} alt={empresaConfig.nome} style={{ height: 32 }} />
           </div>
 
-          {/* Abas */}
           <div style={{ display: "flex", gap: 1 }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 3, padding: "3px 8px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 0.2, textTransform: "uppercase", transition: "all 0.15s", whiteSpace: "nowrap" }}>{t.label}</button>
             ))}
           </div>
 
-          {/* Separador */}
           <div style={{ width: 1, height: 24, background: C.border, margin: "0 2px" }}></div>
 
-          {/* Controles */}
           <select value={ano} onChange={e => { const novoAno = Number(e.target.value); console.log("✏️ ANO ALTERADO", { anoAnterior: ano, novoAno }); setAno(novoAno); }} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
             {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
@@ -1401,10 +1420,8 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
             {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
           </select>
 
-          {/* Spacer */}
           <div style={{ flex: 1 }}></div>
 
-          {/* Botões de ação */}
           {(tab === "dre" || tab === "dfc") && (
             <button
               onClick={() => setModoAnual(!modoAnual)}
@@ -1432,10 +1449,8 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
             onClick={async () => {
               setLoading(true);
               try {
-                // Chama a API com parâmetro de atualização manual
                 const response = await fetch(`${apiUrl}?atualizar_cache=true`);
                 if (response.ok) {
-                  // Aguarda 1 segundo pra cache ser populado, depois recarrega
                   await new Promise(resolve => setTimeout(resolve, 1000));
                   fetchDados();
                 }
@@ -1464,7 +1479,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
             {loading ? "Atualizando..." : "🔄"}
           </button>
 
-          {/* Menu Dropdown */}
           <MenuDropdown tab={tab} loading={loading} empresaConfig={empresaConfig} C={C} />
         </div>
 
