@@ -1010,6 +1010,43 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
 export default function Dashboard({ params }: { params: { slug: string; modulo: string } }) {
   const slug = params.slug;
   const empresaConfig = resolveEmpresa(slug);
+  
+  // ✅ VALIDAÇÃO CRÍTICA: Se empresa não foi encontrada, mostrar erro
+  if (!empresaConfig) {
+    return (
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        height: "100vh",
+        flexDirection: "column",
+        background: "#F8F8F8",
+        fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif"
+      }}>
+        <div style={{ 
+          background: "#FFFFFF", 
+          border: "1px solid #E2E2E2", 
+          borderRadius: 12, 
+          padding: 40, 
+          textAlign: "center",
+          maxWidth: 400,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+        }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
+          <h1 style={{ margin: "0 0 12px 0", fontSize: 24, color: "#1A1A1A", fontWeight: 700 }}>
+            Empresa não encontrada
+          </h1>
+          <p style={{ margin: "0 0 24px 0", fontSize: 14, color: "#666666", lineHeight: 1.6 }}>
+            O dashboard para "<strong style={{ color: "#333333" }}>{slug}</strong>" não existe no sistema.
+          </p>
+          <p style={{ margin: 0, fontSize: 12, color: "#999999" }}>
+            Verifique a URL e tente novamente.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
   const C = empresaConfig.paleta;
   const apiUrl = getApiUrlForEmpresa(slug);
   
