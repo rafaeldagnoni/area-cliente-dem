@@ -1090,10 +1090,12 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const fetchDados = useCallback(async () => {
     setLoading(true);
     setError(null);
+    console.log("🔄 FETCHDADOS CHAMADO", { ano, filial, mesInicial, mesFinal });
     try {
       // Buscar DRE e DFC do cache Supabase
       const dre = await buscarDoCache("dre", ano, filial);
       const dfc = await buscarDoCache("dfc", ano, filial);
+      console.log("📊 DADOS DO CACHE", { dreEncontrada: !!dre, dfcEncontrada: !!dfc, ano, filial });
 
       if (!dre || !dfc) {
         throw new Error("Dados não encontrados no cache");
@@ -1137,6 +1139,12 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier, apiUrl]);
 
   useEffect(() => { fetchDados(); }, [fetchDados]);
+
+  // 🔄 Efeito adicional que reage diretamente ao ano
+  useEffect(() => {
+    console.log("📅 EFEITO DE ANO DISPARADO", { ano, filial });
+    fetchDados();
+  }, [ano, filial]);
 
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
   const tabs = [
@@ -1183,7 +1191,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           <div style={{ width: 1, height: 24, background: C.border, margin: "0 2px" }}></div>
 
           {/* Controles */}
-          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
+          <select value={ano} onChange={e => { const novoAno = Number(e.target.value); console.log("✏️ ANO ALTERADO", { anoAnterior: ano, novoAno }); setAno(novoAno); }} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
             {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
           
