@@ -57,12 +57,23 @@ const getArray12 = (arr?: number[]): number[] => {
   return Array.from({ length: 12 }, (_, i) => Number(arr?.[i] || 0));
 };
 
-const sumArrays = (...arrays: number[][]): number[] => {
+const addArrays = (...arrays: number[][]): number[] => {
   const out = Array(12).fill(0);
   for (const arr of arrays) {
     const safe = getArray12(arr);
     for (let i = 0; i < 12; i++) {
       out[i] += Number(safe[i] || 0);
+    }
+  }
+  return out;
+};
+
+const subtractAbsArrays = (base: number[], ...arraysToSubtract: number[][]): number[] => {
+  const out = getArray12(base);
+  for (const arr of arraysToSubtract) {
+    const safe = getArray12(arr);
+    for (let i = 0; i < 12; i++) {
+      out[i] -= Math.abs(Number(safe[i] || 0));
     }
   }
   return out;
@@ -152,28 +163,28 @@ const enrichDRE = (dre: any) => {
   const distribuicaoLucro = getContaValores(contas, "Distribuição de Lucro", ["Distribuicao de Lucro"]);
 
   const receitaVendasOriginal = getContaValores(contas, "Receita de Vendas");
-  const receitaVendasRecalculada = sumArrays(receitaOutros, receitaServico, receitaVendaRevenda, lojaVirtual);
+  const receitaVendasRecalculada = addArrays(receitaOutros, receitaServico, receitaVendaRevenda, lojaVirtual);
   const receitaVendas = receitaVendasOriginal.some(v => v !== 0) ? receitaVendasOriginal : receitaVendasRecalculada;
 
-  const deducoesVendas = sumArrays(devolucaoNF, impostosVendas);
-  const receitaLiquida = sumArrays(receitaVendas, deducoesVendas);
+  const deducoesVendas = addArrays(devolucaoNF, impostosVendas);
+  const receitaLiquida = subtractAbsArrays(receitaVendas, deducoesVendas);
 
-  const custoProdutosVendidos = sumArrays(cmv, custosVarOper, devolucaoMP, maoObraTerceirizada);
-  const margemBruta = sumArrays(receitaLiquida, custoProdutosVendidos);
+  const custoProdutosVendidos = addArrays(cmv, custosVarOper, devolucaoMP, maoObraTerceirizada);
+  const margemBruta = subtractAbsArrays(receitaLiquida, custoProdutosVendidos);
 
-  const despesasVariaveis = sumArrays(comissoes, fretes, gastosVeiculos, manutencaoEquip, outrosVar, taxaBoletos);
-  const margemContribuicao = sumArrays(margemBruta, despesasVariaveis);
+  const despesasVariaveis = addArrays(comissoes, fretes, gastosVeiculos, manutencaoEquip, outrosVar, taxaBoletos);
+  const margemContribuicao = subtractAbsArrays(margemBruta, despesasVariaveis);
 
-  const gastosFixos = sumArrays(gastoPessoalAdm, gastoPessoalProd, despesasOper, usoConsumo, viagens);
-  const ebitda = sumArrays(margemContribuicao, gastosFixos);
+  const gastosFixos = addArrays(gastoPessoalAdm, gastoPessoalProd, despesasOper, usoConsumo, viagens);
+  const ebitda = subtractAbsArrays(margemContribuicao, gastosFixos);
 
-  const receitasFinanceiras = sumArrays(outrasReceitasFinanceiras);
-  const despesasFinanceiras = sumArrays(despesasBancarias, jurosMultas, outrasDespesasFinanceiras);
+  const receitasFinanceiras = addArrays(outrasReceitasFinanceiras);
+  const despesasFinanceiras = addArrays(despesasBancarias, jurosMultas, outrasDespesasFinanceiras);
 
-  const resultadoOperacionalBruto = sumArrays(ebitda, receitasFinanceiras, despesasFinanceiras);
-  const impostosSobLucro = sumArrays(csll, irpj);
-  const resultadoOperacionalLiquido = sumArrays(resultadoOperacionalBruto, impostosSobLucro);
-  const resultadoPosDistribuicao = sumArrays(resultadoOperacionalLiquido, distribuicaoLucro);
+  const resultadoOperacionalBruto = subtractAbsArrays(addArrays(ebitda, receitasFinanceiras), despesasFinanceiras);
+  const impostosSobLucro = addArrays(csll, irpj);
+  const resultadoOperacionalLiquido = subtractAbsArrays(resultadoOperacionalBruto, impostosSobLucro);
+  const resultadoPosDistribuicao = subtractAbsArrays(resultadoOperacionalLiquido, distribuicaoLucro);
 
   setConta(contas, "Receita de Vendas", receitaVendas);
   setConta(contas, "Deduções de Vendas", deducoesVendas);
@@ -303,41 +314,24 @@ const DFC_ROWS = [
 
 // ─── CATEGORIAS PARA OVERVIEW ────────────────────────────────────────────────
 const DESPESAS_KEYS = [
-  "Comissões de vendas",
-  "CMV/CPV - Custo Mercadoria Vendida",
-  "Custos Variáveis de Operação",
-  "Mão de obra terceirizada",
-  "Fretes e Combustíveis (venda)",
-  "Gastos com Veículos",
-  "Manutenção de Equipamentos",
-  "Taxa de Boletos | Cartão",
-  "Gasto com Pessoal - Adm",
-  "Gasto com pessoal - Prod/Oper",
-  "Despesas Operacionais",
+  "Comissões de vendas", "CMV/CPV - Custo Mercadoria Vendida",
+  "Custos Variáveis de Operação", "Mão de obra terceirizada",
+  "Fretes e Combustíveis (venda)", "Gastos com Veículos",
+  "Manutenção de Equipamentos", "Taxa de Boletos | Cartão",
+  "Gasto com Pessoal - Adm", "Gasto com pessoal - Prod/Oper",
+  "Despesas Operacionais"
 ];
 
 const RECEITAS_KEYS = [
-  "Receita Outros",
-  "Receita Serviço",
-  "Receita Venda/Revenda",
-  "Loja Virtual",
-  "Receitas Financeiras",
+  "Receita Outros", "Receita Serviço", "Receita Venda/Revenda",
+  "Loja Virtual", "Receitas Financeiras"
 ];
 
 // ─── COMPONENTES AUXILIARES ──────────────────────────────────────────────────
 function LoadingSpinner({ C }: { C: any }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 60 }}>
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          border: `3px solid ${C.gray100}`,
-          borderTopColor: C.red,
-          borderRadius: "50%",
-          animation: "spin 1s linear infinite",
-        }}
-      />
+      <div style={{ width: 32, height: 32, border: `3px solid ${C.gray100}`, borderTopColor: C.red, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -345,162 +339,42 @@ function LoadingSpinner({ C }: { C: any }) {
 
 function ErrorMessage({ message, onRetry, C }: { message: string; onRetry?: () => void; C: any }) {
   return (
-    <div
-      style={{
-        background: C.redLight,
-        border: `1px solid ${C.red}`,
-        borderRadius: 8,
-        padding: 16,
-        color: C.red,
-        fontSize: 14,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <div>
-        <strong>Erro:</strong> {message}
-      </div>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          style={{
-            padding: "4px 12px",
-            background: C.red,
-            color: C.white,
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-            fontSize: 12,
-          }}
-        >
-          Tentar novamente
-        </button>
-      )}
+    <div style={{ background: C.redLight, border: `1px solid ${C.red}`, borderRadius: 8, padding: 16, color: C.red, fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div><strong>Erro:</strong> {message}</div>
+      {onRetry && <button onClick={onRetry} style={{ padding: "4px 12px", background: C.red, color: C.white, border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Tentar novamente</button>}
     </div>
   );
 }
 
 // ─── KPI CARD ────────────────────────────────────────────────────────────────
-function KPICard({
-  label,
-  valor,
-  percentual,
-  cor,
-  small = false,
-  showDiff = false,
-  subLabel,
-  C,
-}: {
-  label: string;
-  valor: number;
-  percentual?: number;
-  cor?: string;
-  small?: boolean;
-  showDiff?: boolean;
-  subLabel?: string;
-  C: any;
+function KPICard({ label, valor, percentual, cor, small = false, showDiff = false, subLabel, C }: {
+  label: string; valor: number; percentual?: number; cor?: string; small?: boolean; showDiff?: boolean; subLabel?: string; C: any;
 }) {
   return (
-    <div
-      style={{
-        background: cor ? `${cor}11` : C.white,
-        border: `1px solid ${cor || C.border}`,
-        borderRadius: 8,
-        padding: small ? "12px 16px" : "16px 20px",
-        minWidth: small ? 140 : 160,
-        flex: 1,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Barlow',sans-serif",
-          fontWeight: 600,
-          fontSize: 10,
-          letterSpacing: 0.5,
-          color: cor || C.gray500,
-          textTransform: "uppercase",
-          marginBottom: 6,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontFamily: "'Barlow',sans-serif",
-          fontWeight: 700,
-          fontSize: small ? 18 : 22,
-          color: C.dark,
-        }}
-      >
-        {fmtBRL(valor)}
-      </div>
+    <div style={{ background: cor ? `${cor}11` : C.white, border: `1px solid ${cor || C.border}`, borderRadius: 8, padding: small ? "12px 16px" : "16px 20px", minWidth: small ? 140 : 160, flex: 1 }}>
+      <div style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 600, fontSize: 10, letterSpacing: 0.5, color: cor || C.gray500, textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
+      <div style={{ fontFamily: "'Barlow',sans-serif", fontWeight: 700, fontSize: small ? 18 : 22, color: C.dark }}>{fmtBRL(valor)}</div>
       {percentual !== undefined && (
-        <div
-          style={{
-            fontFamily: "'JetBrains Mono',monospace",
-            fontSize: 11,
-            color: showDiff ? (percentual >= 0 ? C.green : C.red) : C.gray500,
-            marginTop: 4,
-          }}
-        >
-          {showDiff && percentual > 0 ? "+" : ""}
-          {percentual.toFixed(2).replace(".", ",")}%
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: showDiff ? (percentual >= 0 ? C.green : C.red) : C.gray500, marginTop: 4 }}>
+          {showDiff && percentual > 0 ? "+" : ""}{percentual.toFixed(2).replace(".", ",")}%
         </div>
       )}
-      {subLabel && (
-        <div
-          style={{
-            fontFamily: "'Barlow',sans-serif",
-            fontSize: 10,
-            color: C.gray500,
-            marginTop: 4,
-          }}
-        >
-          {subLabel}
-        </div>
-      )}
+      {subLabel && <div style={{ fontFamily: "'Barlow',sans-serif", fontSize: 10, color: C.gray500, marginTop: 4 }}>{subLabel}</div>}
     </div>
   );
 }
 
 // ─── GAUGE CHART ─────────────────────────────────────────────────────────────
 function GaugeChart({ value, max, label, C }: { value: number; max: number; label: string; C: any }) {
-  const percentage = max > 0 ? Math.min(Math.max((value / max) * 100, 0), 150) : 0;
+  const percentage = Math.min(Math.max((value / max) * 100, 0), 150);
   const angle = (percentage / 150) * 180 - 90;
-  const getColor = (pct: number) => (pct < 80 ? C.red : pct < 100 ? C.gold : C.green);
+  const getColor = (pct: number) => pct < 80 ? C.red : pct < 100 ? C.gold : C.green;
   const currentColor = getColor(percentage);
-  const displayPct = max > 0 ? (value / max) * 100 : 0;
+  const displayPct = ((value / max) * 100);
 
   return (
-    <div
-      style={{
-        background: C.white,
-        border: `1px solid ${C.border}`,
-        borderRadius: 8,
-        padding: 20,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: 340,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Barlow Condensed',sans-serif",
-          fontWeight: 700,
-          fontSize: 12,
-          color: C.dark,
-          textTransform: "uppercase",
-          marginBottom: 16,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          width: "100%",
-          letterSpacing: 0.5,
-        }}
-      >
+    <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 340 }}>
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, width: "100%", letterSpacing: 0.5 }}>
         <span style={{ width: 3, height: 14, background: C.red, borderRadius: 2 }}></span>
         {label}
       </div>
@@ -513,55 +387,18 @@ function GaugeChart({ value, max, label, C }: { value: number; max: number; labe
           <circle cx="130" cy="140" r="11" fill={currentColor} />
           <circle cx="130" cy="140" r="6" fill={C.white} />
         </g>
-        <text x="50" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">
-          0%
-        </text>
-        <text x="130" y="12" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">
-          100%
-        </text>
-        <text x="210" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">
-          150%
-        </text>
+        <text x="50" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">0%</text>
+        <text x="130" y="12" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">100%</text>
+        <text x="210" y="158" fontSize="12" fontWeight="600" fill={C.gray500} textAnchor="middle">150%</text>
       </svg>
       <div style={{ textAlign: "center" }}>
-        <div
-          style={{
-            fontFamily: "'JetBrains Mono',monospace",
-            fontSize: 36,
-            fontWeight: 900,
-            color: currentColor,
-            letterSpacing: -1,
-          }}
-        >
-          {displayPct.toFixed(1).replace(".", ",")}
-          <span style={{ fontSize: 24, opacity: 0.8 }}>%</span>
-        </div>
-        <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500 }}>
-          {fmtK(value)} / {fmtK(max)}
-        </div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 36, fontWeight: 900, color: currentColor, letterSpacing: -1 }}>{displayPct.toFixed(1).replace(".", ",")}<span style={{ fontSize: 24, opacity: 0.8 }}>%</span></div>
+        <div style={{ fontSize: 12, color: C.gray700, marginTop: 6, fontWeight: 500 }}>{fmtK(value)} / {fmtK(max)}</div>
       </div>
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          marginTop: 14,
-          fontSize: 11,
-          justifyContent: "center",
-          flexWrap: "wrap",
-          borderTop: `1px solid ${C.gray100}`,
-          paddingTop: 12,
-          width: "100%",
-        }}
-      >
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: C.red }}></span>Risco
-        </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: C.gold }}></span>Atenção
-        </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: C.green }}></span>Saudável
-        </span>
+      <div style={{ display: "flex", gap: 12, marginTop: 14, fontSize: 11, justifyContent: "center", flexWrap: "wrap", borderTop: `1px solid ${C.gray100}`, paddingTop: 12, width: "100%" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.red }}></span>Risco</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.gold }}></span>Atenção</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 11, height: 11, borderRadius: "50%", background: C.green }}></span>Saudável</span>
       </div>
     </div>
   );
@@ -572,20 +409,7 @@ function Top5List({ title, items, cor, tipo, C }: { title: string; items: Array<
   const total = items.reduce((acc, i) => acc + Math.abs(i.valor), 0);
   return (
     <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20, flex: 1 }}>
-      <div
-        style={{
-          fontFamily: "'Barlow Condensed',sans-serif",
-          fontWeight: 700,
-          fontSize: 12,
-          color: C.dark,
-          textTransform: "uppercase",
-          marginBottom: 16,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          letterSpacing: 0.5,
-        }}
-      >
+      <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, letterSpacing: 0.5 }}>
         <span style={{ width: 3, height: 14, background: cor, borderRadius: 2 }}></span>
         {title}
       </div>
@@ -598,18 +422,9 @@ function Top5List({ title, items, cor, tipo, C }: { title: string; items: Array<
             return (
               <div key={i}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: C.dark, fontWeight: 500 }}>
-                    {i + 1}. {item.nome}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontFamily: "'JetBrains Mono',monospace",
-                      color: tipo === "despesa" ? C.red : C.green,
-                    }}
-                  >
-                    {tipo === "despesa" ? "-" : "+"}
-                    {fmtBRL(Math.abs(item.valor))}
+                  <span style={{ fontSize: 12, color: C.dark, fontWeight: 500 }}>{i + 1}. {item.nome}</span>
+                  <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono',monospace", color: tipo === "despesa" ? C.red : C.green }}>
+                    {tipo === "despesa" ? "-" : "+"}{fmtBRL(Math.abs(item.valor))}
                   </span>
                 </div>
                 <div style={{ background: C.gray100, borderRadius: 4, height: 6, overflow: "hidden" }}>
@@ -625,22 +440,8 @@ function Top5List({ title, items, cor, tipo, C }: { title: string; items: Array<
 }
 
 // ─── TABELA FINANCEIRA ───────────────────────────────────────────────────────
-function TabelaFinanceira({
-  rows,
-  dados,
-  mesInicial,
-  mesFinal,
-  titulo,
-  mostrarAno,
-  C,
-}: {
-  rows: Array<{ key: string; nivel: number; tipo?: string }>;
-  dados: any;
-  mesInicial: number;
-  mesFinal: number;
-  titulo: string;
-  mostrarAno: boolean;
-  C: any;
+function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAno, C }: {
+  rows: Array<{ key: string; nivel: number; tipo?: string }>; dados: any; mesInicial: number; mesFinal: number; titulo: string; mostrarAno: boolean; C: any;
 }) {
   if (!dados || !dados.contas) return <LoadingSpinner C={C} />;
 
@@ -653,20 +454,13 @@ function TabelaFinanceira({
     return soma;
   };
   const getAnual = (key: string): number => dados.contas[key]?.valores?.reduce((a: number, b: number) => a + b, 0) || 0;
-
   const receitaBrutaPeriodo = getValorPeriodo("Receita de Vendas") || getValorPeriodo("Receitas");
   const receitaLiquidaPeriodo = getValorPeriodo("Receita líquida");
-
   const getPctPeriodo = (key: string, valor: number): number => {
     if (key === "Ebitda") return receitaLiquidaPeriodo ? (valor / receitaLiquidaPeriodo) * 100 : 0;
     return receitaBrutaPeriodo ? (valor / receitaBrutaPeriodo) * 100 : 0;
   };
-
-  const rowsExistentes = rows.filter(
-    row =>
-      dados.contas[row.key] ||
-      ["Receita de Vendas", "Receita líquida", "Margem bruta", "Ebitda", "Saldo Inicial", "Saldo"].includes(row.key)
-  );
+  const rowsExistentes = rows.filter(row => dados.contas[row.key] || ["Receita de Vendas", "Receita líquida", "Margem bruta", "Ebitda", "Saldo Inicial", "Saldo"].includes(row.key));
 
   return (
     <div style={{ overflowX: "auto" }}>
@@ -676,21 +470,7 @@ function TabelaFinanceira({
             <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600, fontSize: 12 }}>{titulo}</th>
             {mostrarAno ? (
               <>
-                {MESES_CURTO.map((m, i) => (
-                  <th
-                    key={m}
-                    style={{
-                      padding: "10px 8px",
-                      textAlign: "right",
-                      color: C.white,
-                      fontWeight: 500,
-                      fontSize: 11,
-                      background: i >= mesInicial && i <= mesFinal ? C.redDark : C.dark,
-                    }}
-                  >
-                    {m}
-                  </th>
-                ))}
+                {MESES_CURTO.map((m, i) => <th key={m} style={{ padding: "10px 8px", textAlign: "right", color: C.white, fontWeight: 500, fontSize: 11, background: (i >= mesInicial && i <= mesFinal) ? C.redDark : C.dark }}>{m}</th>)}
                 <th style={{ padding: "10px 8px", textAlign: "right", color: C.red, fontWeight: 700, fontSize: 11 }}>TOTAL</th>
               </>
             ) : (
@@ -712,83 +492,23 @@ function TabelaFinanceira({
             if (isDestaque) bg = C.redLight;
             else if (isResultado) bg = C.blueLight;
             else if (isTotal) bg = C.greenLight;
-
-            const fontWeight = isDestaque || isResultado || row.tipo === "subtotal" || isTotal ? 600 : 400;
+            const fontWeight = (isDestaque || isResultado || row.tipo === "subtotal" || isTotal) ? 600 : 400;
             const paddingLeft = 12 + (row.nivel || 0) * 16;
-
             return (
               <tr key={row.key} style={{ background: bg }}>
-                <td
-                  style={{
-                    padding: `8px 12px 8px ${paddingLeft}px`,
-                    fontWeight,
-                    color: isDestaque ? C.redDark : C.dark,
-                    borderBottom: `1px solid ${C.gray100}`,
-                  }}
-                >
-                  {row.key}
-                </td>
+                <td style={{ padding: `8px 12px 8px ${paddingLeft}px`, fontWeight, color: isDestaque ? C.redDark : C.dark, borderBottom: `1px solid ${C.gray100}` }}>{row.key}</td>
                 {mostrarAno ? (
                   <>
                     {MESES_CURTO.map((_, i) => {
                       const val = getValor(row.key, i);
-                      return (
-                        <td
-                          key={i}
-                          style={{
-                            padding: "8px",
-                            textAlign: "right",
-                            fontFamily: "'JetBrains Mono',monospace",
-                            fontSize: 11,
-                            color: val < 0 ? C.red : C.dark,
-                            borderBottom: `1px solid ${C.gray100}`,
-                            background: i >= mesInicial && i <= mesFinal ? `${C.red}08` : "transparent",
-                          }}
-                        >
-                          {fmtK(val)}
-                        </td>
-                      );
+                      return <td key={i} style={{ padding: "8px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: val < 0 ? C.red : C.dark, borderBottom: `1px solid ${C.gray100}`, background: (i >= mesInicial && i <= mesFinal) ? `${C.red}08` : "transparent" }}>{fmtK(val)}</td>;
                     })}
-                    <td
-                      style={{
-                        padding: "8px",
-                        textAlign: "right",
-                        fontFamily: "'JetBrains Mono',monospace",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: getAnual(row.key) < 0 ? C.red : C.dark,
-                        borderBottom: `1px solid ${C.gray100}`,
-                      }}
-                    >
-                      {fmtK(getAnual(row.key))}
-                    </td>
+                    <td style={{ padding: "8px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 600, color: getAnual(row.key) < 0 ? C.red : C.dark, borderBottom: `1px solid ${C.gray100}` }}>{fmtK(getAnual(row.key))}</td>
                   </>
                 ) : (
                   <>
-                    <td
-                      style={{
-                        padding: "8px 12px",
-                        textAlign: "right",
-                        fontFamily: "'JetBrains Mono',monospace",
-                        color: valorPeriodo < 0 ? C.red : C.dark,
-                        fontWeight,
-                        borderBottom: `1px solid ${C.gray100}`,
-                      }}
-                    >
-                      {fmtBRL(valorPeriodo)}
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px 12px",
-                        textAlign: "right",
-                        fontFamily: "'JetBrains Mono',monospace",
-                        fontSize: 12,
-                        color: C.gray500,
-                        borderBottom: `1px solid ${C.gray100}`,
-                      }}
-                    >
-                      {pctPeriodo.toFixed(2).replace(".", ",")}%
-                    </td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: valorPeriodo < 0 ? C.red : C.dark, fontWeight, borderBottom: `1px solid ${C.gray100}` }}>{fmtBRL(valorPeriodo)}</td>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: C.gray500, borderBottom: `1px solid ${C.gray100}` }}>{pctPeriodo.toFixed(2).replace(".", ",")}%</td>
                   </>
                 )}
               </tr>
@@ -811,7 +531,6 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
     for (let i = mesInicial; i <= mesFinal; i++) soma += conta.valores[i] || 0;
     return soma;
   };
-
   const getValorPeriodoDFC = (key: string): number => {
     const conta = dados.dfc?.contas?.[key];
     if (!conta?.valores) return 0;
@@ -819,7 +538,6 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
     for (let i = mesInicial; i <= mesFinal; i++) soma += conta.valores[i] || 0;
     return soma;
   };
-
   const getValor = (key: string, idx: number): number => dados.dre.contas[key]?.valores?.[idx] || 0;
 
   const receitaBrutaPeriodo = getValorPeriodoDRE("Receita de Vendas");
@@ -828,8 +546,11 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const margemContribPeriodo = getValorPeriodoDRE("Margem líquida (margem de contribuição)");
   const ebitdaPeriodo = getValorPeriodoDRE("Ebitda");
   const gastosFixosPeriodo = getValorPeriodoDRE("Gastos fixos (custos fixos + despesas fixas)");
+  const receitasFinanceirasPeriodo = getValorPeriodoDRE("Receitas Financeiras");
   const despesasFinanceirasPeriodo = getValorPeriodoDRE("Despesas Financeiras");
+  const resultadoOperacionalBrutoPeriodo = getValorPeriodoDRE("Resultado operacional bruto");
   const impostosLucroPeriodo = getValorPeriodoDRE("Impostos Sob Lucro");
+  const resultadoOperacionalLiquidoPeriodo = getValorPeriodoDRE("Resultado operacional líquido");
   const distribuicaoLucroPeriodo = getValorPeriodoDRE("Distribuição de Lucro");
   const lucroLiqPeriodo = getValorPeriodoDRE("Resultado pós distribuição de lucros");
 
@@ -838,9 +559,9 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const pctEbitda = receitaLiquidaPeriodo ? (ebitdaPeriodo / receitaLiquidaPeriodo) * 100 : 0;
   const pctLucro = receitaBrutaPeriodo ? (lucroLiqPeriodo / receitaBrutaPeriodo) * 100 : 0;
 
-  const margemContribUnitaria = receitaBrutaPeriodo > 0 ? margemContribPeriodo / receitaBrutaPeriodo : 0;
+  const margemContribUnitaria = receitaBrutaPeriodo > 0 ? (margemContribPeriodo / receitaBrutaPeriodo) : 0;
   const custosTotaisAlem = Math.abs(gastosFixosPeriodo) + Math.abs(despesasFinanceirasPeriodo) + Math.abs(impostosLucroPeriodo) + Math.abs(distribuicaoLucroPeriodo);
-  const pontoEquilibrio = margemContribUnitaria > 0 ? custosTotaisAlem / margemContribUnitaria : 0;
+  const pontoEquilibrio = margemContribUnitaria > 0 ? (custosTotaisAlem / margemContribUnitaria) : 0;
   const pctPontoEquilibrio = pontoEquilibrio > 0 ? ((receitaBrutaPeriodo - pontoEquilibrio) / pontoEquilibrio) * 100 : 0;
 
   const mesAtual = mesFinal;
@@ -853,55 +574,22 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const liquidezPeriodo = getValorPeriodoDFC("Liquidez") || 0;
   const saldoFinal = saldoInicial + liquidezPeriodo;
 
-  const top5Despesas = DESPESAS_KEYS
-    .map(key => ({ nome: key, valor: getValorPeriodoDRE(key) }))
-    .filter(d => d.valor !== 0)
-    .sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor))
-    .slice(0, 5);
+  const top5Despesas = DESPESAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) })).filter(d => d.valor !== 0).sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor)).slice(0, 5);
+  const top5Receitas = RECEITAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) })).filter(d => d.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 5);
 
-  const top5Receitas = RECEITAS_KEYS
-    .map(key => ({ nome: key, valor: getValorPeriodoDRE(key) }))
-    .filter(d => d.valor > 0)
-    .sort((a, b) => b.valor - a.valor)
-    .slice(0, 5);
-
-  const chartData = MESES_CURTO.map((m, i) => ({
-    mes: m,
-    Receita: getValor("Receita de Vendas", i),
-    EBITDA: getValor("Ebitda", i),
-    inRange: i >= mesInicial && i <= mesFinal,
-  }));
-
+  const chartData = MESES_CURTO.map((m, i) => ({ mes: m, Receita: getValor("Receita de Vendas", i), EBITDA: getValor("Ebitda", i), inRange: i >= mesInicial && i <= mesFinal }));
   const pieData = [
     { name: "Custo Produtos", value: Math.abs(getValorPeriodoDRE("Custo dos Produtos Vendidos")) },
     { name: "Desp. Variáveis", value: Math.abs(getValorPeriodoDRE("Despesas Variáveis")) },
     { name: "Gastos Fixos", value: Math.abs(gastosFixosPeriodo) },
     { name: "Lucro", value: Math.max(0, lucroLiqPeriodo) },
   ].filter(d => d.value > 0);
-
   const PIE_COLORS = [C.red, C.orange, C.blue, C.green];
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
-    return (
-      <div
-        style={{
-          background: C.white,
-          border: `1px solid ${C.border}`,
-          borderRadius: 8,
-          padding: "8px 12px",
-          fontSize: 12,
-        }}
-      >
-        {payload.map((p: any, i: number) => (
-          <div key={i} style={{ color: p.color }}>
-            {p.name}: {fmtBRL(p.value)}
-          </div>
-        ))}
-      </div>
-    );
+    return <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>{payload.map((p: any, i: number) => <div key={i} style={{ color: p.color }}>{p.name}: {fmtBRL(p.value)}</div>)}</div>;
   };
-
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
 
   return (
@@ -914,120 +602,34 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
         <KPICard label="Lucro Líquido" valor={lucroLiqPeriodo} percentual={pctLucro} cor={C.green} C={C} />
         <KPICard label="Ponto Equilíbrio" valor={pontoEquilibrio} percentual={pctPontoEquilibrio} cor={C.gray700} showDiff={true} C={C} />
       </div>
-
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KPICard
-          label="Variação MoM"
-          valor={receitaMesAtual}
-          percentual={variacaoMoM}
-          cor={variacaoMoM >= 0 ? C.green : C.red}
-          showDiff={true}
-          subLabel={`vs ${MESES_CURTO[mesAnterior]}: ${fmtBRL(receitaMesAnterior)}`}
-          C={C}
-        />
+        <KPICard label="Variação MoM" valor={receitaMesAtual} percentual={variacaoMoM} cor={variacaoMoM >= 0 ? C.green : C.red} showDiff={true} subLabel={`vs ${MESES_CURTO[mesAnterior]}: ${fmtBRL(receitaMesAnterior)}`} C={C} />
         <KPICard label="Saldo Inicial" valor={saldoInicial} cor={C.blue} subLabel={`Em ${MESES_CURTO[mesInicial]}`} C={C} />
-        <KPICard
-          label="Liquidez Período"
-          valor={liquidezPeriodo}
-          percentual={saldoInicial ? (liquidezPeriodo / saldoInicial) * 100 : 0}
-          cor={liquidezPeriodo >= 0 ? C.green : C.red}
-          showDiff={true}
-          C={C}
-        />
+        <KPICard label="Liquidez Período" valor={liquidezPeriodo} percentual={saldoInicial ? (liquidezPeriodo / saldoInicial) * 100 : 0} cor={liquidezPeriodo >= 0 ? C.green : C.red} showDiff={true} C={C} />
         <KPICard label="Saldo Final" valor={saldoFinal} cor={saldoFinal >= 0 ? C.blue : C.red} subLabel={`Projetado em ${MESES_CURTO[mesFinal]}`} C={C} />
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
         <GaugeChart value={receitaBrutaPeriodo} max={pontoEquilibrio} label="Faturamento vs Ponto de Equilíbrio" C={C} />
-
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-          <div
-            style={{
-              fontFamily: "'Barlow Condensed',sans-serif",
-              fontWeight: 700,
-              fontSize: 12,
-              color: C.dark,
-              textTransform: "uppercase",
-              marginBottom: 16,
-              letterSpacing: 0.5,
-            }}
-          >
-            Composição — {periodoLabel}
-          </div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Composição — {periodoLabel}</div>
           <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} paddingAngle={2}>
-                {pieData.map((_, i) => (
-                  <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v: any) => fmtBRL(v)} />
-              <Legend wrapperStyle={{ fontSize: 10 }} />
-            </PieChart>
+            <PieChart><Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} paddingAngle={2}>{pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}</Pie><Tooltip formatter={(v: any) => fmtBRL(v)} /><Legend wrapperStyle={{ fontSize: 10 }} /></PieChart>
           </ResponsiveContainer>
         </div>
-
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-          <div
-            style={{
-              fontFamily: "'Barlow Condensed',sans-serif",
-              fontWeight: 700,
-              fontSize: 12,
-              color: C.dark,
-              textTransform: "uppercase",
-              marginBottom: 16,
-              letterSpacing: 0.5,
-            }}
-          >
-            Faturamento Mensal
-          </div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>Faturamento Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={C.red} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={C.red} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={C.gray100} />
-              <XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="Receita" stroke={C.red} strokeWidth={2} fill="url(#colorReceita)" />
-            </AreaChart>
+            <AreaChart data={chartData}><defs><linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={C.red} stopOpacity={0.3} /><stop offset="95%" stopColor={C.red} stopOpacity={0} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Area type="monotone" dataKey="Receita" stroke={C.red} strokeWidth={2} fill="url(#colorReceita)" /></AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
         <Top5List title="Top 5 Despesas" items={top5Despesas} cor={C.red} tipo="despesa" C={C} />
         <Top5List title="Top 5 Receitas" items={top5Receitas} cor={C.green} tipo="receita" C={C} />
         <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-          <div
-            style={{
-              fontFamily: "'Barlow Condensed',sans-serif",
-              fontWeight: 700,
-              fontSize: 12,
-              color: C.dark,
-              textTransform: "uppercase",
-              marginBottom: 16,
-              letterSpacing: 0.5,
-            }}
-          >
-            EBITDA Mensal
-          </div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>EBITDA Mensal</div>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={C.gray100} />
-              <XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>
-                {chartData.map((d, i) => (
-                  <Cell key={i} fill={d.EBITDA < 0 ? C.red : d.inRange ? C.red : C.gray300} />
-                ))}
-              </Bar>
-            </BarChart>
+            <BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke={C.gray100} /><XAxis dataKey="mes" tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: C.gray500, fontSize: 10 }} axisLine={false} tickLine={false} width={40} /><Tooltip content={<CustomTooltip />} /><Bar dataKey="EBITDA" radius={[4, 4, 0, 0]}>{chartData.map((d, i) => <Cell key={i} fill={d.EBITDA < 0 ? C.red : (d.inRange ? C.red : C.gray300)} />)}</Bar></BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -1035,7 +637,7 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   );
 }
 
-// ─── DESPESAS VIEW (CONTAS A PAGAR) ──────────────────────────────────────────
+// ─── DESPESAS VIEW (CONTAS A PAGAR) ────────────────────────────────────────────
 function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: string; empresaConfig: any; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1051,11 +653,8 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
         const json = await res.json();
         if (json.success) setLancamentos(json.lancamentos || []);
         else throw new Error(json.error || "Erro ao carregar");
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (e: any) { setError(e.message); }
+      finally { setLoading(false); }
     };
     fetchData();
   }, [ano, apiUrl, empresaConfig.apiIdentifier]);
@@ -1076,28 +675,13 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
         <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} C={C} />
         <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} C={C} />
       </div>
-
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {(["todos", "Pendente", "Liquidado"] as const).map(s => (
-          <button
-            key={s}
-            onClick={() => setFiltroStatus(s)}
-            style={{
-              padding: "6px 16px",
-              borderRadius: 6,
-              border: `1px solid ${filtroStatus === s ? C.red : C.border}`,
-              background: filtroStatus === s ? C.red : C.white,
-              color: filtroStatus === s ? C.white : C.dark,
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
+          <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? C.red : C.border}`, background: filtroStatus === s ? C.red : C.white, color: filtroStatus === s ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
             {s === "todos" ? "Todos" : s}
           </button>
         ))}
       </div>
-
       <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
@@ -1119,18 +703,7 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento || "-"}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.red, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span
-                    style={{
-                      padding: "4px 10px",
-                      borderRadius: 12,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight,
-                      color: l.status_titulo === "Liquidado" ? C.green : C.red,
-                    }}
-                  >
-                    {l.status_titulo}
-                  </span>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
                 </td>
               </tr>
             ))}
@@ -1143,7 +716,7 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
   );
 }
 
-// ─── RECEITAS VIEW (CONTAS A RECEBER) ────────────────────────────────────────
+// ─── RECEITAS VIEW (CONTAS A RECEBER) ──────────────────────────────────────────
 function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: string; empresaConfig: any; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1159,11 +732,8 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
         const json = await res.json();
         if (json.success) setLancamentos(json.lancamentos || []);
         else throw new Error(json.error || "Erro ao carregar");
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (e: any) { setError(e.message); }
+      finally { setLoading(false); }
     };
     fetchData();
   }, [ano, apiUrl, empresaConfig.apiIdentifier]);
@@ -1184,28 +754,13 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
         <KPICard label="Liquidado" valor={totalLiquidado} cor={C.green} subLabel={`${qtdLiquidado} lançamentos`} C={C} />
         <KPICard label="Total Geral" valor={totalPendente + totalLiquidado} cor={C.blue} subLabel={`${lancamentos.length} lançamentos`} C={C} />
       </div>
-
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {(["todos", "Pendente", "Liquidado"] as const).map(s => (
-          <button
-            key={s}
-            onClick={() => setFiltroStatus(s)}
-            style={{
-              padding: "6px 16px",
-              borderRadius: 6,
-              border: `1px solid ${filtroStatus === s ? C.green : C.border}`,
-              background: filtroStatus === s ? C.green : C.white,
-              color: filtroStatus === s ? C.white : C.dark,
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
+          <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: "6px 16px", borderRadius: 6, border: `1px solid ${filtroStatus === s ? C.green : C.border}`, background: filtroStatus === s ? C.green : C.white, color: filtroStatus === s ? C.white : C.dark, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
             {s === "todos" ? "Todos" : s}
           </button>
         ))}
       </div>
-
       <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
@@ -1227,18 +782,7 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento || "-"}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.green, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span
-                    style={{
-                      padding: "4px 10px",
-                      borderRadius: 12,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight,
-                      color: l.status_titulo === "Liquidado" ? C.green : C.red,
-                    }}
-                  >
-                    {l.status_titulo}
-                  </span>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
                 </td>
               </tr>
             ))}
@@ -1251,7 +795,7 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
   );
 }
 
-// ─── ORÇADO VS REALIZADO VIEW ────────────────────────────────────────────────
+// ─── ORÇADO VS REALIZADO VIEW ─────────────────────────────────────────────────
 function OrcadoRealizadoView({ ano, mesInicial, mesFinal, C }: { ano: number; mesInicial: number; mesFinal: number; C: any }) {
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
 
@@ -1268,88 +812,36 @@ function OrcadoRealizadoView({ ano, mesInicial, mesFinal, C }: { ano: number; me
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div
-          style={{
-            background: C.white,
-            border: `2px dashed ${C.blue}`,
-            borderRadius: 8,
-            padding: 24,
-            textAlign: "center",
-            color: C.gray500,
-            minHeight: 200,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ background: C.white, border: `2px dashed ${C.blue}`, borderRadius: 8, padding: 24, textAlign: "center", color: C.gray500, minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>📊</div>
-          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
-            Orçamento vs Realizado
-          </div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Orçamento vs Realizado</div>
           <div style={{ fontSize: 11, marginTop: 8, maxWidth: 200 }}>Gráfico comparativo será exibido aqui</div>
         </div>
 
-        <div
-          style={{
-            background: C.white,
-            border: `2px dashed ${C.blue}`,
-            borderRadius: 8,
-            padding: 24,
-            textAlign: "center",
-            color: C.gray500,
-            minHeight: 200,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ background: C.white, border: `2px dashed ${C.blue}`, borderRadius: 8, padding: 24, textAlign: "center", color: C.gray500, minHeight: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>📈</div>
-          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
-            Variação Mensal
-          </div>
+          <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>Variação Mensal</div>
           <div style={{ fontSize: 11, marginTop: 8, maxWidth: 200 }}>% de desvio orçamento vs realizado</div>
         </div>
       </div>
 
       <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, padding: 20 }}>
-        <div
-          style={{
-            fontFamily: "'Barlow Condensed',sans-serif",
-            fontWeight: 700,
-            fontSize: 12,
-            color: C.dark,
-            textTransform: "uppercase",
-            marginBottom: 16,
-            letterSpacing: 0.5,
-          }}
-        >
-          KPI's — Desvio Orçado vs Realizado
-        </div>
+        <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 12, color: C.dark, textTransform: "uppercase", marginBottom: 16, letterSpacing: 0.5 }}>KPI's — Desvio Orçado vs Realizado</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
           <div style={{ background: C.blueLight, border: `1px solid ${C.blue}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.blue, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>
-              Receita
-            </div>
+            <div style={{ fontSize: 10, color: C.blue, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Receita</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.blue }}>-</div>
           </div>
           <div style={{ background: C.orangeLight, border: `1px solid ${C.orange}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.orange, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>
-              Custos
-            </div>
+            <div style={{ fontSize: 10, color: C.orange, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Custos</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.orange }}>-</div>
           </div>
           <div style={{ background: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.gold, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>
-              Despesas
-            </div>
+            <div style={{ fontSize: 10, color: C.gold, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Despesas</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.gold }}>-</div>
           </div>
           <div style={{ background: C.greenLight, border: `1px solid ${C.green}`, borderRadius: 6, padding: 12, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: C.green, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>
-              Resultado
-            </div>
+            <div style={{ fontSize: 10, color: C.green, fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", marginBottom: 4 }}>Resultado</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.green }}>-</div>
           </div>
         </div>
@@ -1358,7 +850,7 @@ function OrcadoRealizadoView({ ano, mesInicial, mesFinal, C }: { ano: number; me
   );
 }
 
-// ─── MENU DROPDOWN ───────────────────────────────────────────────────────────
+// ─── MENU DROPDOWN ────────────────────────────────────────────────────────────
 function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [usuarioModalAberto, setUsuarioModalAberto] = useState(false);
@@ -1377,13 +869,11 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
 
   useEffect(() => {
     const carregarUsuario = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUsuario({
           email: user.email,
-          name: user.user_metadata?.name || "Usuário",
+          name: user.user_metadata?.name || "Usuário"
         });
       }
     };
@@ -1398,11 +888,11 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
     };
 
     if (menuAberto) {
-      document.addEventListener("mousedown", handleClickFora);
+      document.addEventListener('mousedown', handleClickFora);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickFora);
+      document.removeEventListener('mousedown', handleClickFora);
     };
   }, [menuAberto]);
 
@@ -1417,47 +907,44 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
 
   const handleGerarPDF = async () => {
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const elemento =
-        document.querySelector('div[style*="display: flex"][style*="flexDirection: column"]') ||
-        document.querySelector('div[style*="flex-direction: column"]') ||
-        document.body;
+      const html2pdf = (await import('html2pdf.js')).default;
+      const elemento = document.querySelector('div[style*="display: flex"][style*="flexDirection: column"]') || document.querySelector('div[style*="flex-direction: column"]') || document.body;
 
       if (!elemento || elemento === document.body) {
-        alert("Erro: Conteúdo não encontrado na página");
+        alert('Erro: Conteúdo não encontrado na página');
         return;
       }
 
-      const nomePagina = tabs.find(t => t.id === tab)?.label || "Dashboard";
+      const nomePagina = tabs.find(t => t.id === tab)?.label || 'Dashboard';
       const opcoes = {
         margin: 10,
-        filename: `${empresaConfig.nome}_${nomePagina}_${new Date().toLocaleDateString("pt-BR")}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        filename: `${empresaConfig.nome}_${nomePagina}_${new Date().toLocaleDateString('pt-BR')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { orientation: "portrait", unit: "mm", format: "a4" },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
       };
 
       html2pdf().set(opcoes).from(elemento).save();
       setMenuAberto(false);
     } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      alert("Erro ao gerar PDF");
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF');
     }
   };
 
   const handleSair = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   const handleRedefinirSenha = async () => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(usuario?.email);
       if (error) throw error;
-      alert("Email de redefinição enviado com sucesso!");
+      alert('Email de redefinição enviado com sucesso!');
       setUsuarioModalAberto(false);
     } catch (error: any) {
-      alert("Erro: " + error.message);
+      alert('Erro: ' + error.message);
     }
   };
 
@@ -1476,31 +963,26 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
             fontFamily: "'Barlow',sans-serif",
             fontWeight: 700,
             fontSize: 18,
-            transition: "all 0.15s",
+            transition: "all 0.15s"
           }}
         >
           ⋯
         </button>
 
         {menuAberto && (
-          <div
-            style={{
-              position: "absolute",
-              top: 45,
-              right: 0,
-              background: C.white,
-              border: `1px solid ${C.border}`,
-              borderRadius: 8,
-              minWidth: 220,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              zIndex: 1000,
-            }}
-          >
+          <div style={{
+            position: "absolute",
+            top: 45,
+            right: 0,
+            background: C.white,
+            border: `1px solid ${C.border}`,
+            borderRadius: 8,
+            minWidth: 220,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            zIndex: 1000
+          }}>
             <button
-              onClick={() => {
-                router.push("/select-company");
-                setMenuAberto(false);
-              }}
+              onClick={() => { router.push('/select-company'); setMenuAberto(false); }}
               style={{
                 width: "100%",
                 textAlign: "left",
@@ -1512,19 +994,16 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 color: C.dark,
                 borderBottom: `1px solid ${C.gray100}`,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.background = C.gray50)}
-              onMouseOut={e => (e.currentTarget.style.background = "none")}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🏢 Selecionar Empresa
             </button>
 
             <button
-              onClick={() => {
-                window.history.back();
-                setMenuAberto(false);
-              }}
+              onClick={() => { window.history.back(); setMenuAberto(false); }}
               style={{
                 width: "100%",
                 textAlign: "left",
@@ -1536,10 +1015,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 color: C.dark,
                 borderBottom: `1px solid ${C.gray100}`,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.background = C.gray50)}
-              onMouseOut={e => (e.currentTarget.style.background = "none")}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               📊 Selecionar Módulo
             </button>
@@ -1557,10 +1036,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 color: C.dark,
                 borderBottom: `1px solid ${C.gray100}`,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.background = C.gray50)}
-              onMouseOut={e => (e.currentTarget.style.background = "none")}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               👤 Meu Usuário
             </button>
@@ -1578,10 +1057,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 color: C.dark,
                 borderBottom: `1px solid ${C.gray100}`,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.background = C.gray50)}
-              onMouseOut={e => (e.currentTarget.style.background = "none")}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray50)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🖥️ Tela Cheia
             </button>
@@ -1601,12 +1080,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 borderBottom: `1px solid ${C.gray100}`,
                 opacity: loading ? 0.5 : 1,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => {
-                if (!loading) e.currentTarget.style.background = C.gray50;
-              }}
-              onMouseOut={e => (e.currentTarget.style.background = "none")}
+              onMouseOver={(e) => { if (!loading) (e.currentTarget.style.background = C.gray50); }}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🖨️ Gerar PDF
             </button>
@@ -1623,10 +1100,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 fontSize: 13,
                 color: C.red,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.background = C.redLight)}
-              onMouseOut={e => (e.currentTarget.style.background = "none")}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.redLight)}
+              onMouseOut={(e) => (e.currentTarget.style.background = "none")}
             >
               🚪 Sair
             </button>
@@ -1635,29 +1112,25 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
       </div>
 
       {usuarioModalAberto && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-          }}
-        >
-          <div
-            style={{
-              background: C.white,
-              borderRadius: 12,
-              padding: 32,
-              maxWidth: 400,
-              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-            }}
-          >
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 2000
+        }}>
+          <div style={{
+            background: C.white,
+            borderRadius: 12,
+            padding: 32,
+            maxWidth: 400,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.2)"
+          }}>
             <h2 style={{ fontFamily: "'Barlow',sans-serif", marginTop: 0 }}>Meu Usuário</h2>
 
             <div style={{ marginBottom: 20 }}>
@@ -1688,10 +1161,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 fontWeight: 600,
                 marginBottom: 12,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "opacity 0.15s",
+                transition: "opacity 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.opacity = "0.9")}
-              onMouseOut={e => (e.currentTarget.style.opacity = "1")}
+              onMouseOver={(e) => (e.currentTarget.style.opacity = "0.9")}
+              onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
             >
               Redefinir Senha
             </button>
@@ -1708,10 +1181,10 @@ function MenuDropdown({ tab, loading, empresaConfig, C }: any) {
                 cursor: "pointer",
                 fontWeight: 600,
                 fontFamily: "'Barlow',sans-serif",
-                transition: "background 0.15s",
+                transition: "background 0.15s"
               }}
-              onMouseOver={e => (e.currentTarget.style.background = C.gray300)}
-              onMouseOut={e => (e.currentTarget.style.background = C.gray100)}
+              onMouseOver={(e) => (e.currentTarget.style.background = C.gray300)}
+              onMouseOut={(e) => (e.currentTarget.style.background = C.gray100)}
             >
               Fechar
             </button>
@@ -1727,30 +1200,27 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const slug = params.slug;
   const empresaConfig = resolveEmpresa(slug);
 
+  // ✅ VALIDAÇÃO CRÍTICA: Se empresa não foi encontrada, mostrar erro
   if (!empresaConfig) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          flexDirection: "column",
-          background: "#F8F8F8",
-          fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif",
-        }}
-      >
-        <div
-          style={{
-            background: "#FFFFFF",
-            border: "1px solid #E2E2E2",
-            borderRadius: 12,
-            padding: 40,
-            textAlign: "center",
-            maxWidth: 400,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          }}
-        >
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        flexDirection: "column",
+        background: "#F8F8F8",
+        fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif"
+      }}>
+        <div style={{
+          background: "#FFFFFF",
+          border: "1px solid #E2E2E2",
+          borderRadius: 12,
+          padding: 40,
+          textAlign: "center",
+          maxWidth: 400,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+        }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
           <h1 style={{ margin: "0 0 12px 0", fontSize: 24, color: "#1A1A1A", fontWeight: 700 }}>
             Empresa não encontrada
@@ -1758,7 +1228,9 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           <p style={{ margin: "0 0 24px 0", fontSize: 14, color: "#666666", lineHeight: 1.6 }}>
             O dashboard para "<strong style={{ color: "#333333" }}>{slug}</strong>" não existe no sistema.
           </p>
-          <p style={{ margin: 0, fontSize: 12, color: "#999999" }}>Verifique a URL e tente novamente.</p>
+          <p style={{ margin: 0, fontSize: 12, color: "#999999" }}>
+            Verifique a URL e tente novamente.
+          </p>
         </div>
       </div>
     );
@@ -1770,7 +1242,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   console.log("🚀 [DASHBOARD INICIADO]", {
     slug,
     empresa: empresaConfig.nome,
-    corPrimaria: C.red,
+    corPrimaria: C.red
   });
 
   const [ano, setAno] = useState(2026);
@@ -1784,15 +1256,15 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const [error, setError] = useState<string | null>(null);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [mesesDisponiveis, setMesesDisponiveis] = useState<Array<{ idx: number; label: string }>>([]);
-  const fetchIdRef = useRef(0);
 
-  const buscarDoCache = async (tipo: string, anoBusca: number, filialBusca: string) => {
+  // Função auxiliar para buscar do Supabase Cache
+  const buscarDoCache = async (tipo: string, ano: number, filial: string) => {
     const { data, error } = await supabase
       .from("cache_financeiro")
       .select("*")
       .eq("empresa_slug", empresaConfig.apiIdentifier)
-      .eq("filial", filialBusca)
-      .eq("ano", anoBusca)
+      .eq("filial", filial)
+      .eq("ano", ano)
       .eq("tipo", tipo)
       .single();
 
@@ -1805,24 +1277,14 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   };
 
   const fetchDados = useCallback(async () => {
-    const currentFetchId = ++fetchIdRef.current;
-
     setLoading(true);
     setError(null);
-
-    console.log("🔄 FETCHDADOS CHAMADO", { ano, filial, mesInicial, mesFinal, slug });
-
+    console.log("🔄 FETCHDADOS CHAMADO", { ano, filial, mesInicial, mesFinal });
     try {
+      // Buscar DRE e DFC do cache Supabase
       const dre = await buscarDoCache("dre", ano, filial);
       const dfc = await buscarDoCache("dfc", ano, filial);
-
-      console.log("📊 DADOS DO CACHE", {
-        dreEncontrada: !!dre,
-        dfcEncontrada: !!dfc,
-        ano,
-        filial,
-        empresa: empresaConfig.apiIdentifier,
-      });
+      console.log("📊 DADOS DO CACHE", { dreEncontrada: !!dre, dfcEncontrada: !!dfc, ano, filial });
 
       if (!dre || !dfc) {
         throw new Error("Dados não encontrados no cache");
@@ -1831,76 +1293,50 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       const json = enrichFinancePayload({
         success: true,
         dre: dre.dados,
-        dfc: dfc.dados,
+        dfc: dfc.dados
       });
-
-      if (currentFetchId !== fetchIdRef.current) return;
 
       setDados(json);
       setUltimaAtualizacao(new Date());
 
       if (json.dre?.contas?.["Receita de Vendas"]?.valores) {
         const meses = json.dre.contas["Receita de Vendas"].valores
-          .map((v: number, i: number) => (v !== 0 ? { idx: i, label: MESES[i] } : null))
+          .map((v: number, i: number) => v !== 0 ? { idx: i, label: MESES[i] } : null)
           .filter((m: any) => m !== null);
-
         setMesesDisponiveis(meses);
-
-        if (meses.length > 0 && mesInicial === 0 && mesFinal === 0) {
+        if ((mesInicial === 0 && mesFinal === 0) && meses.length > 0) {
           setMesInicial(meses[0].idx);
           setMesFinal(meses[meses.length - 1].idx);
         }
       }
     } catch (e: any) {
-      console.warn("Cache falhou, tentando API original...", e?.message);
-
+      setError(e.message);
+      // Se falhar no cache, tenta a API original como fallback
+      console.warn("Cache falhou, tentando API original...");
       try {
-        const res = await fetch(
-          `${apiUrl}?ano=${ano}&filial=${encodeURIComponent(filial)}&empresa=${empresaConfig.apiIdentifier}`
-        );
-
+        const res = await fetch(`${apiUrl}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const fallbackJsonRaw = await res.json();
-        if (!fallbackJsonRaw.success) throw new Error(fallbackJsonRaw.error || "Erro desconhecido");
-
-        const fallbackJson = enrichFinancePayload(fallbackJsonRaw);
-
-        if (currentFetchId !== fetchIdRef.current) return;
-
-        setDados(fallbackJson);
+        const jsonRaw = await res.json();
+        if (!jsonRaw.success) throw new Error(jsonRaw.error || "Erro desconhecido");
+        const json = enrichFinancePayload(jsonRaw);
+        setDados(json);
         setError(null);
-        setUltimaAtualizacao(new Date());
-
-        if (fallbackJson.dre?.contas?.["Receita de Vendas"]?.valores) {
-          const meses = fallbackJson.dre.contas["Receita de Vendas"].valores
-            .map((v: number, i: number) => (v !== 0 ? { idx: i, label: MESES[i] } : null))
-            .filter((m: any) => m !== null);
-
-          setMesesDisponiveis(meses);
-
-          if (meses.length > 0 && mesInicial === 0 && mesFinal === 0) {
-            setMesInicial(meses[0].idx);
-            setMesFinal(meses[meses.length - 1].idx);
-          }
-        }
-      } catch (fallbackError: any) {
-        if (currentFetchId !== fetchIdRef.current) return;
-        setError(fallbackError.message);
-      }
-    } finally {
-      if (currentFetchId === fetchIdRef.current) {
-        setLoading(false);
+      } catch (fallbackError) {
+        setError((fallbackError as any).message);
       }
     }
-  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier, apiUrl, slug]);
+    finally { setLoading(false); }
+  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier, apiUrl]);
 
+  useEffect(() => { fetchDados(); }, [fetchDados]);
+
+  // 🔄 Efeito adicional que reage diretamente ao ano
   useEffect(() => {
+    console.log("📅 EFEITO DE ANO DISPARADO", { ano, filial });
     fetchDados();
-  }, [fetchDados]);
+  }, [ano, filial]);
 
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
-
   const tabs = [
     { id: "overview", label: "Visão Geral" },
     { id: "dre", label: "DRE" },
@@ -1914,181 +1350,61 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        <div
-          style={{
-            background: C.white,
-            padding: "8px 28px",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            borderBottom: `2px solid ${C.red}`,
-            position: "sticky",
-            top: 0,
-            zIndex: 100,
-            height: 56,
-          }}
-        >
+        {/* ─── HEADER ─── */}
+        <div style={{
+          background: C.white,
+          padding: "8px 28px",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          borderBottom: `2px solid ${C.red}`,
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          height: 56
+        }}>
+          {/* Logos */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 10, borderRight: `1px solid ${C.border}` }}>
             <img src={empresaConfig.logoDM} alt="D&M Consultoria" style={{ height: 36 }} />
             <img src={empresaConfig.logo} alt={empresaConfig.nome} style={{ height: 32 }} />
           </div>
 
+          {/* Abas */}
           <div style={{ display: "flex", gap: 1 }}>
             {tabs.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id as any)}
-                style={{
-                  background: tab === t.id ? C.red : "transparent",
-                  color: tab === t.id ? C.white : C.dark,
-                  border: "none",
-                  borderRadius: 3,
-                  padding: "3px 8px",
-                  cursor: "pointer",
-                  fontFamily: "'Barlow Condensed',sans-serif",
-                  fontWeight: 700,
-                  fontSize: 10,
-                  letterSpacing: 0.2,
-                  textTransform: "uppercase",
-                  transition: "all 0.15s",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {t.label}
-              </button>
+              <button key={t.id} onClick={() => setTab(t.id as any)} style={{ background: tab === t.id ? C.red : "transparent", color: tab === t.id ? C.white : C.dark, border: "none", borderRadius: 3, padding: "3px 8px", cursor: "pointer", fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 0.2, textTransform: "uppercase", transition: "all 0.15s", whiteSpace: "nowrap" }}>{t.label}</button>
             ))}
           </div>
 
+          {/* Separador */}
           <div style={{ width: 1, height: 24, background: C.border, margin: "0 2px" }}></div>
 
-          <select
-            value={ano}
-            onChange={e => {
-              const novoAno = Number(e.target.value);
-              console.log("✏️ ANO ALTERADO", { anoAnterior: ano, novoAno });
-              setAno(novoAno);
-            }}
-            style={{
-              border: `1px solid ${C.border}`,
-              borderRadius: 3,
-              padding: "4px 8px",
-              fontFamily: "'Barlow',sans-serif",
-              fontSize: 11,
-              color: C.dark,
-              background: C.white,
-              cursor: "pointer",
-              fontWeight: 600,
-              height: 32,
-            }}
-          >
-            {[2024, 2025, 2026].map(a => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
+          {/* Controles */}
+          <select value={ano} onChange={e => { const novoAno = Number(e.target.value); console.log("✏️ ANO ALTERADO", { anoAnterior: ano, novoAno }); setAno(novoAno); }} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
+            {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
 
-          <select
-            value={filial}
-            onChange={e => setFilial(e.target.value)}
-            style={{
-              border: `1px solid ${C.border}`,
-              borderRadius: 3,
-              padding: "4px 8px",
-              fontFamily: "'Barlow',sans-serif",
-              fontSize: 11,
-              color: C.dark,
-              background: C.white,
-              cursor: "pointer",
-              fontWeight: 600,
-              height: 32,
-            }}
-          >
-            {empresaConfig.filiais.map((f: string) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
+          <select value={filial} onChange={e => setFilial(e.target.value)} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", fontWeight: 600, height: 32 }}>
+            {empresaConfig.filiais.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
 
-          <span
-            style={{
-              fontSize: 9,
-              color: C.gray500,
-              fontFamily: "'Barlow Condensed',sans-serif",
-              letterSpacing: 0.3,
-              fontWeight: 600,
-              textTransform: "uppercase",
-            }}
-          >
-            Período:
-          </span>
+          <span style={{ fontSize: 9, color: C.gray500, fontFamily: "'Barlow Condensed',sans-serif", letterSpacing: 0.3, fontWeight: 600, textTransform: "uppercase" }}>Período:</span>
 
-          <select
-            value={mesInicial}
-            onChange={e => setMesInicial(Number(e.target.value))}
-            disabled={mesesDisponiveis.length === 0}
-            style={{
-              border: `1px solid ${C.border}`,
-              borderRadius: 3,
-              padding: "4px 8px",
-              fontFamily: "'Barlow',sans-serif",
-              fontSize: 11,
-              color: C.dark,
-              background: C.white,
-              cursor: "pointer",
-              opacity: mesesDisponiveis.length === 0 ? 0.5 : 1,
-              fontWeight: 600,
-              height: 32,
-            }}
-          >
-            {mesesDisponiveis.length > 0 ? (
-              mesesDisponiveis.map(m => (
-                <option key={m.idx} value={m.idx}>
-                  {m.label}
-                </option>
-              ))
-            ) : (
-              <option>-</option>
-            )}
+          <select value={mesInicial} onChange={e => setMesInicial(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, height: 32 }}>
+            {mesesDisponiveis.length > 0 ? mesesDisponiveis.map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
           </select>
 
           <span style={{ fontSize: 9, color: C.gray500, fontFamily: "'Barlow',sans-serif", fontWeight: 600 }}>–</span>
 
-          <select
-            value={mesFinal}
-            onChange={e => setMesFinal(Number(e.target.value))}
-            disabled={mesesDisponiveis.length === 0}
-            style={{
-              border: `1px solid ${C.border}`,
-              borderRadius: 3,
-              padding: "4px 8px",
-              fontFamily: "'Barlow',sans-serif",
-              fontSize: 11,
-              color: C.dark,
-              background: C.white,
-              cursor: "pointer",
-              opacity: mesesDisponiveis.length === 0 ? 0.5 : 1,
-              fontWeight: 600,
-              height: 32,
-            }}
-          >
-            {mesesDisponiveis.length > 0 ? (
-              mesesDisponiveis
-                .filter(m => m.idx >= mesInicial)
-                .map(m => (
-                  <option key={m.idx} value={m.idx}>
-                    {m.label}
-                  </option>
-                ))
-            ) : (
-              <option>-</option>
-            )}
+          <select value={mesFinal} onChange={e => setMesFinal(Number(e.target.value))} disabled={mesesDisponiveis.length === 0} style={{ border: `1px solid ${C.border}`, borderRadius: 3, padding: "4px 8px", fontFamily: "'Barlow',sans-serif", fontSize: 11, color: C.dark, background: C.white, cursor: "pointer", opacity: mesesDisponiveis.length === 0 ? 0.5 : 1, fontWeight: 600, height: 32 }}>
+            {mesesDisponiveis.length > 0 ? mesesDisponiveis.filter(m => m.idx >= mesInicial).map(m => <option key={m.idx} value={m.idx}>{m.label}</option>) : <option>-</option>}
           </select>
 
+          {/* Spacer */}
           <div style={{ flex: 1 }}></div>
 
+          {/* Botões de ação */}
           {(tab === "dre" || tab === "dfc") && (
             <button
               onClick={() => setModoAnual(!modoAnual)}
@@ -2105,7 +1421,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
                 letterSpacing: 0.3,
                 textTransform: "uppercase",
                 height: 32,
-                transition: "all 0.15s",
+                transition: "all 0.15s"
               }}
             >
               {modoAnual ? "Anual" : "Mensal"}
@@ -2116,19 +1432,15 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
             onClick={async () => {
               setLoading(true);
               try {
-                const response = await fetch(
-                  `${apiUrl}?atualizar_cache=true&ano=${ano}&filial=${encodeURIComponent(filial)}&empresa=${empresaConfig.apiIdentifier}`
-                );
-
-                if (!response.ok) {
-                  throw new Error(`Erro ao atualizar cache: HTTP ${response.status}`);
+                // Chama a API com parâmetro de atualização manual
+                const response = await fetch(`${apiUrl}?atualizar_cache=true`);
+                if (response.ok) {
+                  // Aguarda 1 segundo pra cache ser populado, depois recarrega
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  fetchDados();
                 }
-
-                await new Promise(resolve => setTimeout(resolve, 1200));
-                await fetchDados();
               } catch (e) {
                 console.error("Erro ao atualizar cache:", e);
-                setError((e as any)?.message || "Erro ao atualizar cache");
               } finally {
                 setLoading(false);
               }
@@ -2146,12 +1458,13 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
               fontSize: 11,
               fontWeight: 600,
               height: 32,
-              transition: "all 0.15s",
+              transition: "all 0.15s"
             }}
           >
             {loading ? "Atualizando..." : "🔄"}
           </button>
 
+          {/* Menu Dropdown */}
           <MenuDropdown tab={tab} loading={loading} empresaConfig={empresaConfig} C={C} />
         </div>
 
@@ -2160,38 +1473,19 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner C={C} />}
           {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" C={C} />}
           {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
-          {!loading && !error && dados && tab === "dre" && (
-            <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
-              <TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — ${ano} — ${periodoLabel}`} mostrarAno={modoAnual} C={C} />
-            </div>
-          )}
-          {!loading && !error && dados && tab === "dfc" && (
-            <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
-              <TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — ${ano} — ${periodoLabel}`} mostrarAno={modoAnual} C={C} />
-            </div>
-          )}
+          {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
+          {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
           {tab === "despesas" && <DespesasView ano={ano} apiUrl={apiUrl} empresaConfig={empresaConfig} C={C} />}
           {tab === "receitas" && <ReceitasView ano={ano} apiUrl={apiUrl} empresaConfig={empresaConfig} C={C} />}
           {!loading && !error && tab === "orcado-realizado" && <OrcadoRealizadoView ano={ano} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
         </div>
       </div>
 
-      <div
-        style={{
-          borderTop: `1px solid ${C.border}`,
-          padding: "12px 28px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          background: C.white,
-        }}
-      >
-        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>
-          {empresaConfig.nomeCompleto} · CNPJ {empresaConfig.cnpj}
-        </span>
+      <div style={{ borderTop: `1px solid ${C.border}`, padding: "12px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", background: C.white }}>
+        <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'Barlow',sans-serif" }}>{empresaConfig.nomeCompleto} · CNPJ {empresaConfig.cnpj}</span>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>
-            {loading ? "Carregando..." : ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : ""}
+            {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
           </span>
           <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>Fonte: Omie API via Google Sheets</span>
         </div>
