@@ -663,6 +663,191 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   );
 }
 
+// ─── DEBUG FINANCEIRO ────────────────────────────────────────────────────────
+function DebugFinanceiroView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInicial: number; mesFinal: number; C: any }) {
+  if (!dados?.dre?.contas) return null;
+
+  const getValorPeriodo = (key: string): number => {
+    const conta = dados.dre.contas[key];
+    if (!conta?.valores) return 0;
+    let soma = 0;
+    for (let i = mesInicial; i <= mesFinal; i++) soma += Number(conta.valores[i] || 0);
+    return soma;
+  };
+
+  const linhasPrincipais = [
+    "Receita de Vendas",
+    "Deduções de Vendas",
+    "Receita líquida",
+    "Custo dos Produtos Vendidos",
+    "Margem bruta",
+    "Despesas Variáveis",
+    "Margem líquida (margem de contribuição)",
+    "Gastos fixos (custos fixos + despesas fixas)",
+    "Ebitda",
+    "Receitas Financeiras",
+    "Despesas Financeiras",
+    "Resultado operacional bruto",
+    "Impostos Sob Lucro",
+    "Resultado operacional líquido",
+    "Distribuição de Lucro",
+    "Resultado pós distribuição de lucros",
+  ];
+
+  const blocosAnaliticos = [
+    {
+      titulo: "Componentes de Gastos Fixos",
+      linhas: [
+        "Gasto com Pessoal - Adm",
+        "Gasto com pessoal - Prod/Oper",
+        "Despesas Operacionais",
+        "Uso e Consumo",
+        "Viagens e Hospedagens",
+      ],
+      subtotal: "Gastos fixos (custos fixos + despesas fixas)",
+    },
+    {
+      titulo: "Componentes de Despesas Variáveis",
+      linhas: [
+        "Comissões de vendas",
+        "Fretes e Combustíveis (venda)",
+        "Gastos com Veículos",
+        "Manutenção de Equipamentos",
+        "Outros",
+        "Taxa de Boletos | Cartão",
+      ],
+      subtotal: "Despesas Variáveis",
+    },
+    {
+      titulo: "Componentes de Despesas Financeiras",
+      linhas: [
+        "Despesas bancárias",
+        "Juros e multas",
+        "Outras despesas financeiras",
+      ],
+      subtotal: "Despesas Financeiras",
+    },
+    {
+      titulo: "Componentes de Impostos Sobre Lucro",
+      linhas: [
+        "CSLL",
+        "IRPJ",
+      ],
+      subtotal: "Impostos Sob Lucro",
+    },
+  ];
+
+  const fmtLinha = (v: number) => {
+    const abs = Math.abs(v);
+    const s = new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(abs);
+    return v < 0 ? `-R$ ${s}` : `R$ ${s}`;
+  };
+
+  return (
+    <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+      <div
+        style={{
+          background: C.blueLight,
+          border: `1px solid ${C.blue}`,
+          borderRadius: 8,
+          padding: 16,
+        }}
+      >
+        <div style={{ fontWeight: 700, fontSize: 13, color: C.blue, marginBottom: 6 }}>
+          DEBUG FINANCEIRO — LONDON
+        </div>
+        <div style={{ fontSize: 12, color: C.dark }}>
+          Este painel mostra os valores efetivamente usados no cálculo do dashboard para o período selecionado.
+        </div>
+      </div>
+
+      <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+          <thead>
+            <tr style={{ background: C.dark }}>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white }}>Linha DRE</th>
+              <th style={{ padding: "10px 12px", textAlign: "right", color: C.white }}>Valor no período</th>
+            </tr>
+          </thead>
+          <tbody>
+            {linhasPrincipais.map((linha, idx) => {
+              const valor = getValorPeriodo(linha);
+              return (
+                <tr key={linha} style={{ background: idx % 2 === 0 ? C.white : C.gray50 }}>
+                  <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}` }}>{linha}</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", color: valor < 0 ? C.red : C.dark }}>
+                    {fmtLinha(valor)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {blocosAnaliticos.map((bloco) => {
+        const subtotal = getValorPeriodo(bloco.subtotal);
+        const somaFilhos = bloco.linhas.reduce((acc, linha) => acc + getValorPeriodo(linha), 0);
+        const diferenca = subtotal - somaFilhos;
+
+        return (
+          <div key={bloco.titulo} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ padding: "12px 16px", fontWeight: 700, fontSize: 12, borderBottom: `1px solid ${C.gray100}`, background: C.gray50 }}>
+              {bloco.titulo}
+            </div>
+
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr style={{ background: C.dark }}>
+                  <th style={{ padding: "10px 12px", textAlign: "left", color: C.white }}>Linha</th>
+                  <th style={{ padding: "10px 12px", textAlign: "right", color: C.white }}>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bloco.linhas.map((linha, idx) => {
+                  const valor = getValorPeriodo(linha);
+                  return (
+                    <tr key={linha} style={{ background: idx % 2 === 0 ? C.white : C.gray50 }}>
+                      <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}` }}>{linha}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace" }}>
+                        {fmtLinha(valor)}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                <tr style={{ background: C.blueLight }}>
+                  <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontWeight: 700 }}>Soma dos filhos</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>
+                    {fmtLinha(somaFilhos)}
+                  </td>
+                </tr>
+
+                <tr style={{ background: C.greenLight }}>
+                  <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontWeight: 700 }}>Subtotal usado no dashboard</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>
+                    {fmtLinha(subtotal)}
+                  </td>
+                </tr>
+
+                <tr style={{ background: Math.abs(diferenca) > 0.009 ? C.redLight : C.gray50 }}>
+                  <td style={{ padding: "10px 12px", fontWeight: 700 }}>Diferença subtotal - soma filhos</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, color: Math.abs(diferenca) > 0.009 ? C.red : C.dark }}>
+                    {fmtLinha(diferenca)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── DESPESAS VIEW (CONTAS A PAGAR) ────────────────────────────────────────────
 function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: string; empresaConfig: any; C: any }) {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
@@ -1279,10 +1464,10 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const [dados, setDados] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mostrarDebug, setMostrarDebug] = useState(false);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [mesesDisponiveis, setMesesDisponiveis] = useState<Array<{ idx: number; label: string }>>([]);
 
-  // Função auxiliar para buscar do Supabase Cache
   const buscarDoCache = async (tipo: string, ano: number, filial: string) => {
     const { data, error } = await supabase
       .from("cache_financeiro")
@@ -1353,7 +1538,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
 
   useEffect(() => { fetchDados(); }, [fetchDados]);
 
-  // 🔄 Efeito adicional que reage diretamente ao ano
   useEffect(() => {
     console.log("📅 EFEITO DE ANO DISPARADO", { ano, filial });
     fetchDados();
@@ -1373,7 +1557,6 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
     <>
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Barlow', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-        {/* ─── HEADER ─── */}
         <div style={{
           background: C.white,
           padding: "8px 28px",
@@ -1479,6 +1662,25 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
             {loading ? "Atualizando..." : "🔄"}
           </button>
 
+          <button
+            onClick={() => setMostrarDebug(v => !v)}
+            style={{
+              background: mostrarDebug ? C.blue : C.white,
+              color: mostrarDebug ? C.white : C.blue,
+              border: `1px solid ${mostrarDebug ? C.blue : C.border}`,
+              borderRadius: 3,
+              padding: "4px 10px",
+              cursor: "pointer",
+              fontFamily: "'Barlow',sans-serif",
+              fontSize: 11,
+              fontWeight: 600,
+              height: 32,
+              transition: "all 0.15s"
+            }}
+          >
+            {mostrarDebug ? "Debug ON" : "Debug"}
+          </button>
+
           <MenuDropdown tab={tab} loading={loading} empresaConfig={empresaConfig} C={C} />
         </div>
 
@@ -1486,7 +1688,12 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           {error && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message={error} onRetry={fetchDados} C={C} />}
           {loading && tab !== "despesas" && tab !== "receitas" && !dados && <LoadingSpinner C={C} />}
           {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" C={C} />}
-          {!loading && !error && dados && tab === "overview" && <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
+          {!loading && !error && dados && tab === "overview" && (
+            <>
+              <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />
+              {mostrarDebug && <DebugFinanceiroView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
+            </>
+          )}
           {!loading && !error && dados && tab === "dre" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DRE_ROWS} dados={dados?.dre} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DRE — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
           {!loading && !error && dados && tab === "dfc" && <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}><TabelaFinanceira rows={DFC_ROWS} dados={dados?.dfc} mesInicial={mesInicial} mesFinal={mesFinal} titulo={`DFC — 2026 — ${periodoLabel}`} mostrarAno={modoAnual} C={C} /></div>}
           {tab === "despesas" && <DespesasView ano={ano} apiUrl={apiUrl} empresaConfig={empresaConfig} C={C} />}
