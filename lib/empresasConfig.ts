@@ -94,8 +94,8 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     paleta: C_TECH4CON,
     usaCache: false,
   },
-  "london-marca": {
-    aliases: ["london-marca", "london_marca", "londonmarca"],
+  "london-franqueadas": {
+  aliases: ["london-franqueadas", "london_franqueadas", "londonfranqueadas", "london-franquias"],
     nome: "London Marca",
     nomeCompleto: "London Marca",
     cnpj: "[CNPJ a confirmar]",
