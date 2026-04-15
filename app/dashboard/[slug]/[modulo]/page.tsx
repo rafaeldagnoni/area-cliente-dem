@@ -1520,21 +1520,10 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       }
     } catch (e: any) {
       setError(e.message);
-      console.warn("Cache falhou, tentando API original...");
-      try {
-        const res = await fetch(`${apiUrl}?ano=${ano}&filial=${filial}&empresa=${empresaConfig.apiIdentifier}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const jsonRaw = await res.json();
-        if (!jsonRaw.success) throw new Error(jsonRaw.error || "Erro desconhecido");
-        const json = enrichFinancePayload(jsonRaw);
-        setDados(json);
-        setError(null);
-      } catch (fallbackError) {
-        setError((fallbackError as any).message);
-      }
+      console.error("❌ ERRO AO BUSCAR DO CACHE:", e.message);
     }
     finally { setLoading(false); }
-  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier, apiUrl]);
+  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier]);
 
   useEffect(() => { fetchDados(); }, [fetchDados]);
 
@@ -1708,7 +1697,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>
             {loading ? "Carregando..." : (ultimaAtualizacao ? `Atualizado: ${ultimaAtualizacao.toLocaleTimeString("pt-BR")}` : "")}
           </span>
-          <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>Fonte: Omie API via Google Sheets</span>
+          <span style={{ fontSize: 11, color: C.gray500, fontFamily: "'JetBrains Mono',monospace" }}>Fonte: Supabase Cache</span>
         </div>
       </div>
     </>
