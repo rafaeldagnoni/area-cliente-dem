@@ -1489,7 +1489,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const fetchDados = useCallback(async () => {
     setLoading(true);
     setError(null);
-    console.log("🔄 FETCHDADOS CHAMADO", { ano, filial, mesInicial, mesFinal });
+    console.log("🔄 FETCHDADOS CHAMADO", { ano, filial });
     try {
       const dre = await buscarDoCache("dre", ano, filial);
       const dfc = await buscarDoCache("dfc", ano, filial);
