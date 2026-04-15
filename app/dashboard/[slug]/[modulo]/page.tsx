@@ -1523,9 +1523,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       console.error("❌ ERRO AO BUSCAR DO CACHE:", e.message);
     }
     finally { setLoading(false); }
-  }, [ano, filial, mesInicial, mesFinal, empresaConfig.apiIdentifier]);
-
-  useEffect(() => { fetchDados(); }, [fetchDados]);
+  }, [ano, filial, empresaConfig.apiIdentifier]);
 
   useEffect(() => {
     console.log("📅 EFEITO DE ANO DISPARADO", { ano, filial });
