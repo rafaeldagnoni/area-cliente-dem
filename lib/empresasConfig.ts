@@ -60,6 +60,33 @@ export const C_LONDON = {
   borderDark: "#CCCCCC",
 };
 
+export const C_MEDIARH = {
+  red:        "#1B4965",      // Azul marinho principal
+  redDark:    "#0D2E3F",      // Azul marinho escuro
+  redLight:   "#E8F4F8",      // Azul marinho claro
+  redMid:     "#5A8FA8",      // Azul marinho médio
+  black:      "#0A1628",
+  dark:       "#0D2E3F",
+  gray900:    "#1E3A4C",
+  gray700:    "#3D5A6F",
+  gray500:    "#5A7A8A",
+  gray300:    "#A8C4D4",
+  gray100:    "#E8F0F4",
+  gray50:     "#F4F8FA",
+  white:      "#FFFFFF",
+  blue:       "#1B4965",      // Igual ao primary
+  blueDark:   "#0D2E3F",
+  blueLight:  "#E8F4F8",
+  green:      "#14B8A6",      // Teal
+  greenLight: "#CCFBF1",      // Teal claro
+  gold:       "#5A8FA8",      // Azul médio
+  goldLight:  "#E8F4F8",
+  orange:     "#5EEAD4",      // Teal médio
+  orangeLight:"#CCFBF1",
+  border:     "#D1E3EC",
+  borderDark: "#A8C4D4",
+};
+
 // ─── TIPO PARA CONFIGURAÇÃO DE EMPRESA ────────────────────────────────────────
 export interface EmpresaConfig {
   aliases: string[];
@@ -71,7 +98,7 @@ export interface EmpresaConfig {
   apiUrl: string;
   apiIdentifier: string;
   filiais: string[];
-  paleta: typeof C_TECH4CON | typeof C_LONDON;
+  paleta: typeof C_TECH4CON | typeof C_LONDON | typeof C_MEDIARH;
   modulosDisponiveis?: string[];
   estruturaDados?: string;
   usaCache?: boolean;
@@ -107,6 +134,23 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     paleta: C_LONDON,
     modulosDisponiveis: ["financeiro"],
     estruturaDados: "london",
+    usaCache: true,
+    supabaseUrl: SUPABASE_URL,
+    supabaseKey: SUPABASE_KEY,
+  },
+  mediarh: {
+    aliases: ["mediarh", "mediarh-consultoria", "mediarh_consultoria"],
+    nome: "Mediarh",
+    nomeCompleto: "Mediarh Consultoria de Benefícios",
+    cnpj: "[CNPJ a confirmar]",
+    logo: "https://mediarh.com.br/wp-content/uploads/2024/06/Logo-Misto.svg",
+    logoDM: LOGO_DM_URL,
+    apiUrl: "https://script.google.com/macros/s/[YOUR_MEDIARH_SCRIPT_ID]/exec",
+    apiIdentifier: "mediarh",
+    filiais: ["Consolidado"],
+    paleta: C_MEDIARH,
+    modulosDisponiveis: ["financeiro"],
+    estruturaDados: "mediarh",
     usaCache: true,
     supabaseUrl: SUPABASE_URL,
     supabaseKey: SUPABASE_KEY,
