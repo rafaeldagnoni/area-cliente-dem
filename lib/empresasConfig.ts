@@ -87,6 +87,33 @@ export const C_MEDIARH = {
   borderDark: "#A8C4D4",
 };
 
+export const C_ESPEL = {
+  red:        "#D32F2F",      // Vermelho Espel
+  redDark:    "#B71C1C",      // Vermelho escuro
+  redLight:   "#FFEBEE",      // Vermelho bem claro
+  redMid:     "#EF5350",      // Vermelho médio
+  black:      "#1A1A1A",
+  dark:       "#2A2A2A",
+  gray900:    "#424242",
+  gray700:    "#616161",      // Cinza Espel
+  gray500:    "#888888",
+  gray300:    "#BDBDBD",
+  gray100:    "#F5F5F5",
+  gray50:     "#FAFAFA",      // Branco/cinza muito claro
+  white:      "#FFFFFF",
+  blue:       "#1976D2",
+  blueDark:   "#1565C0",
+  blueLight:  "#E3F2FD",
+  green:      "#388E3C",
+  greenLight: "#E8F5E9",
+  gold:       "#FFA500",
+  goldLight:  "#FFF3E0",
+  orange:     "#F57C00",
+  orangeLight:"#FFE0B2",
+  border:     "#E0E0E0",
+  borderDark: "#BDBDBD",
+};
+
 // ─── TIPO PARA CONFIGURAÇÃO DE EMPRESA ────────────────────────────────────────
 export interface EmpresaConfig {
   aliases: string[];
@@ -98,7 +125,7 @@ export interface EmpresaConfig {
   apiUrl: string;
   apiIdentifier: string;
   filiais: string[];
-  paleta: typeof C_TECH4CON | typeof C_LONDON | typeof C_MEDIARH;
+  paleta: typeof C_TECH4CON | typeof C_LONDON | typeof C_MEDIARH | typeof C_ESPEL;
   modulosDisponiveis?: string[];
   estruturaDados?: string;
   usaCache?: boolean;
@@ -151,6 +178,23 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     paleta: C_MEDIARH,
     modulosDisponiveis: ["financeiro"],
     estruturaDados: "mediarh",
+    usaCache: true,
+    supabaseUrl: SUPABASE_URL,
+    supabaseKey: SUPABASE_KEY,
+  },
+  "espel-elevadores": {
+    aliases: ["espel-elevadores", "espel_elevadores", "espelelevadores", "espel"],
+    nome: "Espel Elevadores",
+    nomeCompleto: "Espel Elevadores LTDA",
+    cnpj: "[CNPJ a confirmar]",
+    logo: "/logos/espel.png",
+    logoDM: LOGO_DM_URL,
+    apiUrl: "https://script.google.com/macros/s/YOUR_APPS_SCRIPT_ID/exec",
+    apiIdentifier: "espel-elevadores",
+    filiais: ["Consolidado", "Campinas", "Jundiaí"],
+    paleta: C_ESPEL,
+    modulosDisponiveis: ["financeiro"],
+    estruturaDados: "espel",
     usaCache: true,
     supabaseUrl: SUPABASE_URL,
     supabaseKey: SUPABASE_KEY,
