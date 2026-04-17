@@ -189,7 +189,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     cnpj: "[CNPJ a confirmar]",
     logo: "/logos/espel.png",
     logoDM: LOGO_DM_URL,
-    apiUrl: "https://script.google.com/macros/s/YOUR_APPS_SCRIPT_ID/exec",
+    apiUrl: "https://script.google.com/macros/s/AKfycbwj13HcTT4el1vTJ-uR7NkBXXLRamoYRfihU0sWTsyMaZTOqKm2yr6nEDCiP237V2eI/exec",
     apiIdentifier: "espel-elevadores",
     filiais: ["Consolidado", "Campinas", "Jundiaí"],
     paleta: C_ESPEL,
