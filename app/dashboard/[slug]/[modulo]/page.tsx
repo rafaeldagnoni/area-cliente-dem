@@ -112,6 +112,48 @@ const setConta = (contas: ContasMap, key: string, valores: number[]) => {
   contas[key] = { valores: getArray12(valores) };
 };
 
+// ─── NORMALIZAR DADOS DO CACHE (linhas -> contas) ────────────────────────────
+// Transforma a estrutura de Espel (linhas) para a estrutura universal (contas)
+// Detecta automaticamente e só transforma se necessário
+// SEGURO para London, Mediarh, Tech4Con (eles já têm 'contas')
+const normalizarDadosCache = (cacheData: any) => {
+  // Se JÁ tem 'contas', retorna como está (London, Mediarh, Tech4Con)
+  if (cacheData?.contas) {
+    return cacheData;
+  }
+
+  // Se tem 'linhas', transforma em 'contas' (Espel)
+  if (cacheData?.linhas) {
+    const contas: ContasMap = {};
+    const MESES_ORDEM = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
+
+    for (let i = 0; i < cacheData.linhas.length; i++) {
+      const linha = cacheData.linhas[i];
+      
+      // Extrair chave: usar descricao (se for significativa) ou codigo
+      let chave = (linha.descricao && linha.descricao.trim()) || (linha.codigo && linha.codigo.trim());
+      
+      // Se não temos chave boa, usar um índice
+      if (!chave) {
+        chave = `Linha ${i}`;
+      }
+
+      // Transformar valores de objeto { "JANEIRO": 123, "FEVEREIRO": 456 } em array [123, 456, ...]
+      const valores = MESES_ORDEM.map(mes => {
+        const valor = linha.valores?.[mes];
+        return typeof valor === 'number' ? valor : (typeof valor === 'string' ? parseFloat(valor) || 0 : 0);
+      });
+
+      contas[chave] = { valores };
+    }
+
+    return { ...cacheData, contas };
+  }
+
+  // Se não temos nada, retorna vazio
+  return { contas: {} };
+};
+
 const enrichDRE = (dre: any) => {
   const contas = cloneContas(dre?.contas);
 
@@ -245,10 +287,15 @@ const enrichDFC = (dfc: any) => {
 
 const enrichFinancePayload = (payload: any) => {
   if (!payload) return payload;
+  
+  // Normalizar AMBOS os dados (detecta automaticamente se precisa transformar)
+  const dre = normalizarDadosCache(payload.dre);
+  const dfc = normalizarDadosCache(payload.dfc);
+
   return {
     ...payload,
-    dre: payload.dre ? enrichDRE(payload.dre) : payload.dre,
-    dfc: payload.dfc ? enrichDFC(payload.dfc) : payload.dfc,
+    dre: dre ? enrichDRE(dre) : dre,
+    dfc: dfc ? enrichDFC(dfc) : dfc,
   };
 };
 
