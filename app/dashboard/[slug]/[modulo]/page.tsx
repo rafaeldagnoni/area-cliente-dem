@@ -600,7 +600,7 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
 }
 
 // ─── OVERVIEW VIEW ───────────────────────────────────────────────────────────
-function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInicial: number; mesFinal: number; C: any }) {
+function OverviewView({ dados, mesInicial, mesFinal, lancamentosReceber, empresaConfig, C }: { dados: any; mesInicial: number; mesFinal: number; lancamentosReceber: any[]; empresaConfig: any; C: any }) {
   if (!dados || !dados.dre || !dados.dre.contas) return <LoadingSpinner C={C} />;
 
   const getValorPeriodoDRE = (key: string): number => {
@@ -651,7 +651,29 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const liquidezPeriodo = saldoFinal - saldoInicial;
 
   const top5Despesas = DESPESAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) })).filter(d => d.valor !== 0).sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor)).slice(0, 5);
-  const top5Receitas = RECEITAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) })).filter(d => d.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 5);
+  
+  // Top 5 Receitas: CONDICIONAL por cliente
+  // Se empresa tiver temContasReceber=true, agrupa por cliente
+  // Senão, usa linhas da DRE
+  const top5Receitas = empresaConfig.temContasReceber
+    ? lancamentosReceber
+        .reduce((acc: Array<{ nome: string; valor: number }>, l: any) => {
+          const cliente = l.cliente || "Sem cliente";
+          const existing = acc.find(item => item.nome === cliente);
+          if (existing) {
+            existing.valor += l.valor_documento || 0;
+          } else {
+            acc.push({ nome: cliente, valor: l.valor_documento || 0 });
+          }
+          return acc;
+        }, [])
+        .filter(d => d.valor > 0)
+        .sort((a, b) => b.valor - a.valor)
+        .slice(0, 5)
+    : RECEITAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) }))
+        .filter(d => d.valor > 0)
+        .sort((a, b) => b.valor - a.valor)
+        .slice(0, 5);
 
   const chartData = MESES_CURTO.map((m, i) => ({ mes: m, Receita: getValor("Receita de Vendas", i), EBITDA: getValor("Ebitda", i), inRange: i >= mesInicial && i <= mesFinal }));
   const pieData = [
@@ -1517,6 +1539,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const [mostrarDebug, setMostrarDebug] = useState(false);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [mesesDisponiveis, setMesesDisponiveis] = useState<Array<{ idx: number; label: string }>>([]);
+  const [lancamentosReceber, setLancamentosReceber] = useState<any[]>([]);
 
   const buscarDoCache = async (tipo: string, ano: number, filial: string) => {
     const { data, error } = await supabase
@@ -1579,6 +1602,31 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
     console.log("📅 EFEITO DE ANO DISPARADO", { ano, filial });
     fetchDados();
   }, [ano, filial]);
+
+  // ─── FETCH CONTAS A RECEBER (APENAS SE A EMPRESA TIVER ESSE RECURSO) ────────
+  useEffect(() => {
+    if (!empresaConfig.temContasReceber) {
+      setLancamentosReceber([]);
+      return;
+    }
+
+    const fetchReceber = async () => {
+      try {
+        const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
+        const json = await res.json();
+        if (json.success) {
+          setLancamentosReceber(json.lancamentos || []);
+          console.log("💰 CONTAS A RECEBER CARREGADAS:", json.lancamentos?.length || 0);
+        } else {
+          console.warn("⚠️ Erro ao carregar Contas a Receber:", json.error);
+        }
+      } catch (e: any) {
+        console.error("❌ ERRO ao buscar Contas a Receber:", e.message);
+      }
+    };
+
+    fetchReceber();
+  }, [ano, apiUrl, empresaConfig]);
 
   const periodoLabel = mesInicial === mesFinal ? MESES[mesInicial] : `${MESES_CURTO[mesInicial]} a ${MESES_CURTO[mesFinal]}`;
   const tabs = [
@@ -1727,7 +1775,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
           {!loading && !error && !dados && tab !== "despesas" && tab !== "receitas" && <ErrorMessage message="Nenhum dado disponível" C={C} />}
           {!loading && !error && dados && tab === "overview" && (
             <>
-              <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />
+              <OverviewView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} lancamentosReceber={lancamentosReceber} empresaConfig={empresaConfig} C={C} />
               {mostrarDebug && <DebugFinanceiroView dados={dados} mesInicial={mesInicial} mesFinal={mesFinal} C={C} />}
             </>
           )}
