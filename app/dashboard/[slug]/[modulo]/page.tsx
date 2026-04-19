@@ -515,6 +515,15 @@ function TabelaFinanceira({ rows, dados, mesInicial, mesFinal, titulo, mostrarAn
 
   const getValor = (key: string, mesIdx: number): number => dados.contas[key]?.valores?.[mesIdx] || 0;
   const getValorPeriodo = (key: string): number => {
+    // Saldo Inicial: sempre pega o primeiro mês do período
+    if (key === "Saldo Inicial") {
+      return dados.contas[key]?.valores?.[mesInicial] || 0;
+    }
+    // Saldo Final: sempre pega o último mês do período
+    if (key === "Saldo Final") {
+      return dados.contas[key]?.valores?.[mesFinal] || 0;
+    }
+    
     const conta = dados.contas[key];
     if (!conta?.valores) return 0;
     let soma = 0;
