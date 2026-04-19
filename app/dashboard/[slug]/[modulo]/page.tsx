@@ -377,7 +377,6 @@ const DFC_ROWS = [
   { key: "Despesas Financeiras", nivel: 0, tipo: "subtotal" },
   { key: "Impostos Sob Lucro", nivel: 0, tipo: "subtotal" },
   { key: "Distribuição de Lucro", nivel: 0, tipo: "subtotal" },
-  { key: "Resultado pós distribuição de lucros", nivel: 0, tipo: "destaque" },
   { key: "Saldo Final", nivel: 0, tipo: "destaque" },
 ];
 
