@@ -638,8 +638,8 @@ function OverviewView({ dados, mesInicial, mesFinal, C }: { dados: any; mesInici
   const variacaoMoM = receitaMesAnterior > 0 ? ((receitaMesAtual - receitaMesAnterior) / receitaMesAnterior) * 100 : 0;
 
   const saldoInicial = dados.dfc?.contas?.["Saldo Inicial"]?.valores?.[mesInicial] || 0;
-  const liquidezPeriodo = getValorPeriodoDFC("Liquidez") || 0;
-  const saldoFinal = saldoInicial + liquidezPeriodo;
+  const saldoFinal = dados.dfc?.contas?.["Saldo Final"]?.valores?.[mesFinal] || 0;
+  const liquidezPeriodo = saldoFinal - saldoInicial;
 
   const top5Despesas = DESPESAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) })).filter(d => d.valor !== 0).sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor)).slice(0, 5);
   const top5Receitas = RECEITAS_KEYS.map(key => ({ nome: key, valor: getValorPeriodoDRE(key) })).filter(d => d.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 5);
