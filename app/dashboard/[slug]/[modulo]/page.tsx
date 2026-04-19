@@ -934,8 +934,16 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
       try {
         const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
-        if (json.success) setLancamentos(json.lancamentos || []);
-        else throw new Error(json.error || "Erro ao carregar");
+        // Espel retorna { registros: [...] }, não { lancamentos: [...] }
+        if (json.registros && Array.isArray(json.registros)) {
+          setLancamentos(json.registros);
+        } else if (json.lancamentos && Array.isArray(json.lancamentos)) {
+          setLancamentos(json.lancamentos);
+        } else if (json.success && json.lancamentos) {
+          setLancamentos(json.lancamentos || []);
+        } else {
+          throw new Error(json.error || "Estrutura de resposta inválida");
+        }
       } catch (e: any) { setError(e.message); }
       finally { setLoading(false); }
     };
@@ -1013,8 +1021,16 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
       try {
         const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
-        if (json.success) setLancamentos(json.lancamentos || []);
-        else throw new Error(json.error || "Erro ao carregar");
+        // Espel retorna { registros: [...] }, não { lancamentos: [...] }
+        if (json.registros && Array.isArray(json.registros)) {
+          setLancamentos(json.registros);
+        } else if (json.lancamentos && Array.isArray(json.lancamentos)) {
+          setLancamentos(json.lancamentos);
+        } else if (json.success && json.lancamentos) {
+          setLancamentos(json.lancamentos || []);
+        } else {
+          throw new Error(json.error || "Estrutura de resposta inválida");
+        }
       } catch (e: any) { setError(e.message); }
       finally { setLoading(false); }
     };
@@ -1614,11 +1630,15 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       try {
         const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
-        if (json.success) {
-          setLancamentosReceber(json.lancamentos || []);
+        // Espel retorna { registros: [...] }, não { lancamentos: [...] }
+        if (json.registros && Array.isArray(json.registros)) {
+          setLancamentosReceber(json.registros);
+          console.log("💰 CONTAS A RECEBER CARREGADAS:", json.registros?.length || 0);
+        } else if (json.lancamentos && Array.isArray(json.lancamentos)) {
+          setLancamentosReceber(json.lancamentos);
           console.log("💰 CONTAS A RECEBER CARREGADAS:", json.lancamentos?.length || 0);
         } else {
-          console.warn("⚠️ Erro ao carregar Contas a Receber:", json.error);
+          console.warn("⚠️ Estrutura de resposta inválida:", json);
         }
       } catch (e: any) {
         console.error("❌ ERRO ao buscar Contas a Receber:", e.message);
