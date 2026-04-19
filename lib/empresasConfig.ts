@@ -131,6 +131,7 @@ export interface EmpresaConfig {
   usaCache?: boolean;
   supabaseUrl?: string;
   supabaseKey?: string;
+  temContasReceber?: boolean;
 }
 
 // ─── CONFIGURAÇÃO CENTRAL DE EMPRESAS ──────────────────────────────────────────
@@ -147,6 +148,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     filiais: ["Consolidado", "Fibra", "Químicos"],
     paleta: C_TECH4CON,
     usaCache: false,
+    temContasReceber: false,
   },
   "london-franqueadas": {
     aliases: ["london-franqueadas", "london_franqueadas", "londonfranqueadas", "london-franquias"],
@@ -164,6 +166,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     usaCache: true,
     supabaseUrl: SUPABASE_URL,
     supabaseKey: SUPABASE_KEY,
+    temContasReceber: false,
   },
   mediarh: {
     aliases: ["mediarh", "mediarh-consultoria", "mediarh_consultoria"],
@@ -181,6 +184,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     usaCache: true,
     supabaseUrl: SUPABASE_URL,
     supabaseKey: SUPABASE_KEY,
+    temContasReceber: false,
   },
   "espel-elevadores": {
     aliases: ["espel-elevadores", "espel_elevadores", "espelelevadores", "espel"],
@@ -198,6 +202,7 @@ export const EMPRESAS_CONFIG: { [key: string]: EmpresaConfig } = {
     usaCache: true,
     supabaseUrl: SUPABASE_URL,
     supabaseKey: SUPABASE_KEY,
+    temContasReceber: true,
   },
 };
 
