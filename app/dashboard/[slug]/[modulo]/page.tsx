@@ -259,7 +259,7 @@ const enrichDRE = (dre: any) => {
   setConta(contas, "Receita líquida", receitaLiquida);
   setConta(contas, "Custo dos Produtos Vendidos", custoProdutosVendidos);
   setConta(contas, "Margem bruta", margemBruta);
-  setConta(contas, "Despesas Variáveis", despesasVariaveis);
+  setConta(contas, "Despesas Variáveissssss", despesasVariaveis);
   setConta(contas, "Margem líquida (margem de contribuição)", margemContribuicao);
   setConta(contas, "Gastos fixos (custos fixos + despesas fixas)", gastosFixos);
   setConta(contas, "Receitas Financeiras", receitasFinanceiras);
