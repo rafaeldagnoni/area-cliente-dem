@@ -934,15 +934,12 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
       try {
         const res = await fetch(`${apiUrl}?tipo=contas_pagar&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
-        // Espel retorna { registros: [...] }, não { lancamentos: [...] }
         if (json.registros && Array.isArray(json.registros)) {
           setLancamentos(json.registros);
         } else if (json.lancamentos && Array.isArray(json.lancamentos)) {
           setLancamentos(json.lancamentos);
-        } else if (json.success && json.lancamentos) {
-          setLancamentos(json.lancamentos || []);
         } else {
-          throw new Error(json.error || "Estrutura de resposta inválida");
+          throw new Error(json.error || "Erro ao carregar");
         }
       } catch (e: any) { setError(e.message); }
       finally { setLoading(false); }
@@ -958,6 +955,16 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
   const totalLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
   const qtdPendente = lancamentos.filter(l => l.status_titulo === "Pendente").length;
   const qtdLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").length;
+
+  const fmtData = (d: any): string => {
+    if (!d) return "-";
+    try {
+      const date = new Date(d);
+      return date.toLocaleDateString("pt-BR");
+    } catch {
+      return d;
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -977,10 +984,13 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
             <tr style={{ background: C.dark }}>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Filial</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Fornecedor</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Emissão</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Descrição</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Vencimento</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Pagamento</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
               <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 600 }}>Valor</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Status</th>
             </tr>
@@ -988,13 +998,16 @@ function DespesasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
           <tbody>
             {filtrados.slice(0, 50).map((l, i) => (
               <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_pagamento || "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.filial || "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}` }}>{l.fornecedor || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_emissao)}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}` }}>{l.descricao || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_vencimento)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_pagamento)}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição || "-"}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.red, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo || "-"}</span>
                 </td>
               </tr>
             ))}
@@ -1021,15 +1034,12 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
       try {
         const res = await fetch(`${apiUrl}?tipo=contas_receber&ano=${ano}&empresa=${empresaConfig.apiIdentifier}`);
         const json = await res.json();
-        // Espel retorna { registros: [...] }, não { lancamentos: [...] }
         if (json.registros && Array.isArray(json.registros)) {
           setLancamentos(json.registros);
         } else if (json.lancamentos && Array.isArray(json.lancamentos)) {
           setLancamentos(json.lancamentos);
-        } else if (json.success && json.lancamentos) {
-          setLancamentos(json.lancamentos || []);
         } else {
-          throw new Error(json.error || "Estrutura de resposta inválida");
+          throw new Error(json.error || "Erro ao carregar");
         }
       } catch (e: any) { setError(e.message); }
       finally { setLoading(false); }
@@ -1045,6 +1055,16 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
   const totalLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").reduce((acc, l) => acc + (l.valor_documento || 0), 0);
   const qtdPendente = lancamentos.filter(l => l.status_titulo === "Pendente").length;
   const qtdLiquidado = lancamentos.filter(l => l.status_titulo === "Liquidado").length;
+
+  const fmtData = (d: any): string => {
+    if (!d) return "-";
+    try {
+      const date = new Date(d);
+      return date.toLocaleDateString("pt-BR");
+    } catch {
+      return d;
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -1064,10 +1084,13 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Barlow',sans-serif" }}>
           <thead>
             <tr style={{ background: C.dark }}>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Documento</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Filial</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Cliente</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Emissão</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Descrição</th>
+              <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Vencimento</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Recebimento</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", color: C.white, fontWeight: 600 }}>Categoria</th>
               <th style={{ padding: "10px 12px", textAlign: "right", color: C.white, fontWeight: 600 }}>Valor</th>
               <th style={{ padding: "10px 12px", textAlign: "center", color: C.white, fontWeight: 600 }}>Status</th>
             </tr>
@@ -1075,13 +1098,16 @@ function ReceitasView({ ano, apiUrl, empresaConfig, C }: { ano: number; apiUrl: 
           <tbody>
             {filtrados.slice(0, 50).map((l, i) => (
               <tr key={i} style={{ background: i % 2 === 0 ? C.white : C.gray50 }}>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição}</td>
-                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{l.numero_documento}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_emissao || "-"}</td>
-                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{l.data_recebimento || "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.filial || "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}` }}>{l.fornecedor || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_emissao)}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}` }}>{l.descricao || "-"}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_vencimento)}</td>
+                <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}`, fontSize: 11 }}>{fmtData(l.data_recebimento)}</td>
+                <td style={{ padding: "10px 12px", borderBottom: `1px solid ${C.gray100}`, color: C.gray500 }}>{l.categoria_descrição || "-"}</td>
                 <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "'JetBrains Mono',monospace", color: C.green, borderBottom: `1px solid ${C.gray100}`, fontWeight: 500 }}>{fmtBRL(l.valor_documento)}</td>
                 <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: `1px solid ${C.gray100}` }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo}</span>
+                  <span style={{ padding: "4px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, background: l.status_titulo === "Liquidado" ? C.greenLight : C.redLight, color: l.status_titulo === "Liquidado" ? C.green : C.red }}>{l.status_titulo || "-"}</span>
                 </td>
               </tr>
             ))}
