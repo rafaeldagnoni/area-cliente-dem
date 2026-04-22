@@ -635,9 +635,8 @@ function OverviewView({ dados, mesInicial, mesFinal, lancamentosReceber, empresa
   const pctEbitda = receitaLiquidaPeriodo ? (ebitdaPeriodo / receitaLiquidaPeriodo) * 100 : 0;
   const pctLucro = receitaLiquidaPeriodo ? (lucroLiqPeriodo / receitaLiquidaPeriodo) * 100 : 0;
 
-  const margemContribUnitaria = receitaBrutaPeriodo > 0 ? (margemContribPeriodo / receitaBrutaPeriodo) : 0;
-  const custosTotaisAlem = Math.abs(gastosFixosPeriodo) + Math.abs(despesasFinanceirasPeriodo) + Math.abs(impostosLucroPeriodo) + Math.abs(distribuicaoLucroPeriodo);
-  const pontoEquilibrio = margemContribUnitaria > 0 ? (custosTotaisAlem / margemContribUnitaria) : 0;
+  const pontoEquilibrio = margemContribPeriodo > 0 
+  ? ((gastosFixosPeriodo + despesasFinanceirasPeriodo + impostosLucroPeriodo + distribuicaoLucroPeriodo) * receitaBrutaPeriodo) / margemContribPeriodo : 0;
   const pctPontoEquilibrio = pontoEquilibrio > 0 ? ((receitaBrutaPeriodo - pontoEquilibrio) / pontoEquilibrio) * 100 : 0;
 
   const mesAtual = mesFinal;
