@@ -1571,7 +1571,7 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
   const [ano, setAno] = useState(2026);
   const [filial, setFilial] = useState("Consolidado");
   const [mesInicial, setMesInicial] = useState(0);
-  const [mesFinal, setMesFinal] = useState(0);
+  const [mesFinal, setMesFinal] = useState(11);
   const [modoAnual, setModoAnual] = useState(false);
   const [tab, setTab] = useState<"overview" | "dre" | "dfc" | "receitas" | "despesas" | "orcado-realizado">("overview");
   const [dados, setDados] = useState<any>(null);
@@ -1622,16 +1622,19 @@ export default function Dashboard({ params }: { params: { slug: string; modulo: 
       setDados(json);
       setUltimaAtualizacao(new Date());
 
-      if (json.dre?.contas?.["Receita de Vendas"]?.valores) {
-        const meses = json.dre.contas["Receita de Vendas"].valores
-          .map((v: number, i: number) => v !== 0 ? { idx: i, label: MESES[i] } : null)
-          .filter((m: any) => m !== null);
-        setMesesDisponiveis(meses);
-        if ((mesInicial === 0 && mesFinal === 0) && meses.length > 0) {
-          setMesInicial(meses[0].idx);
-          setMesFinal(meses[meses.length - 1].idx);
-        }
-      }
+  const mesesFixos = MESES.map((label, idx) => ({
+  idx,
+  label,
+}));
+
+setMesesDisponiveis(mesesFixos);
+
+// Se ainda estiver no estado inicial, define o período padrão.
+// Janeiro até Dezembro, ou Janeiro até o último mês com algum dado se preferir.
+if (mesInicial === 0 && mesFinal === 0) {
+  setMesInicial(0);
+  setMesFinal(11);
+}
     } catch (e: any) {
       setError(e.message);
       console.error("❌ ERRO AO BUSCAR DO CACHE:", e.message);
